@@ -2,11 +2,11 @@ requirejs([
     'jquery',
     'underscore',
     'backbone',
-    'views/form'],
+    'views/application'],
 function($,_,Backbone,View) {
 
     var appView = new View();
-    //console.log("... loaded app.js");
+    console.log("loaded app.js");
   
 });
 

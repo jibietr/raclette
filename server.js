@@ -95,9 +95,6 @@ requirejs([
     //Models
     var UserModel = mongoose.model( 'User', User );
 
-
-
-
     //Get a list of all users
     app.get( '/api/users', function( request, response ) {
 	return UserModel.find( function( err, users ) {

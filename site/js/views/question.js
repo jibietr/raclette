@@ -4,39 +4,75 @@ define([
     'bootstrap',
     'jquery.form',
     'backbone',
+    'views/chrono',
+    'text!templates/question.html',
     'text!templates/video.html',
-    'text!templates/unknown.html'],
-  function($,_,bootstrap,form,Backbone,Tmpl_video,Tmpl_unknown) {
+    'text!templates/start.html',
+    'text!templates/wait.html',
+    'text!templates/end.html',
+    'text!templates/text.html'],
+  function($,_,bootstrap,form,Backbone,ChronoView,Tmpl_question,Tmpl_video,Tmpl_start,Tmpl_wait,Tmpl_end,Tmpl_text) {
 
     var questionView = Backbone.View.extend({
       //id: 'question',
       tagName: 'div',
       className: 'QuestionContainer',
+      template_question: _.template(Tmpl_question),
       template_video: _.template(Tmpl_video),
-      template_unknown:  _.template(Tmpl_unknown),
+      template_start: _.template(Tmpl_start),
+      template_wait: _.template(Tmpl_wait),
+      template_end: _.template(Tmpl_end),
+      template_text:  _.template(Tmpl_text),
 
-      events: {
-       'click #submit':'submit',
-      },
 
-    //tagName: 'div',
-    //className: 'questionContainer',
-    //template: _.template( $( '#questionTemplate' ).html() ),
+    events: {
+       'click #start': 'stopWait',
+       'click #stop': 'stopActive'
+    }, 
 
-    // render question renders the template                                                                                      
+    // render question and timer                                                                                    
     render: function() {
-        //this.el is what we defined in tagName. use $el to get access to jQuery html() function                                 
-        //console.log("question type" + this.model.type);
-        var type = this.model.get("type");
-        //console.log(this.template);
-        //console.log(this["template_"+type])
-        //console.log(this.template_video());
-        //this.$el.html( this.template_video(this.model.toJSON()));
-        //this.$el.html(this.template_video());
-        $(this.el).html(this.template_video()); 
-        return this;
-    }
 
+        var type = this.model.get("type");
+        // apply basic layout
+        this.$el.html(this.template_question(this.model.toJSON()));
+        // set up question
+        //this.$("#QuestionContainer").html(this.model.get("title"));
+     
+        this.$("#MainContainer").html(this["template_"+type](this.model.toJSON()));
+
+       //this.$el.html(this.template_video());
+        if(this.model.get('time_wait')){
+          this.renderCountdown();
+        }else{
+          this.renderChrono();
+        }
+        return this;
+    },
+
+    renderCountdown: function(){
+        var time = this.model.get('time_wait');
+        this.chronoView = new ChronoView({ seconds: time , type: 'countdown' });
+        this.listenTo(this.chronoView, 'chrono_stop', this.stopWait);
+        this.$("#ChronoContainer").html(this.chronoView.render().el);
+     },
+
+    renderChrono: function(){
+        var time = this.model.get('time_response');
+        this.chronoView = new ChronoView({ seconds: time , type: 'normal'  });
+        this.listenTo(this.chronoView, 'chrono_stop', this.stopActive);
+        this.$("#ChronoContainer").html(this.chronoView.render().el);
+     },
+
+    stopWait: function(){
+        this.chronoView.close();
+        this.renderChrono();
+    },
+
+    stopActive: function(){
+        this.chronoView.close();
+        this.trigger('question_done');
+    }
 
 
     });
