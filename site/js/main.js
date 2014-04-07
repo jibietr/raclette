@@ -13,6 +13,7 @@ requirejs.config({
         'backbone' : 'lib/backbone-min',
         'jquery.form' : 'lib/jquery.form.min',
         'bootstrap' : 'lib/bootstrap.min',
+        'RecordRTC' : 'lib/RecordRTC',
     },
     shim: {
         'jquery' : {
