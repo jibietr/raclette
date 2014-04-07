@@ -6,7 +6,7 @@ var requirejs = require('requirejs');
 requirejs.config({
     nodeRequire: require,
     baseUrl: 'site/js',
-    //this is server side stuff...
+   //this is server side stuff...
     //these does not seem to be used...
     paths: {
         'models': 'models',
@@ -107,7 +107,15 @@ requirejs([
     });
 
 
+
+   app.post('/upload_video',function(request,response){
+      
+     response.send( 'video upload s running' );
+
+   });
+
    app.post('/upload',function(request,response){
+
 
 	fs.readFile(request.files.resume.path, function (err, data) {
 
