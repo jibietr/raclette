@@ -1,8 +1,8 @@
-// Module dependencies.
+//Module dependencies.
 
 
 var requirejs = require('requirejs');
- 
+
 requirejs.config({
     nodeRequire: require,
     baseUrl: 'site/js',
@@ -46,21 +46,48 @@ requirejs([
 
     var application_root = __dirname;
     var app = express();
+   
+
+    function _upload(response, file, name) {
+
+    var fileRootName = name,
+        fileExtension = file.extension ,
+        //filePathBase = config.upload_dir + '/',
+        filePathBase = __dirname + '/uploads/',
+        
+        fileRootNameWithBase = filePathBase + fileRootName,
+        filePath = fileRootNameWithBase + '.' + fileExtension,
+        fileID = 2,
+        fileBuffer;
+
+    while (fs.existsSync(filePath)) {
+        filePath = fileRootNameWithBase + '(' + fileID + ').' + fileExtension;
+        fileID += 1;
+    }
+
+    file.contents = file.contents.split(',').pop();
+
+    fileBuffer = new Buffer(file.contents, "base64");
+
+    fs.writeFileSync(filePath, fileBuffer);
+   
+   };
 
 
    app.use('/api/docs', function (req, res, next) {
-            // imageVersions are taken from upload.configure()
+
        console.log("api docs");
          
         });
   
-    // Configure server
+    // Configure seer
     // So far the server will load the static content in site/index.html
     app.configure( function() {
-      //parses request body and populates request.body
+      //parses requesody and populates request.body
       app.use( express.bodyParser() );
       //app.use(express.bodyParser({keepExtensions:true,uploadDir:path.join(__dirname,'/docs')}));
-
+      //app.use(express.json());
+      //app.use(express.urlencoded());
 
 	//checks request.body for HTTP method overrides
 	app.use( express.methodOverride() );
@@ -80,7 +107,7 @@ requirejs([
     });
 
     //Connect to database
-    mongoose.connect( 'mongodb://localhost/library_database' );
+    mongoose.connect( 'mongodb://localhost/idiap-scg-april2014' );
 
     //Schemas
     var User = new mongoose.Schema({
@@ -92,8 +119,30 @@ requirejs([
 	joined: Date,
    });
 
+   // QUESTION: should userid and qid be ObjectIds?
+   var Answer = new mongoose.Schema({
+       userid: String, 
+       qtype: String,
+       qid: String,
+       content: [mongoose.Schema.Types.Mixed],  
+       created: Date, 
+       wait_time: Number,
+       work_time: Number,
+   }); 
+
+
+   var Question = new mongoose.Schema({
+       qid: { type: String, required: true, unique: true },
+       qtype: { type: String, required: true },
+       title: { type: String, required: true }, 
+       time_wait: { type: Number},
+       time_response: { type: Number, required: true},
+   }); 
+
     //Models
     var UserModel = mongoose.model( 'User', User );
+    var AnswerModel = mongoose.model( 'Answer', Answer);
+    var QuestionModel = mongoose.model( 'Question', Question);
 
     //Get a list of all users
     app.get( '/api/users', function( request, response ) {
@@ -107,26 +156,40 @@ requirejs([
     });
 
 
-   app.post('/upload_video',function(response, postData) {
-    var files = JSON.parse(postData);
+    app.get( '/api/questions', function( request, response ) {
+	return QuestionModel.find( function( err, questions ) {
+	    if( !err ) {
+		return response.send(questions);
+	    } else {
+		return console.log( err );
+	    }
+	});
+    });
 
-    console.log("upload_video");
-    // writing audio file to disk
-    /*_upload(response, files.audio);
 
-    if (files.isFirefox) {
-        response.statusCode = 200;
-        response.writeHead(200, { 'Content-Type': 'application/json' });
-        response.end(files.audio.name);
-    }
+    app.get( '/api/answers', function( request, response ) {
+	return AnswerModel.find( function( err, answers ) {
+	    if( !err ) {
+		return response.send( answers );
+	    } else {
+		return console.log( err );
+	    }	});
+    });
 
-    if (!files.isFirefox) {
-        // writing video file to disk
-        _upload(response, files.video);
 
-        merge(response, files);
-    }*/
+    app.post('/api/upload_video',function(request, response) {
+      // TODO: check for errors
+      // writing audio file to disk
+      var filename = new Date().toString(11);
+      //console.log(request.body.audio.extension);
+      console.log(request.body);
+      //_upload(response, request.body.audio, filename);
+      //_upload(response, request.body.video, filename);
 
+      //merge(response, files);
+      // this is a success
+      console.log("Done with upload");
+      response.send({});   
 
    });
 
@@ -153,7 +216,7 @@ requirejs([
 		var newPath = __dirname + "/docs/" + fileName;
                 console.log("write in " + newPath);
 		// write file to uploads folder
-		fs.writeFile(newPath, data, function (err) {
+	fs.writeFile(newPath, data, function (err) {
 
 		   // let's see uploaded file
 		   response.redirect("/uploads/" + fileName);
@@ -180,7 +243,7 @@ requirejs([
     app.post( '/api/users', function( request, response ,next) {
        console.log("api users");
 
-       console.log(request.form);
+       console.log(request);
 
 	var user = new UserModel({
 	    name: request.body.name,
@@ -194,18 +257,9 @@ requirejs([
       // upload supporting material using /api/docs as a route
       // with express this is as simple as moving the file from 
       // the tmp directory...
-      //upload.fileHandler();
+      //upload.fileHandleans();
       
-      upload.fileHandler({
-                uploadDir: function () {
-                    return __dirname + '/docs/' + request.sessionID
-                },
-                uploadUrl: function () {
-                    return '/docs/' + request.sessionID
-                }
-            })(request, response, next);
-
-
+ 
  	user.save( function( err ) {
 	    if( !err ) {
 		return console.log( 'created' );
@@ -214,6 +268,51 @@ requirejs([
 	    }
 	    return response.send( user );
 	});
+    });
+
+
+    // insert new answer with collection.create
+    app.post( '/api/answers', function(request,response) {
+      console.log("POST to /api/answers");
+      //console.log(request.body);
+      //console.log(request.body.audioJSON);
+      //console.log(request);
+      // save to mongodb
+      var answer = new AnswerModel({
+       userid: request.body.userid, 
+       qtype: request.body.qtype,
+       qid: request.body.qid,
+       content: request.body.content,  
+       created: request.body.created, 
+       wait_time: request.body.wait_time,
+       work_time: request.body.work_time,
+      }); 
+       
+      console.log("save in mongodb");
+      answer.save( function( err ) {
+	    if( !err ) { 
+                //console.log(answer);
+                //console.log(request.body.qtype);
+                //if(answer.qtype=="video"){
+                
+                if(request.body.qtype=="video"){
+                     
+                    console.log("should save video here");
+                    //console.log(request.body.qtype);
+                    _upload(response, request.body.audio, answer._id);
+                    _upload(response, request.body.video, answer._id);
+                }
+                //_upload(request.body.audio,
+		console.log( 'answer created!!!' );
+                console.log(answer);
+                return response.send(answer);
+	    } else {
+		return console.log( err );
+	    }
+	    return response.send(answer);
+            //return response.send({});
+      });
+
     });
 
     //Get a single book by id
@@ -265,14 +364,6 @@ requirejs([
 	});
     });
 
-
-
-    //app.use('/api/docs', upload.fileHandler());
-
-/*
-*/
-
-
     //Start server
     var port = 8080;
     app.listen( port, function() {
@@ -293,26 +384,6 @@ function merge(response, files) {
     }
 }
 
-function _upload(response, file) {
-    var fileRootName = file.name.split('.').shift(),
-        fileExtension = file.name.split('.').pop(),
-        filePathBase = config.upload_dir + '/',
-        fileRootNameWithBase = filePathBase + fileRootName,
-        filePath = fileRootNameWithBase + '.' + fileExtension,
-        fileID = 2,
-        fileBuffer;
-
-    while (fs.existsSync(filePath)) {
-        filePath = fileRootNameWithBase + '(' + fileID + ').' + fileExtension;
-        fileID += 1;
-    }
-
-    file.contents = file.contents.split(',').pop();
-
-    fileBuffer = new Buffer(file.contents, "base64");
-
-    fs.writeFileSync(filePath, fileBuffer);
-}
 
 function serveStatic(response, pathname) {
 
