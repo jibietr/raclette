@@ -44,6 +44,12 @@ define([
        this.trigger('chrono_stop');
     },
 
+
+    getTime: function(){
+       var seconds = ((this.type =='countdown') ? this.total-this.seconds : this.seconds); 
+       return seconds;
+    },
+
    // show current time
     render: function() {
        console.log("render");

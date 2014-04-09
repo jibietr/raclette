@@ -6,16 +6,11 @@ define([
 
     var question = Backbone.Model.extend({
 
-     //idAttribute: "email", //do we need this?
-     url: '/api/question',
+     url: '/api/answers',
 
-     //if no defaults, then undefined...
-     defaults:{
-       id: 'unknown',
-       type: 'video', // video, likert, test
-       response: 'unknown',
-     }
-
+     // if no defaults, then undefined...
+     // we can add as defaults: 
+     // userid, qtype, qid, content, created, time_wait, time_response, title
       
     });
 

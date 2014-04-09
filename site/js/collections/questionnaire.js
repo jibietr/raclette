@@ -7,10 +7,11 @@ define([
 
     var questionnaire = Backbone.Collection.extend({
       model: question,  
+      url: '/api/questions', 
 
-      initialize: function(){
+      /*initialize: function(){
          console.log("init collection");
-      }
+      }*/
 
     });
 
