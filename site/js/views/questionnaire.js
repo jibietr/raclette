@@ -16,8 +16,10 @@ define([
 
      initialize: function() {
         this.collection = new Questionnaire();
-        this.collection.fetch({reset: true}); //initialize collection from db
-        this.renderStart();
+        this.collection.fetch({reset: true,//initialize collection from db
+         success: function(){ 
+           this.renderStart();
+        }.bind(this)}); 
      },
 
      events:{

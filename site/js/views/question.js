@@ -98,7 +98,7 @@ define([
         console.log("read form");
         var answer = $('#textAnswer').val();
         console.log(answer);
-        this.model.set("response",answer);
+        this.model.set("content",answer);
         this.saveModel();
 
     },
