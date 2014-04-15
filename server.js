@@ -6,7 +6,7 @@ var requirejs = require('requirejs');
 requirejs.config({
     nodeRequire: require,
     baseUrl: 'site/js',
-   //this is server side stuff...
+   //this is serverpi side stuff...
     //these does not seem to be used...
     paths: {
         'models': 'models',
@@ -23,7 +23,7 @@ requirejs.config({
         },
         'lib/underscore-min' : {
             exports: '_'  
-        },
+       },
         'lib/backbone-min': {
             deps: ['underscore-min', 'jquery'],
             exports: 'Backbone'
@@ -43,7 +43,6 @@ requirejs([
     'underscore',
     'backbone'], 
   function(express,path,mongoose,$,fs,_,Backbone){
-
     var application_root = __dirname;
     var app = express();
    
@@ -109,13 +108,23 @@ requirejs([
     //Connect to database
     mongoose.connect( 'mongodb://localhost/idiap-scg-april2014' );
 
-    //Schemas
+    // Define a keyword-like schema for positions
+    var Positions = new mongoose.Schema({
+       position: String, 
+        
+    });
+
+    // A user 
     var User = new mongoose.Schema({
 	name: String,
 	email: String,
-	country: String,
-	cover: String,
-	resume: String,
+        nationality: String,
+        school: String,
+       	country: String,
+        degree: String,
+        status: String,
+        major: String,
+        positions: [ Positions ],
 	joined: Date,
    });
 
@@ -197,8 +206,8 @@ requirejs([
 
 
    app.post('/upload',function(request,response){
-
-
+          
+         console.log(request.files.resume.path);
 	fs.readFile(request.files.resume.path, function (err, data) {
 
 	      //File Name
@@ -208,8 +217,8 @@ requirejs([
 	     if(!fileName)
 	     {
 		console.log("There was an error")
-		response.redirect("/");
-		response.end();
+		//response.redirect("/");
+		//response.end();
 	     }
 	     else
 	     {
@@ -217,11 +226,11 @@ requirejs([
 		var newPath = __dirname + "/docs/" + fileName;
                 console.log("write in " + newPath);
 		// write file to uploads folder
-	fs.writeFile(newPath, data, function (err) {
+	        fs.writeFile(newPath, data, function (err) {
 
 		   // let's see uploaded file
-		   response.redirect("/uploads/" + fileName);
-
+		   //response.redirect("/uploads/" + fileName);
+                   //response.send("done!")
 	       });
 	     }
 	  });
@@ -240,34 +249,91 @@ requirejs([
 
 
 
+
+    app.get('/uploads/:file', function (req, res){
+
+    file = req.params.file;
+    var img = fs.readFileSync(__dirname + "/docs/" + file);
+    res.writeHead(200, {'Content-Type': 'image/jpg'});
+    res.end(img, 'binary'); 
+    });
+
+
+     // it is not clear to me how save expects to get the model as a response to a success
+     // i thought user was to be send with the response, but it does not seem to be the case
+     function multiple_file_upload(user,files,response){
+
+        var count = 0;
+        var max_files = _.keys(files).length;
+
+        var handler = function(error, content){
+		    count++;
+		    if (error){
+                        response.statusCode = 500;
+                        //response.write("Ooops. Something went wrong!");
+                        return response.send();
+		    }
+		    if (count == max_files) {
+                        response.statusCode = 200;
+                        //response.write("Form upload successful.");
+                        return response.send(user);
+		    }
+		}
+                
+                // iterate on files
+                //request.files.each
+        for(var file_type in files){
+          //TODO: i am not sure how _upload_file deals with the handler.
+          // does it feel error and content correctly?
+          _upload_file(files[file_type],file_type + "_" + user._id, handler);
+        }
+     }
+               
+    function _upload_file(file, name, handler) {
+       fs.readFile(file.path, function (err, data) {
+	   var newPath = __dirname + "/docs/" + name;
+           console.log(newPath);
+	   fs.writeFile(newPath, data, handler);
+       });
+    }
+
     //Insert a new user
     app.post( '/api/users', function( request, response ,next) {
-       console.log("api users");
+       console.log("POST to /api/users");
+       //console.log(request.body);
+       //console.log(JSON.stringify(request.body.positions[0]));
 
-       console.log(request);
+       // not sure how to pass this object directly from the backbone model
+       // so we are passing it as an array, and we create it here
+       var positions = [];
+       request.body.positions.split(",").forEach(function(target){
+         positions.push({ position: target });
+        });
 
-	var user = new UserModel({
-	    name: request.body.name,
-	    email: request.body.email,
-	    country: request.body.country,
-	    cover: request.body.cover,
-	    resume: request.body.resume,
-	    joined: request.body.joined
+       var user = new UserModel({
+	  name: request.body.name,
+	  email: request.body.email,
+	  nationality: request.body.nationality,
+	  school: request.body.school,
+	  country: request.body.country,
+	  degree: request.body.degree,
+	  status: request.body.status,
+	  major: request.body.major,
+	  positions: positions,
+	  joined: request.body.joined
 	});
 
-      // upload supporting material using /api/docs as a route
-      // with express this is as simple as moving the file from 
-      // the tmp directory...
-      //upload.fileHandleans();
-      
- 
- 	user.save( function( err ) {
+        // upload supporting material using /api/docs as a route
+        // with express this is as simple as moving the file from 
+        // the tmp directory...
+       	user.save( function( err ) {
 	    if( !err ) {
-		return console.log( 'created' );
-	    } else {
+		console.log( 'entry created. try to upload file' );
+                //console.log(request.files);
+                multiple_file_upload(user,request.files,response);
+	     } else {
 		return console.log( err );
 	    }
-	    return response.send( user );
 	});
     });
 
@@ -275,9 +341,7 @@ requirejs([
     // insert new answer with collection.create
     app.post( '/api/answers', function(request,response) {
       console.log("POST to /api/answers");
-      //console.log(request.body);
-      //console.log(request.body.audioJSON);
-      //console.log(request);
+
       // save to mongodb
       var answer = new AnswerModel({
        userid: request.body.userid, 
@@ -315,7 +379,8 @@ requirejs([
       });
 
     });
-
+ 
+ 
     //Get a single book by id
     app.get( '/api/users/:id', function( request, response ) {
 	return UserModel.findById( request.params.id, function( err, user ) {
