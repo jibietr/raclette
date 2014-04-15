@@ -20,6 +20,7 @@ requirejs.config({
         'jquery.serializeObject': 'lib/jquery.serializeObject',
         'selectize': 'lib/standalone/selectize',
         'backbone-validation': 'lib/backbone-validation',
+        's3upload': 'lib/s3upload',
     },
     shim: {
         'jquery' : {
@@ -41,5 +42,8 @@ requirejs.config({
         'jquery.serializeObject':{
            deps: ['jquery']
         },
+        's3upload': {
+           deps: ['jquery']
+        }
     }
 });

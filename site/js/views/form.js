@@ -13,8 +13,9 @@ define([
     'jquery.iframe',
     'selectize',
     'backbone-validation',
-    'jquery.serializeObject'],
-  function($,_,bootstrap,form,Backbone,TmplForm,TmplCountry,TmplDegree,TmplStatus,TmplOpen,Applicant,itrans,selectize,validation,serialize) {
+    'jquery.serializeObject',
+    's3upload'],
+  function($,_,bootstrap,form,Backbone,TmplForm,TmplCountry,TmplDegree,TmplStatus,TmplOpen,Applicant,itrans,selectize,validation,serialize,s3upload) {
 
     // these are nested views..
     // http://codehustler.org/blog/rendering-nested-views-backbone-js/
@@ -77,7 +78,11 @@ define([
        'hidden.bs.collapse': 'set_hidden_glyph',
        'show.bs.collapse': 'set_show_glyph',
        'click #submit':'submit',
+        'change #resume': 's3_upload',
       },
+
+
+
 
       /*render: function() {
         $(this.el).html(this.template());
@@ -92,6 +97,20 @@ define([
        $(e.target).prev().find("span").removeClass("glyphicon-chevron-right").addClass("glyphicon-chevron-down");
       },
 
+      s3upload: function(){
+          console.log("create s3upload");
+	  var s3upload = new S3Upload({
+	      file_dom_selector: '#files',
+	      s3_sign_put_url: '/sign_s3',
+              // for the moment this doc will be public...
+	      onFinishS3Put: function(public_url) {
+		  console.log('Upload completed. Uploaded to: '+ public_url);
+	      },
+	      onError: function(status) {
+		  console.log('Upload error: ' + status);
+	      }
+	  });
+      },
 
       submit: function(e){
 

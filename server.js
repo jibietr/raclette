@@ -12,7 +12,7 @@ requirejs.config({
         'views' : 'views',
         'templates' : 'templates',
         'text' :  'lib/text',
-        
+     
     },
     //this should be client side..
     shim: {
@@ -26,7 +26,7 @@ requirejs.config({
             deps: ['underscore-min', 'jquery'],
             exports: 'Backbone'
         }
- 
+     
     }
 });
 
@@ -38,39 +38,13 @@ requirejs([
     'jquery',
     'fs', 
     'underscore',
-    'backbone'], 
-  function(express,path,mongoose,$,fs,_,Backbone){
+    'backbone',
+    'crypto'], 
+  function(express,path,mongoose,$,fs,_,Backbone,crypto){
     var application_root = __dirname;
     var app = express();
    
 
-    // function _upload(response, file, name) {
-
-   //  var fileRootName = name,
-   //      fileExtension = file.extension ,
-   //      //filePathBase = config.upload_dir + '/',
-   //      filePathBase = __dirname + '/uploads/',
-        
-   //      fileRootNameWithBase = filePathBase + fileRootName,
-   //      filePath = fileRootNameWithBase + '.' + fileExtension,
-   //      fileID = 2,
-   //      fileBuffer;
-
-   //  while (fs.existsSync(filePath)) {
-   //      filePath = fileRootNameWithBase + '(' + fileID + ').' + fileExtension;
-   //      fileID += 1;
-   //  }
-
-   //  file.contents = file.contents.split(',').pop();
-
-   //  fileBuffer = new Buffer(file.contents, "base64");
-
-   //  fs.writeFileSync(filePath, fileBuffer);
-   
-   // };
-
-
-  
     // Configure seer
     // So far the server will load the static content in site/index.html
     app.configure( function() {
@@ -319,6 +293,34 @@ requirejs([
 	});
     });
 
+    // 
+    app.get('/sign_s3', function(req, res){
+        // extract name and mime from object to upload
+        // TODO: check on name...
+	var object_name = req.query.s3_object_name;
+	var mime_type = req.query.s3_object_type;
+        
+        // create a temporal signature
+	var now = new Date();
+	var expires = Math.ceil((now.getTime() + 10000)/1000); // 10 seconds from now
+	var amz_headers = "x-amz-acl:public-read";   // grant permissions
+
+        // create request
+	var put_request = "PUT\n\n"+mime_type+"\n"+expires+"\n"+amz_headers+"\n/"+S3_BUCKET+"/"+object_name;
+
+	var signature = crypto.createHmac('sha1', AWS_SECRET_KEY).update(put_request).digest('base64');
+	signature = encodeURIComponent(signature.trim());
+	signature = signature.replace('%2B','+');
+
+	var url = 'https://'+S3_BUCKET+'.s3.amazonaws.com/'+object_name;
+
+	var credentials = {
+	    signed_request: url+"?AWSAccessKeyId="+AWS_ACCESS_KEY+"&Expires="+expires+"&Signature="+signature,
+	    url: url
+	};
+	res.write(JSON.stringify(credentials));
+	res.end();
+    });
 
     // insert new answer with collection.create
     // app.post( '/api/answers', function(request,response) {
