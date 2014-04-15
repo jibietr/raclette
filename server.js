@@ -31,7 +31,6 @@ requirejs.config({
 });
 
 requirejs(['jquery', 'backbone'], function($, Backbone) { Backbone.$ = $; });
-
 requirejs([
     'express',
     'path',
@@ -366,7 +365,7 @@ requirejs([
  
 
     //Start server
-    var port = 5000;
+    var port = process.env.PORT || 8080;
     app.listen( port, function() {
       console.log( 'Express server listening on port %d in %s mode', port, app.settings.env );
     });
