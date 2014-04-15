@@ -160,13 +160,13 @@ define([
        // 3. sync model
        this.formData = formData;
        this.model.set(this.formData);
-       //if(this.model.isValid(true)){
+       if(this.model.isValid(true)){
           // write in file 
           // since model is valid, we know there are two files to be uploaded
-        //  this.num_uploads = 0;
-         // this.s3upload('resume');
-         // this.s3upload('cover_letter');
-       this.saveModel();
+          this.num_uploads = 0;
+        this.s3upload('resume');
+        this.s3upload('cover_letter');
+       }
 
        //}
        // we can still check that model is valid and make use of the 
