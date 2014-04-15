@@ -94,18 +94,14 @@ requirejs([
         
     });
     
-    app.get( '/api', function( request, response ) {
-	response.send( 'Library API is running' );
-    });
 
     //Connect to database
-    //
     var uristring =
         process.env.MONGOLAB_URI ||
         process.env.MONGOHQ_URL ||
         'mongodb://localhost/idiap-scg-april2014';
 
-    
+    console.log("connecting to " + uristring); 
     mongoose.connect(uristring, function (err, res) {
       if (err) {
       console.log ('ERROR connecting to: ' + uristring + '. ' + err);
