@@ -77,9 +77,8 @@ define([
     events: {
        'hidden.bs.collapse': 'set_hidden_glyph',
        'show.bs.collapse': 'set_show_glyph',
-       'click #submit':'submit',
-        'change #resume': 's3_upload',
-      },
+       'click #submit':'submit'
+    },
 
 
 
@@ -97,15 +96,28 @@ define([
        $(e.target).prev().find("span").removeClass("glyphicon-chevron-right").addClass("glyphicon-chevron-down");
       },
 
-      s3upload: function(){
-          console.log("create s3upload");
+
+     updateUploadCount: function(file_id,file_url){
+         console.log("response for " + file_id);
+         this.formData[file_id] = file_url;
+         this.num_uploads++;
+         if(this.num_uploads==2){
+            console.log("done with uploads");
+            this.saveModel();
+         }
+      },  
+
+     s3upload: function(file_id){
+          console.log("create s3");
 	  var s3upload = new S3Upload({
-	      file_dom_selector: '#files',
+	      //file_dom_selector: '#' + id,
+              file_dom_selector: '#' + file_id,
 	      s3_sign_put_url: '/sign_s3',
               // for the moment this doc will be public...
 	      onFinishS3Put: function(public_url) {
 		  console.log('Upload completed. Uploaded to: '+ public_url);
-	      },
+                  this.updateUploadCount(file_id,public_url);
+	      }.bind(this),
 	      onError: function(status) {
 		  console.log('Upload error: ' + status);
 	      }
@@ -125,7 +137,6 @@ define([
          formData[el.name] = $(el)[0].value;
        });
 
- 
        //if('positions' in formData){
        var positions = [];
        
@@ -141,13 +152,31 @@ define([
          });
        }}
        formData['positions'] = positions;
-       console.log(formData);
+       //console.log(formData);
+
+
+       // 1. validate model
+       // 2. save files
+       // 3. sync model
+       this.formData = formData;
+       this.model.set(this.formData);
+       //if(this.model.isValid(true)){
+          // write in file 
+          // since model is valid, we know there are two files to be uploaded
+        //  this.num_uploads = 0;
+         // this.s3upload('resume');
+         // this.s3upload('cover_letter');
+       this.saveModel();
+
+       //}
+       // we can still check that model is valid and make use of the 
+
        // if server returns model, then calls success
        // otherwise, calls error. not sure how to 
        // deal with messages without returning model
        // check this: 
        // http://stackoverflow.com/questions/16965065/backbone-sync-error-even-after-response-code-200
-       this.model.save(formData,{ iframe: true,
+       /*this.model.save(formData,{ iframe: true,
                               files: $('form :file'),
                               data: formData,
                               success: function(model,response) { 
@@ -157,10 +186,27 @@ define([
                               error: function(model,response){ 
                                    console.log("error"); 
                                    this.trigger('form-submitted','error');//,'Ooops! Something ;
-                              }.bind(this)});
-       //}
+                              }.bind(this)}
+       );*/
 
      
+      },
+
+      // this is going to do a second check...
+      saveModel: function(){
+
+            this.model.save(this.formData,{
+                               success: function(model,response) { 
+                                   console.log("success"); 
+                                   this.trigger('form-submitted','success'); //,'Submitted!');
+                               }.bind(this),
+                              error: function(model,response){ 
+                                   console.log("error"); 
+                                   this.trigger('form-submitted','error');//,'Ooops! Something ;
+                              }.bind(this)}
+       );
+
+
       }
 
     /*  renderEnd: function(message){

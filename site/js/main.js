@@ -21,6 +21,7 @@ requirejs.config({
         'selectize': 'lib/standalone/selectize',
         'backbone-validation': 'lib/backbone-validation',
         's3upload': 'lib/s3upload',
+        'lodash' : 'lib/lodash.min',
     },
     shim: {
         'jquery' : {
@@ -43,7 +44,8 @@ requirejs.config({
            deps: ['jquery']
         },
         's3upload': {
-           deps: ['jquery']
+           deps: ['jquery','lodash']
+        },
+
         }
-    }
 });

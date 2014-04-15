@@ -256,15 +256,16 @@ requirejs([
     //Insert a new user
     app.post( '/api/users', function( request, response ,next) {
        console.log("POST to /api/users");
-       //console.log(request.body);
+       console.log(request.body);
        //console.log(JSON.stringify(request.body.positions[0]));
 
        // not sure how to pass this object directly from the backbone model
        // so we are passing it as an array, and we create it here
        var positions = [];
-       request.body.positions.split(",").forEach(function(target){
+       request.body.positions.forEach(function(target){
          positions.push({ position: target });
         });
+    
 
        var user = new UserModel({
 	  name: request.body.name,
@@ -284,9 +285,10 @@ requirejs([
         // the tmp directory...
        	user.save( function( err ) {
 	    if( !err ) {
-		console.log( 'entry created. try to upload file' );
+		//console.log( 'entry created. try to upload file' );
                 //console.log(request.files);
-                multiple_file_upload(user,request.files,response);
+                //multiple_file_upload(user,request.files,response);
+                return response.send(user);
 	     } else {
 		return console.log( err );
 	    }
@@ -294,6 +296,11 @@ requirejs([
     });
 
     // 
+
+    var AWS_ACCESS_KEY = process.env.AWS_ACCESS_KEY_ID;
+    var AWS_SECRET_KEY = process.env.AWS_SECRET_ACCESS_KEY;
+    var S3_BUCKET = process.env.S3_BUCKET_NAME;
+
     app.get('/sign_s3', function(req, res){
         // extract name and mime from object to upload
         // TODO: check on name...
@@ -303,7 +310,7 @@ requirejs([
         // create a temporal signature
 	var now = new Date();
 	var expires = Math.ceil((now.getTime() + 10000)/1000); // 10 seconds from now
-	var amz_headers = "x-amz-acl:public-read";   // grant permissions
+	var amz_headers = "x-amz-acl:private";   // grant permissions
 
         // create request
 	var put_request = "PUT\n\n"+mime_type+"\n"+expires+"\n"+amz_headers+"\n/"+S3_BUCKET+"/"+object_name;
