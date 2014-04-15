@@ -1,6 +1,5 @@
 //Module dependencies.
 
-
 var requirejs = require('requirejs');
 
 requirejs.config({
