@@ -140,7 +140,8 @@ define([
 
       // this is going to do a second check...
       uploadFiles: function(model){
-       console.log(model);
+      
+       console.log("upload files using this model",model);
        var id = model.get("_id");
        fileData = { 
           resume: "resume_" + id +  ".pdf", 

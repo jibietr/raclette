@@ -446,9 +446,9 @@ dd.createTable(params, function(err, data) {
         // extract name and mime from object to upload
         // TODO: check on name...
         var count = 0;
+   console.log(req.body);
         var max_files = _.keys(req.files).length;
-        console.log(req.body);
-        var handler = function(error, data){
+            var handler = function(error, data){
 		    count++;
 		    if (error){
                         console.log("error" + error);
