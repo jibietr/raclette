@@ -308,7 +308,7 @@ requirejs([
     var S3_BUCKET = process.env.S3_BUCKET_NAME;
 
     //var s3 = new AWS.S3();
-    console.log("setup AWS params");
+    console.log("setup AWS params 2");
     console.log(AWS_ACCESS_KEY);
     console.log(AWS_SECRET_KEY);
     console.log(S3_BUCKET);
