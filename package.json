@@ -2,7 +2,9 @@
     "name": "raclette",
     "version": "0.0.1",
     "description": "the idiap-scg recruitment system",
-    "main": "server.js",
+    "scripts": {
+      "start": "node server"
+    },
     "dependencies": {
       "express": "~3.1.0",
       "mongoose": "~3.5.5",

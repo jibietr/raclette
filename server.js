@@ -34,13 +34,12 @@ requirejs(['jquery', 'backbone'], function($, Backbone) { Backbone.$ = $; });
 requirejs([
     'express',
     'path',
-    'mongoose',
     'jquery',
     'fs', 
     'underscore',
     'backbone',
     'aws-sdk'], 
-  function(express,path,mongoose,$,fs,_,Backbone,AWS){
+  function(express,path,$,fs,_,Backbone,AWS){
     var application_root = __dirname;
     var app = express();
    
@@ -68,21 +67,22 @@ requirejs([
     });
     
 
-    //Connect to database
-    var uristring =
+    //Connecto database
+    /*var uristring =
         process.env.MONGOLAB_URI ||
         process.env.MONGOHQ_URL ||
-        'mongodb://localhost/idiap-scg-april2014';
+        'mongodb://localhost/idiap-scg-april2014';*/
 
-    console.log("connecting to " + uristring); 
+    /*console.log("connecting to " + uristring); 
     mongoose.connect(uristring, function (err, res) {
       if (err) {
       console.log ('ERROR connecting to: ' + uristring + '. ' + err);
       } else {
       console.log ('Succeeded connected to: ' + uristring);
       }
-    });
+    });*/
 
+    /*
     // Define a keyword-like schema for positions
     var Positions = new mongoose.Schema({
        position: String, 
@@ -101,7 +101,7 @@ requirejs([
         major: String,
         positions: [ Positions ],
 	joined: Date,
-   });
+   });*/
 
 
    // QUESTION: should userid and qid be ObjectIds?
@@ -125,7 +125,7 @@ requirejs([
    // }); 
 
     //Models
-    var UserModel = mongoose.model( 'User', User );
+    //var UserModel = mongoose.model( 'User', User );
     //var AnswerModel = mongoose.model( 'Answer', Answer);
     //var QuestionModel = mongoose.model( 'Question', Question);
  
