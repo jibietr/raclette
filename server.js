@@ -304,8 +304,8 @@ requirejs([
     // 
 
     var AWS_ACCESS_KEY = process.env.AWS_ACCESS_KEY_ID;
-    var AWS_SECRET_KEY = process.env.AWS_SECRET_ACCESS_KEY;
-    var S3_BUCKET = process.env.S3_BUCKET_NAME;
+    var AWS_SECRET_KEY = process.env.AWS_SECRET_KEY;
+    var S3_BUCKET = process.env.PARAM1;
 
     //var s3 = new AWS.S3();
     console.log("setup AWS params 3");
