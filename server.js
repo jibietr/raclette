@@ -59,6 +59,7 @@ requirejs([
 	//perform route lookup based on url and HTTP method
 	app.use( app.router );
 	//Where to serve static content
+        console.log("This is an updated message");
         console.log('Use %s as dirname',application_root);
         app.use( express.static( path.join( application_root, 'site') ) );
 	//Show all errors in development
