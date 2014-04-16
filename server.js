@@ -448,6 +448,7 @@ dd.createTable(params, function(err, data) {
                         console.log("error" + error);
                         //response.write("Ooops. Something went wrong!");
                         //                        return response.send();
+                        return res.send(error);
 		    }else{
 			console.log("worked, data: "+ JSON.stringify(data));
 		    }		    if (count == max_files) {
