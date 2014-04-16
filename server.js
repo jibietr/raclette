@@ -39,14 +39,14 @@ requirejs([
     'fs', 
     'underscore',
     'backbone',
-    'crypto'], 
-  function(express,path,mongoose,$,fs,_,Backbone,crypto){
+    'aws-sdk'], 
+  function(express,path,mongoose,$,fs,_,Backbone,AWS){
     var application_root = __dirname;
     var app = express();
    
 
     // Configure seer
-    // So far the server will load the static content in site/index.html
+    // So far the serverem will load the static content in site/index.html
     app.configure( function() {
       //parses requesody and populates request.body
       app.use( express.bodyParser() );
@@ -103,6 +103,7 @@ requirejs([
 	joined: Date,
    });
 
+
    // QUESTION: should userid and qid be ObjectIds?
    // var Answer = new mongoose.Schema({
    //     userid: String, 
@@ -127,6 +128,10 @@ requirejs([
     var UserModel = mongoose.model( 'User', User );
     //var AnswerModel = mongoose.model( 'Answer', Answer);
     //var QuestionModel = mongoose.model( 'Question', Question);
+ 
+     
+  
+   
 
     //Get a list of all users
    //  app.get( '/api/users', function( request, response ) {
@@ -221,7 +226,7 @@ requirejs([
 
         var count = 0;
         var max_files = _.keys(files).length;
-
+ 
         var handler = function(error, content){
 		    count++;
 		    if (error){
@@ -301,7 +306,13 @@ requirejs([
     var AWS_SECRET_KEY = process.env.AWS_SECRET_ACCESS_KEY;
     var S3_BUCKET = process.env.S3_BUCKET_NAME;
 
-    app.get('/sign_s3', function(req, res){
+    //var s3 = new AWS.S3();
+    AWS.config.update({accessKeyId: AWS_ACCESS_KEY, secretAccessKey: AWS_SECRET_KEY});
+    AWS.config.update({region: 'eu-west-1'});
+
+
+
+  /*   app.get('/sign_s3', function(req, res){
         // extract name and mime from object to upload
         // TODO: check on name...
 	var object_name = req.query.s3_object_name;
@@ -327,11 +338,136 @@ requirejs([
 	};
 	res.write(JSON.stringify(credentials));
 	res.end();
+    });*/
+
+    
+    function s3_upload_file(file,fname,handler){
+
+          console.log("s3 upload file" + file.name);
+	  var s3 = new AWS.S3();	
+	  fs.readFile(file.path, function(err, fileBuffer){
+              console.log("s3 put " + file.name);
+              var params = {
+		  Bucket: S3_BUCKET + "/docs/",
+		  Key: fname, // add new name
+		  Body: fileBuffer,
+		  ACL: 'private',
+		  ContentType: file.type
+	      };
+	      s3.putObject(params, handler);
+	  });
+    }
+
+    var dd = new AWS.DynamoDB();
+  // use describe table to check status of table?
+    var params = {
+  AttributeDefinitions: [ // required
+    {
+      AttributeName: '_id', // required
+      AttributeType: 'S', // required
+    },
+  ],
+  KeySchema: [ // required
+    {
+      AttributeName: '_id', // required
+      KeyType: 'HASH', // required
+    },
+  ],
+  ProvisionedThroughput: { // required
+    ReadCapacityUnits: 5, // required
+    WriteCapacityUnits: 5, // required
+  },
+  TableName: 'users', // required
+
+};
+
+    
+dd.createTable(params, function(err, data) {
+  if (err) console.log(err, err.stack); // an error occurred
+  else     console.log(data);           // successful response
+});
+
+
+    //Insert a new user
+    app.post( '/s3/users', function( request, response ,next) {
+
+       // not sure how to pass this object directly from the backbone model
+       // so we are passing it as an array, and we create it here
+       var positions = [];
+       request.body.positions.forEach(function(target){
+         positions.push({ position: target });
+        });
+    
+
+       // create unique hashstag
+       var user_hash = (new Date).getTime().toString() + Math.floor((Math.random()*1000)+1).toString();
+       console.log("user_hash:",user_hash);
+
+       var user = request.body;
+       user._id = user_hash;
+ 
+       var item = {
+            '_id': { 'S': user._id },
+            'name': { 'S': user.name },
+            'email': { 'S': user.email },
+            'nationality': { 'S': user.nationality },
+            'school': { 'S': user.school },
+            'degree': { 'S': user.degree },
+            'status': { 'S': user.status },
+            'major': { 'S': user.major }
+          };
+
+       dd.putItem({
+          'TableName': 'users',
+          'Item': item
+        }, function(err, data) {
+             if( !err ) {
+		//console.log( 'entry created. try to upload file' );
+                //console.log(request.files);
+                //multiple_file_upload(user,request.files,response);
+                //return response.send(user);
+                console.log("done"); 
+                response.send(user);
+	     } else {
+		return console.log( err );
+	    }       
+        });
+    });
+
+
+    app.post('/upload_s3', function(req, res){
+        // extract name and mime from object to upload
+        // TODO: check on name...
+        var count = 0;
+        var max_files = _.keys(req.files).length;
+        console.log(req.body);
+        var handler = function(error, data){
+		    count++;
+		    if (error){
+                        console.log("error" + error);
+                        //response.write("Ooops. Something went wrong!");
+                        //                        return response.send();
+		    }else{
+			console.log("worked, data: "+ JSON.stringify(data));
+		    }		    if (count == max_files) {
+                        //response.statusCode = 200;
+                        console.log("done with all uploads");
+                        // we are save returning this
+                        var files = { resume: '.pdf', cover_letter: '.pdf'}
+                        console.log(files);
+                        return res.send(files);
+		    }
+		}
+        for(var key in req.files){
+          fname = req.body[key];
+          s3_upload_file(req.files[key],fname,handler);
+        }
+
     });
 
     // insert new answer with collection.create
     // app.post( '/api/answers', function(request,response) {
-    //   console.log("POST to /api/answers");
+    //   console.log("POST to /api/apianswers");
 
     //   // save to mongodb
     //   var answer = new AnswerModel({
