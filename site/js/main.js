@@ -37,7 +37,7 @@ requirejs.config({
             deps: ['underscore', 'jquery'],
             exports: 'Backbone'
         },
-        'backbone-validatio': {
+        'backbone-validation': {
             deps: ['backbone'],
         },
         'selectize':{
