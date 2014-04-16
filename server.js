@@ -430,7 +430,8 @@ dd.createTable(params, function(err, data) {
                 console.log("done"); 
                 response.send(user);
 	     } else {
-		return console.log( err );
+                console.log(err)
+		return response.send( err );
 	    }       
         });
     });
@@ -462,6 +463,7 @@ dd.createTable(params, function(err, data) {
 		}
         for(var key in req.files){
           fname = req.body[key];
+
           s3_upload_file(req.files[key],fname,handler);
         }
 
