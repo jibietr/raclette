@@ -11,8 +11,6 @@
     <!--script src="https://d396qusza40orc.cloudfront.net/startup%2Fcode%2Fjquery.js"></script-->
     <!--script src="https://d396qusza40orc.cloudfront.net/startup%2Fcode%2Fbootstrap.js"></script-->
      <link rel="stylesheet" href="//netdna.bootstrapcdn.com/bootstrap/3.1.1/css/bootstrap.min.css">
-
-
     
     <script data-main="js/main" src="js/lib/require.js"></script>
     <!--script  src="js/lib/require.js"></script>
@@ -21,164 +19,17 @@
     <link href="http://fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,700italic,300,400,600,700,800" rel="stylesheet" type="text/css"-->
 
     <link rel="stylesheet" href="css/screen.css">
-    <!--link rel="stylesheet" href="css/selectize.default.css-->
     <link rel="stylesheet" href="css/selectize.bootstrap3.css">
-
+   
   </head>
   <body>
 
-  <!-- Mobile-friendly navbar -->
-  <!-- http://twitter.github.io/bootstrap/examples/starter-template.html -->
-  <div class="navbar navbar-inverse navbar-fixed-top">
-    <div class="navbar-inner">
-      <div class="container">
-        <button type="button" class="btn btn-navbar"
-          data-toggle="collapse" data-target=".nav-collapse">
-          <span class="icon-bar"></span>
-          <span class="icon-bar"></span>     
-          <span class="icon-bar"></span>
-        </button>
-        <a class="brand" href="#">Home</a>
-        <a class="brand" href="#application">Application</a>
-        <a class="brand" href="#">Profile</a>
-        </div>
-    </div>
-  </div>
 
   <!-- This will be filled with questions -->
-  <div id="application">  
-  </div>
-
-
-
-  <!-- container is a fixed layout thing... -->
-  
-  <!--script id="VideoQuestionTemplate2" type="text/template">
-    <div class="container">
-      <div class="row-fluid questionHeader">
-	<div><%= title %></div><span class="label label-warning"><%= uploaded %></span>
-      </div>
-      <div class="row-fluid videoEntry">
-	  <video id="camera-preview" controls="false" src="" poster="<%= poster %>" style="border: 1px solid #ccc;" width="250" height="195"  ></video>
-      </div>
-      <div class="row-fluid videoControls">
-	<button class="btn btn-success btn-small" id="play-button">Play</button>  
-	<button class="btn btn-success btn-small" id="record-button">Record</button>  
-	<button class="btn btn-success btn-small" id="upload-button">Upload</button>    
-      </div>
-    </div>
-  </script-->
-
- <!--script id="VideoQuestionTemplate2" type="text/template">
-    <div class="container">
-      <div class="row-fluid questionHeader">
-	<div><%= title %></div><span class="label label-warning"><%= uploaded %></span>
-      </div>
-      <div class="row-fluid videoEntry">
-	  <video id="camera-preview" controls="false" src="" poster="<%= poster %>" style="border: 1px solid #ccc;" width="250" height="195"  ></video>
-      </div>
-      <div class="row-fluid videoControls">
-	<button class="btn btn-success btn-small" id="play-button">Play</button>  
-	<button class="btn btn-success btn-small" id="record-button">Record</button>  
-	<button class="btn btn-success btn-small" id="upload-button">Upload</button>    
-      </div>
-    </div>
-  </script-->
-
-
-<!--
-  <script id="VideoQuestionTemplate" type="text/template">
-    <div class="container">
-      <div id="VideoQuestionContainder">       
-	<div class="container">
-	   <div class="panel panel-default">
-	      <div class="panel-heading panel-<%= status %>">
-
-		<h4 class="panel-title"><span class="glyphicon glyphicon-facetime-video"></span>  <a data-toggle="collapse" data-parent="#accordion" href="#<%= qid %>"><%= title %></a></h4>
-	      </div>
-	      <div id="<%= qid %>" class="panel-collapse collapse">
-	      <div class="row-fluid videoEntry">
-		<video id="camera-preview" controls="false" src="" poster="<%= poster %>" style="border: 1px solid #ccc;" width="250" height="195"  ></video>
-	      </div>
-	      <div class="row-fluid videoControls">
-		<button class="btn btn-success btn-small" id="play-button">Play</button>  
-		<button class="btn btn-success btn-small" id="record-button">Record</button>  
-		<button class="btn btn-success btn-small" id="upload-button">Upload</button>    
-	      </div>
-	      </div>
-	    </div>
-	  </div>
-	</div>
-      </div>
-    </div>
-  </script>
-
-
-<div id="DocContainder">       
-  <div class="container">
-     <div class="panel panel-default">
-	<div class="panel-heading panel-completed"> 
-
-          <h4 class="panel-title"><span class="glyphicon glyphicon glyphicon-file"></span>  <a data-toggle="collapse" data-parent="#accordion" href="#collapseOne">Resume</a></h4>
+        <div id="application">  
         </div>
-	<div id="collapseOne" class="panel-collapse collapse">
-        	<href a="https://www.idiap.ch/~jibiel/docs/joanisaacbiel_resume.pdf">resume.pdf</div>
-	</div>
-      </div>
-    </div>
-  </div>
-</div>
 
 
-
-
-
-<div id="VideoQuestionContainder">       
-  <div class="container">
-     <div class="panel panel-success">
-	<div class="panel-heading">
-          <h4 class="panel-title"><span class="glyphicon glyphicon-facetime-video"></span>  <a data-toggle="collapse" data-parent="#accordion" href="#collapseVideoQuestion">Please introduce yourself.</a></h4>
-        </div>
-	<div id="collapseVideoQuestion" class="panel-collapse collapse">
-        <div class="panel-body">
-        <div class="row-fluid videoEntry">
-	  <video id="camera-preview" controls="false" src="" poster="img/screen-record.gif" style="border: 1px solid #ccc;" width="250" height="195"  ></video>
-        </div>
-        <div class="row-fluid videoControls">
-	  <button class="btn btn-success btn-small" id="play-button">Play</button>  
-	  <button class="btn btn-success btn-small" id="record-button">Record</button>  
-	  <button class="btn btn-success btn-small" id="upload-button">Upload</button>    
-        </div>
-        </div>
-	</div>
-      </div>
-    </div>
-  </div>
-</div>
-
-
-
-<div id="RandomContainer">       
-  <div class="container">
-     <div class="panel panel-default panel-fail">
-	<div class="panel-heading">
-	  <h4 class="panel-title">
-	    <a data-toggle="collapse" data-parent="#accordion" href="#randomcollapse">
-	      Question goes here
-	    </a>
-	  </h4>
-	</div>
-	<div id="randomcollapse" class="panel-collapse collapse">
-	  <div class="panel-body">Response goes here</div>
-	</div>
-      </div>
-    </div>
-  </div>
-</div>
-
--->
-
-  <!--script src="js/app.js"></script-->
 
 </body>
 </html>

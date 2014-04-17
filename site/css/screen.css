@@ -41,7 +41,7 @@ p.lead {
     line-height: 30px;
 } 
 p {
-    font-size: 18px;
+    font-size: 17px;
     line-height: 24px;
 }
 ul {
@@ -51,6 +51,9 @@ li {
     padding-top: 1.5%;
 } 
 
+#application {
+    padding-bottom: 5% ;
+}
 /* ideo pitch and action */
 .pitch {
     padding: 2.5% 0%;

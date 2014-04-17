@@ -365,33 +365,42 @@ requirejs([
     }
 
     var dd = new AWS.DynamoDB();
-  // use describe table to check status of table?
+    // use describe table to check status of table?
     var params = {
-  AttributeDefinitions: [ // required
-    {
-      AttributeName: '_id', // required
-      AttributeType: 'S', // required
-    },
-  ],
-  KeySchema: [ // required
-    {
-      AttributeName: '_id', // required
-      KeyType: 'HASH', // required
-    },
-  ],
-  ProvisionedThroughput: { // required
-    ReadCapacityUnits: 5, // required
-    WriteCapacityUnits: 5, // required
-  },
-  TableName: 'users', // required
+      AttributeDefinitions: [ // required
+	{
+	  AttributeName: '_id', // required
+	  AttributeType: 'S', // required
+	},
+      ],
+      KeySchema: [ // required
+	{
+	  AttributeName: '_id', // required
+	  KeyType: 'HASH', // required
+	},
+      ],
+      ProvisionedThroughput: { // required
+	ReadCapacityUnits: 1, // required
+	WriteCapacityUnits: 1, // required
+      },
+      TableName: 'users', // required
 
-};
+    };
 
-    
-dd.createTable(params, function(err, data) {
-  if (err) console.log(err, err.stack); // an error occurred
-  else     console.log(data);           // successful response
-});
+   
+    // create table only if it does not exist
+    dd.describeTable({ TableName: 'users'}, function(err, data) {
+      if(err){
+	 if(err.code == 'ResourceNotFoundException'){ // table does not exist
+ 	    dd.createTable(params, function(err, data) {
+	       if (err) console.log(err, err.stack); // an error occurred
+	       else     console.log(data);           // successful response
+	   });
+	 }else console.log(err, err.stack); // an error occurred
+      }else{
+       console.log("Table 'users' already exists");
+      }  
+    });
 
 
     //Insert a new user
@@ -399,10 +408,10 @@ dd.createTable(params, function(err, data) {
 
        // not sure how to pass this object directly from the backbone model
        // so we are passing it as an array, and we create it here
-       var positions = [];
-       request.body.positions.forEach(function(target){
-         positions.push({ position: target });
-        });
+       //var positions = [];
+       //request.body.positions.forEach(function(target){
+       //  positions.push({ position: target });
+       // });
     
 
        // create unique hashstag
@@ -420,6 +429,7 @@ dd.createTable(params, function(err, data) {
             'school': { 'S': user.school },
             'degree': { 'S': user.degree },
             'status': { 'S': user.status },
+            'positions' : { 'SS': user.positions },
             'major': { 'S': user.major }
           };
 
