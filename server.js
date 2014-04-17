@@ -71,7 +71,7 @@ requirejs([
     //Connecto database
     /*var uristring =
         process.env.MONGOLAB_URI ||
-        process.env.MONGOHQ_URL ||
+        process.env.MONGOHQ_URL ||c
         'mongodb://localhost/idiap-scg-april2014';*/
 
     /*console.log("connecting to " + uristring); 
@@ -446,7 +446,10 @@ requirejs([
                 response.send(user);
 	     } else {
                 console.log(err)
-		return response.send( err );
+                // note that error may content user attributes
+                // which may trigger .save success
+                // do not return full error object
+                return response.send(err.message);
 	    }       
         });
     });
