@@ -133,7 +133,7 @@ define([
        formData.status = "default";
        formData.school = "default";
       formData.major = "default";
-      formData.positions = "default";
+      formData.positions = ["default","default"];
         
 
        this.model.save(formData,{
