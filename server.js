@@ -420,7 +420,9 @@ requirejs([
 
        var user = request.body;
        user._id = user_hash;
- 
+       console.log("user",user); 
+
+
        var item = {
             '_id': { 'S': user._id },
             'name': { 'S': user.name },
