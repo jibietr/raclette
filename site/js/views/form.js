@@ -124,18 +124,6 @@ define([
 
        // validates model
        // 
-
-       formData.name = "default";
-       formData.email = "default@gmail.com";
-       formData.country = "default";
-       formData.nationality = "default";
-       formData.degree = "default";
-       formData.status = "default";
-       formData.school = "default";
-      formData.major = "default";
-      formData.positions = ["default1","default2"];
-        
-
        this.model.save(formData,{
          success: function(model,response) { 
            console.log("success"); 
