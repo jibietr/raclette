@@ -17,7 +17,8 @@ define([
      initialize: function() {
         this.collection = new Questionnaire();
         this.collection.fetch({reset: true,//initialize collection from db
-         success: function(){ 
+         success: function(collection,response){
+           console.log(collection); 
            this.renderStart();
         }.bind(this)}); 
      },
@@ -34,6 +35,7 @@ define([
      },
      
     renderStart: function(){
+        console.log(this.collection.length);
         var panel = new Panel({ type: 'start', num_questions: this.collection.length });
         console.log(panel.type);
         var panelView = new PanelView({ 

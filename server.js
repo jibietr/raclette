@@ -96,7 +96,7 @@ requirejs([
         var params = {
           TableName: TABLEQUESTIONS, // required
           AttributesToGet: [
-            'qid', 'title', 'time_response', 'time_wait',
+            'qid', 'title', 'time_response', 'time_wait', 'qtype',
           ],};
         dd.scan(params, function(err, data) {
            if (err) console.log(err, err.stack); // an error occurred
@@ -107,6 +107,7 @@ requirejs([
                 var item = { 
                    'qid': entry.qid.S,
                    'title': entry.title.S,
+                   'qtype': entry.qtype.S,
                    'time_response': entry.time_response.N,
                 };
                 if('time_wait' in entry) item.time_wait = entry.time_wait.N;
