@@ -2,7 +2,7 @@ requirejs([
     'jquery',
     'underscore',
     'backbone',
-    'views/app_form'],
+    'views/app_interview'],
 function($,_,Backbone,View) {
 
     var appView = new View();

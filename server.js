@@ -1,3 +1,4 @@
+
 //Module dependencies.
 
 var requirejs = require('requirejs');
@@ -65,15 +66,6 @@ requirejs([
 
 
 
-    //Models
-    //var UserModel = mongoose.model( 'User', User );
-    //var AnswerModel = mongoose.model( 'Answer', Answer);
-    //var QuestionModel = mongoose.model( 'Question', Question);
- 
-     
-  
-   
-
     //Get a list of all users
    //  app.get( '/api/users', function( request, response ) {
    // 	return UserModel.find( function( err, users ) {
@@ -100,15 +92,29 @@ requirejs([
     app.get( '/api/questions', function( request, response ) {
 
         var dd = new AWS.DynamoDB();
-        params = var params = {
-          TableName: request.table_name, // required
+        console.log("Use Table",TABLEQUESTIONS);
+        var params = {
+          TableName: TABLEQUESTIONS, // required
           AttributesToGet: [
-            'qid',
+            'qid', 'title', 'time_response', 'time_wait',
           ],};
-        dd.dynamodb.scan(params, function(err, data) {
+        dd.scan(params, function(err, data) {
            if (err) console.log(err, err.stack); // an error occurred
-           else     console.log(data);           // successful response
-        }
+           else{      console.log(data);           // successful response
+             questions = [];
+             data.Items.forEach(function(entry) {
+                console.log(entry);
+                var item = { 
+                   'qid': entry.qid.S,
+                   'title': entry.title.S,
+                   'time_response': entry.time_response.N,
+                };
+                if('time_wait' in entry) item.time_wait = entry.time_wait.N;
+                questions.push(item);
+             });
+             response.send(questions);
+           }
+        });
 
         /*
     	return QuestionModel.find( function( err, questions ) {
