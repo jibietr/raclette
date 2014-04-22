@@ -10,16 +10,15 @@ define([
   function($,_,bootstrap,Backbone,Questionnaire,Panel,QuestionView,PanelView) {
 
     var questionnaireView = Backbone.View.extend({
-      tagName: 'div',
-      id: 'sample-page',
-      className: 'questionnaire',
+
+      el: '#application',
 
      initialize: function() {
         this.collection = new Questionnaire();
         this.collection.fetch({reset: true,//initialize collection from db
-         success: function(model,response){ 
-           console.log(model);
-           console.log(response);
+         success: function(collection,response){ 
+           console.log(collection);
+           //console.log(response);
            this.renderStart();
         }.bind(this), error: function(model,response){
           console.log(response);
@@ -39,8 +38,10 @@ define([
      },
      
     renderStart: function(){
+       
         var panel = new Panel({ type: 'start', num_questions: this.collection.length });
-        console.log(panel.type);
+         
+        console.log(panel);
         var panelView = new PanelView({ 
           model: panel 
          });

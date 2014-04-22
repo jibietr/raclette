@@ -6,14 +6,13 @@ define([
     'backbone',
     'views/chrono',
     'views/recorder',
-    'models/stream',
     'text!templates/question.html',
     'text!templates/video.html',
     'text!templates/start.html',
     'text!templates/wait.html',
     'text!templates/end.html',
     'text!templates/text.html'],
-  function($,_,bootstrap,form,Backbone,ChronoView,Recorder,Stream,Tmpl_question,Tmpl_video,Tmpl_start,Tmpl_wait,Tmpl_end,Tmpl_text) {
+  function($,_,bootstrap,form,Backbone,ChronoView,Recorder,Tmpl_question,Tmpl_video,Tmpl_start,Tmpl_wait,Tmpl_end,Tmpl_text) {
 
     var questionView = Backbone.View.extend({
       //id: 'question',

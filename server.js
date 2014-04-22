@@ -92,9 +92,9 @@ requirejs([
     app.get( '/api/questions', function( request, response ) {
 
         var dd = new AWS.DynamoDB();
-        console.log("Use Table",TABLEQUESTIONS);
+        console.log("Use Table",TAB_QUESTIONS);
         var params = {
-          TableName: TABLEQUESTIONS, // required
+          TableName: TAB_QUESTIONS, // required
           AttributesToGet: [
             'qid', 'title', 'time_response', 'time_wait', 'qtype',
           ],};
@@ -277,7 +277,9 @@ requirejs([
     var AWS_ACCESS_KEY = process.env.AWS_ACCESS_KEY_ID;
     var AWS_SECRET_KEY = process.env.AWS_SECRET_KEY;
     var S3_BUCKET = process.env.PARAM1;
-    var TABLEQUESTIONS = process.env.PARAM2;
+    var TAB_QUESTIONS = process.env.PARAM2;
+    var TAB_USERS = process.env.PARAM3;
+    var TAB_ANSWERS = process.env.PARAM4;
 
     //var s3 = new AWS.S3();
     console.log("setup AWS params 3");
@@ -337,10 +339,25 @@ requirejs([
     }
 
     
-    function InitDB(){
+    function InitDB(params){
     var dd = new AWS.DynamoDB();
-    // use describe table to check status of table?
-    var params = {
+    // create table only if it does not exist
+    dd.describeTable({ TableName: params.TableName }, function(err, data) {
+      if(err){
+	 if(err.code == 'ResourceNotFoundException'){ // table does not exist
+ 	    dd.createTable(params, function(err, data) {
+	       if (err) console.log(err, err.stack); // an error occurred
+	       else     console.log(data);           // successful response
+	   });
+	 }else console.log(err, err.stack); // an error occurred
+      }else{
+       console.log("Table 'users' already exists");
+      }  
+    });
+    }
+
+
+    var UserParams = {
       AttributeDefinitions: [ // required
 	{
 	  AttributeName: '_id', // required
@@ -357,26 +374,32 @@ requirejs([
 	ReadCapacityUnits: 1, // required
 	WriteCapacityUnits: 1, // required
       },
-      TableName: 'users', // required
-
+      TableName: TAB_USERS, // required
     };
    
-    // create table only if it does not exist
-    dd.describeTable({ TableName: 'users'}, function(err, data) {
-      if(err){
-	 if(err.code == 'ResourceNotFoundException'){ // table does not exist
- 	    dd.createTable(params, function(err, data) {
-	       if (err) console.log(err, err.stack); // an error occurred
-	       else     console.log(data);           // successful response
-	   });
-	 }else console.log(err, err.stack); // an error occurred
-      }else{
-       console.log("Table 'users' already exists");
-      }  
-    });
-    }
+    var AnswerParams = {
+      AttributeDefinitions: [ // required
+	{
+	  AttributeName: '_id', // required
+	  AttributeType: 'S', // required
+	},
+      ],
+      KeySchema: [ // required
+	{
+	  AttributeName: '_id', // required
+	  KeyType: 'HASH', // required
+	},
+      ],
+      ProvisionedThroughput: { // required
+	ReadCapacityUnits: 1, // required
+	WriteCapacityUnits: 1, // required
+      },
+      TableName: TAB_ANSWERS, // required
+    };
+   
+    InitDB(UserParams);
+    setTimeout(InitDB(AnswerParams),1000);
 
-    InitDB();
 
 
     //Insert a new user
@@ -500,6 +523,55 @@ requirejs([
     //   });
 
     // });
+
+    app.post( '/api/answers', function(request,response) {
+      console.log("POST to /api/apianswers");
+
+       var user = request.body;
+       //create simple user id
+       user._id = request.body.userid + request.body.qid;
+       //console.log(request);
+       //console.log(typeof request.body.work_time);
+       var answer = {
+            '_id': { 'S': user._id },
+            'userid': { 'S': 'XXXXX' },
+            'qtype': { 'S': request.body.qtype },
+            'qid': { 'S': request.body.qid },
+            'content': { 'S': request.body.content },
+            'created': { 'S': 'XXXXX'},
+            'work_time' : { 'N': String(request.body.work_time) },
+          };
+       if('wait_time' in request.body) answer.wait_time = { 'N': String(request.body.wait_time) };
+       console.log(answer);
+
+       dd = new AWS.DynamoDB();
+       dd.putItem({
+          'TableName': TAB_ANSWERS,
+          'Item': answer
+        }, function(err, data) {
+             if( !err ) {
+		//console.log( 'entry created. try to upload file' );
+                if(request.body.qtype=="video"){
+                     
+                    console.log("should save video here");
+                    //console.log(request.body.qtype);
+                    //_upload(response, request.body.audio, answer._id);
+                    //_upload(response, request.body.video, answer._id);
+                }
+                console.log("done"); 
+                response.send(answer);
+	     } else {
+                console.log("Error",err);
+                return console.log(err)
+                // note that error may content user attributes
+                // which may trigger .save success
+                // do not return full error object
+                return response.send(err.message);
+	    }     
+           return response.send(answer);  
+        });
+
+    });
  
  
 
