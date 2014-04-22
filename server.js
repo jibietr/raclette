@@ -369,17 +369,18 @@ requirejs([
 	  });
     }
 
-   
- 
+
+
+
     function s3_upload_video(file,fname,handler){
 
-
-          file
-
-          console.log("s3 upload file" + file.name);
+          fname = fname + "." + file.extension
+          console.log("s3 upload file" + fname);
 	  var s3 = new AWS.S3();	
-	  fs.readFile(file.path, function(err, fileBuffer){
-              console.log("s3 put " + file.name);
+          file.contents = file.contents.split(',').pop();
+          fileBuffer = new Buffer(file.contents, "base64");
+
+	 
               var params = {
 		  Bucket: S3_BUCKET + "/docs/",
 		  Key: fname, // add new name
@@ -388,7 +389,6 @@ requirejs([
 		  ContentType: file.type
 	      };
 	      s3.putObject(params, handler);
-	  });
     }
 
    
