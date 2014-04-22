@@ -144,7 +144,7 @@ requirejs([
    //    var filename = new Date().toString(11);
    //    //console.log(request.body.audio.extension);
    //    console.log(request.body);
-   //    //_upload(response, request.body.audio, filename);
+   //    //_uploaresponse, request.body.audio, filename);
    //    //_upload(response, request.body.video, filename);
 
    //    //merge(response, files);
@@ -221,7 +221,38 @@ requirejs([
           _upload_file(files[file_type],file_type + "_" + user._id, handler);
         }
      }
-               
+
+
+
+    function s3_multimedia_upload(answer, res){
+        // extract name and mime from object to upload
+        // TODO: check on name...
+        var count = 0;
+        var max_files = 2;
+            var handler = function(error, data){
+		    count++;
+		    if (error){
+                        console.log("error" + error);
+                        //response.write("Ooops. Something went wrong!");
+                        //                        return response.send();
+                        return res.send(error);
+		    }else{
+			console.log("worked");
+		    }		    if (count == max_files) {
+                        //response.statusCode = 200;
+                        console.log("done with all uploads");
+                        // we are save returning this
+                        var answer = { qid: 'XXX'};
+                        return res.send(answer);
+		    }
+		}
+        s3_upload_video(answer.audio,answer._id,handler);
+        s3_upload_video(answer.video,answer._id,handler);
+
+
+    });
+
+
     function _upload_file(file, name, handler) {
        fs.readFile(file.path, function (err, data) {
 	   var newPath = __dirname + "/docs/" + name;
@@ -338,7 +369,30 @@ requirejs([
 	  });
     }
 
-    
+   
+ 
+    function s3_upload_video(file,fname,handler){
+
+
+          file
+
+          console.log("s3 upload file" + file.name);
+	  var s3 = new AWS.S3();	
+	  fs.readFile(file.path, function(err, fileBuffer){
+              console.log("s3 put " + file.name);
+              var params = {
+		  Bucket: S3_BUCKET + "/docs/",
+		  Key: fname, // add new name
+		  Body: fileBuffer,
+		  ACL: 'private',
+		  ContentType: file.type
+	      };
+	      s3.putObject(params, handler);
+	  });
+    }
+
+   
+ 
     function InitDB(params){
     var dd = new AWS.DynamoDB();
     // create table only if it does not exist
@@ -555,8 +609,9 @@ requirejs([
                      
                     console.log("should save video here");
                     //console.log(request.body.qtype);
-                    _upload(response, request.body.audio, answer._id);
-                    _upload(response, request.body.video, answer._id);
+		    s3_multimedia_upload(answer, response);
+                    //_upload(response, request.body.audio, answer._id);
+                    //_upload(response, request.body.video, answer._id);
                 }
                 console.log("done"); 
                 response.send(answer);
