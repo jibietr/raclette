@@ -49,7 +49,6 @@ requirejs([
     app.configure( function() {
       //parses requesody and populates request.body
       app.use( express.bodyParser() );
-
 	//checks request.body for HTTP method overrides
 	app.use( express.methodOverride() );
 	//perform route lookup based on url and HTTP method
@@ -87,15 +86,39 @@ requirejs([
    //  });
 
 
-   //  app.get( '/api/questions', function( request, response ) {
-   // 	return QuestionModel.find( function( err, questions ) {
-   // 	    if( !err ) {
-   // 		return response.send(questions);
-   // 	    } else {
-   // 		return console.log( err );
-   // 	    }
-   // 	});
-   //  });
+    /* app.get( '/api/questions', function( request, response ) {
+    	return QuestionModel.find( function( err, questions ) {
+    	    if( !err ) {
+    		return response.send(questions);
+    	    } else {
+    		return console.log( err );
+    	    }
+    	});
+     });*/
+
+
+    app.get( '/api/questions', function( request, response ) {
+
+        var dd = new AWS.DynamoDB();
+        params = var params = {
+          TableName: request.table_name, // required
+          AttributesToGet: [
+            'qid',
+          ],};
+        dd.dynamodb.scan(params, function(err, data) {
+           if (err) console.log(err, err.stack); // an error occurred
+           else     console.log(data);           // successful response
+        }
+
+        /*
+    	return QuestionModel.find( function( err, questions ) {
+    	    if( !err ) {
+    		return response.send(questions);
+    	    } else {
+    		return console.log( err );
+    	    }
+    	});*/
+     });
 
 
    //  app.get( '/api/answers', function( request, response ) {
@@ -247,6 +270,7 @@ requirejs([
     var AWS_ACCESS_KEY = process.env.AWS_ACCESS_KEY_ID;
     var AWS_SECRET_KEY = process.env.AWS_SECRET_KEY;
     var S3_BUCKET = process.env.PARAM1;
+    var TABLEQUESTIONS = process.env.PARAM2;
 
     //var s3 = new AWS.S3();
     console.log("setup AWS params 3");
@@ -305,6 +329,8 @@ requirejs([
 	  });
     }
 
+    
+    function InitDB(){
     var dd = new AWS.DynamoDB();
     // use describe table to check status of table?
     var params = {
@@ -327,16 +353,6 @@ requirejs([
       TableName: 'users', // required
 
     };
-
-   // var Question = new mongoose.Schema({
-   //     qid: { type: String, required: true, unique: true },
-   //     qtype: { type: String, required: true },
-   //     title: { type: String, required: true }, 
-   //     time_wait: { type: Number},
-   //     time_response: { type: Number, required: true},
-   // }); 
-
-
    
     // create table only if it does not exist
     dd.describeTable({ TableName: 'users'}, function(err, data) {
@@ -351,18 +367,14 @@ requirejs([
        console.log("Table 'users' already exists");
       }  
     });
+    }
+
+    InitDB();
 
 
     //Insert a new user
     app.post( '/s3/users', function( request, response ,next) {
 
-       // not sure how to pass this object directly from the backbone model
-       // so we are passing it as an array, and we create it here
-       //var positions = [];
-       //request.body.positions.forEach(function(target){
-       //  positions.push({ position: target });
-       // });
-    
 
        // create unique hashstag
        var user_hash = (new Date).getTime().toString() + Math.floor((Math.random()*1000)+1).toString();
@@ -385,6 +397,7 @@ requirejs([
             'major': { 'S': user.major }
           };
 
+       dd = new AWS.DynamoDB();
        dd.putItem({
           'TableName': 'users',
           'Item': item
