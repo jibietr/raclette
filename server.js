@@ -49,17 +49,12 @@ requirejs([
     app.configure( function() {
       //parses requesody and populates request.body
       app.use( express.bodyParser() );
-      //app.use(express.bodyParser({keepExtensions:true,uploadDir:path.join(__dirname,'/docs')}));
-      //app.use(express.json());
-      //app.use(express.urlencoded());
 
 	//checks request.body for HTTP method overrides
 	app.use( express.methodOverride() );
-        //app.use(express.multipart());
 	//perform route lookup based on url and HTTP method
 	app.use( app.router );
 	//Where to serve static content
-        console.log("This is an updated message");
         console.log('Use %s as dirname',application_root);
         app.use( express.static( path.join( application_root, 'site') ) );
 	//Show all errors in development
@@ -68,62 +63,8 @@ requirejs([
     });
     
 
-    //Connecto database
-    /*var uristring =
-        process.env.MONGOLAB_URI ||
-        process.env.MONGOHQ_URL ||c
-        'mongodb://localhost/idiap-scg-april2014';*/
-
-    /*console.log("connecting to " + uristring); 
-    mongoose.connect(uristring, function (err, res) {
-      if (err) {
-      console.log ('ERROR connecting to: ' + uristring + '. ' + err);
-      } else {
-      console.log ('Succeeded connected to: ' + uristring);
-      }
-    });*/
-
-    /*
-    // Define a keyword-like schema for positions
-    var Positions = new mongoose.Schema({
-       position: String, 
-        
-    });
-
-    // A user 
-    var User = new mongoose.Schema({
-	name: String,
-	email: String,
-        nationality: String,
-        school: String,
-       	country: String,
-        degree: String,
-        status: String,
-        major: String,
-        positions: [ Positions ],
-	joined: Date,
-   });*/
 
 
-   // QUESTION: should userid and qid be ObjectIds?
-   // var Answer = new mongoose.Schema({
-   //     userid: String, 
-   //     qtype: String,
-   //     qid: String,
-   //     content: [mongoose.Schema.Types.Mixed],  
-   //     created: Date, 
-   //     wait_time: Number,
-   //     work_time: Number,
-   // }); 
-
-
-   // var Question = new mongoose.Schema({
-   //     qid: { type: String, required: true, unique: true },
-   //     qtype: { type: String, required: true },
-   //     title: { type: String, required: true }, 
-   //     time_wait: { type: Number},
-   //     time_response: { type: Number, required: true},
-   // }); 
 
     //Models
     //var UserModel = mongoose.model( 'User', User );
@@ -386,6 +327,15 @@ requirejs([
       TableName: 'users', // required
 
     };
+
+   // var Question = new mongoose.Schema({
+   //     qid: { type: String, required: true, unique: true },
+   //     qtype: { type: String, required: true },
+   //     title: { type: String, required: true }, 
+   //     time_wait: { type: Number},
+   //     time_response: { type: Number, required: true},
+   // }); 
+
 
    
     // create table only if it does not exist
