@@ -99,12 +99,6 @@ define([
                 //console.log("save from postFIles");
                 console.log("save model from recrder");
                 this.model.trigger('video-data-ready');
-                this.model.save(//{ audio: audioJSON, video: videoJSON},
-			      { success: function(model,response){
-				          // this.trigger('video-upload-success');
-                         console.log(response);
-				              } }
-			          ); 
 
       }
 

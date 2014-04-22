@@ -537,11 +537,11 @@ requirejs([
             'userid': { 'S': 'XXXXX' },
             'qtype': { 'S': request.body.qtype },
             'qid': { 'S': request.body.qid },
-            'content': { 'S': request.body.content },
             'created': { 'S': 'XXXXX'},
             'work_time' : { 'N': String(request.body.work_time) },
           };
        if('wait_time' in request.body) answer.wait_time = { 'N': String(request.body.wait_time) };
+       if('content' in request.body) answer.content = { 'S': request.body.content };
        console.log(answer);
 
        dd = new AWS.DynamoDB();
@@ -555,8 +555,8 @@ requirejs([
                      
                     console.log("should save video here");
                     //console.log(request.body.qtype);
-                    //_upload(response, request.body.audio, answer._id);
-                    //_upload(response, request.body.video, answer._id);
+                    _upload(response, request.body.audio, answer._id);
+                    _upload(response, request.body.video, answer._id);
                 }
                 console.log("done"); 
                 response.send(answer);
