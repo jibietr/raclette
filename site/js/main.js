@@ -22,6 +22,7 @@ requirejs.config({
         'backbone-validation': 'lib/backbone-validation',
         's3upload': 'lib/s3upload',
         'lodash' : 'lib/lodash.min',
+        'aws-sdk': 'lib/aws-sdk-2.0.0-rc13.min',
     },
     shim: {
         'jquery' : {

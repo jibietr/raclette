@@ -39,8 +39,9 @@ requirejs([
     'fs', 
     'underscore',
     'backbone',
+    'crypto',
     'aws-sdk'], 
-  function(express,path,$,fs,_,Backbone,AWS){
+  function(express,path,$,fs,_,Backbone,crypto,AWS){
     var application_root = __dirname;
     var app = express();
    
@@ -238,7 +239,8 @@ requirejs([
                         return res.send(error);
 		    }else{
 			console.log("worked");
-		    }		    if (count == max_files) {
+		    }		    
+                    if (count == max_files) {
                         //response.statusCode = 200;
                         console.log("done with all uploads");
                         // we are save returning this
@@ -250,7 +252,7 @@ requirejs([
         s3_upload_video(answer.video,answer._id,handler);
 
 
-    });
+    }
 
 
     function _upload_file(file, name, handler) {
@@ -322,8 +324,8 @@ requirejs([
     AWS.config.update({region: 'eu-west-1'});
 
 
-
-  /*   app.get('/sign_s3', function(req, res){
+     //this seems to do a good job..
+     app.get('/sign_s3', function(req, res){
         // extract name and mime from object to upload
         // TODO: check on name...
 	var object_name = req.query.s3_object_name;
@@ -349,9 +351,64 @@ requirejs([
 	};
 	res.write(JSON.stringify(credentials));
 	res.end();
-    });*/
+    });
 
-    
+
+
+     app.get( '/api/gets3access', function( request, response ) {
+
+       var S3= new AWS.S3();     
+        console.log(request);
+
+        var fname = (new Date).getTime().toString() + ".txt";
+        //request.query.fname
+        var params = {
+		  Bucket: S3_BUCKET + "/videos/", 
+                  Key: fname,
+                  //ContentType: "audio/wav",
+                  //ACL: "public-write",
+	      };
+       console.log(params);
+
+       S3.getSignedUrl('putObject', params, function (err, url) {
+           console.log('errror ' + err);
+          console.log('Signed URL: ' + url);
+          console.log('Encoded URL: ' + encodeURIComponent(url));
+//          var credentials = { url:  };
+	  response.write(encodeURIComponent(url));
+	  response.end();
+
+       });
+
+    });
+
+
+    app.get( '/api/getSTS', function( request, response ) {
+
+        var STS = new AWS.STS();     
+        
+        var params = {
+            DurationSeconds: 60,
+
+        };
+
+        STS.getSessionToken(params, function(err, data) {
+          if (err) console.log("error sts",err, err.stack); // an error occurred
+          else {    
+             console.log("send data",data);           // successful response
+             response.send(data);
+          }
+        });
+
+    });
+
+
+
+
+
+
+
+
     function s3_upload_file(file,fname,handler){
 
           console.log("s3 upload file" + file.name);
@@ -371,10 +428,9 @@ requirejs([
 
 
 
-
     function s3_upload_video(file,fname,handler){
 
-          fname = fname + "." + file.extension
+          fname = fname + "." + file.extension;
           console.log("s3 upload file" + fname);
 	  var s3 = new AWS.S3();	
           file.contents = file.contents.split(',').pop();
@@ -382,7 +438,7 @@ requirejs([
 
 	 
               var params = {
-		  Bucket: S3_BUCKET + "/docs/",
+		  Bucket: S3_BUCKET + "/videos/",
 		  Key: fname, // add new name
 		  Body: fileBuffer,
 		  ACL: 'private',
@@ -609,7 +665,7 @@ requirejs([
                      
                     console.log("should save video here");
                     //console.log(request.body.qtype);
-		    s3_multimedia_upload(answer, response);
+		    s3_multimedia_upload(request.body, response);
                     //_upload(response, request.body.audio, answer._id);
                     //_upload(response, request.body.video, answer._id);
                 }

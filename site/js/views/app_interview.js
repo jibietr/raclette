@@ -19,7 +19,8 @@ define([
          success: function(collection,response){ 
            console.log(collection);
            //console.log(response);
-           this.renderStart();
+           //this.renderStart();
+           this.initInterview();
         }.bind(this), error: function(model,response){
           console.log(response);
           

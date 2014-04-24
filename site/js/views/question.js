@@ -6,13 +6,15 @@ define([
     'backbone',
     'views/chrono',
     'views/recorder',
+    's3upload',
+    'aws-sdk',
     'text!templates/question.html',
     'text!templates/video.html',
     'text!templates/start.html',
     'text!templates/wait.html',
     'text!templates/end.html',
     'text!templates/text.html'],
-  function($,_,bootstrap,form,Backbone,ChronoView,Recorder,Tmpl_question,Tmpl_video,Tmpl_start,Tmpl_wait,Tmpl_end,Tmpl_text) {
+  function($,_,bootstrap,form,Backbone,ChronoView,Recorder,s3upload,aws_sdk,Tmpl_question,Tmpl_video,Tmpl_start,Tmpl_wait,Tmpl_end,Tmpl_text) {
 
     var questionView = Backbone.View.extend({
       //id: 'question',
@@ -102,16 +104,101 @@ define([
 
     },
 
+    uploadToS3: function(credentials){
+
+      // config AWS with temporary credentials
+      //var AWS = new AWS();
+      console.log(credentials);
+      AWS.config.update({
+         accessKeyId: credentials.AccesKeyId, 
+         secretAccessKey: credentials.secretAccessKey });
+            
+
+      var s3 = new AWS.S3();
+      obj = this.model.get("audio");
+      contents = obj.contents.split(',').pop();
+      //fileBuffer = new Buffer(contents, "base64");
+      fname = "test.wav";
+
+       var params = {
+                  Bucket: "raclette-assets/videos/",
+                  Key: fname, 
+                  Body: contents,
+                  ACL: 'private',
+                  ContentType: obj.type
+              };
+              s3.putObject(params, function(err,data){ console.log(err); } );
+
+     },
+
+
     saveModel: function(){
-         console.log("save model!");
-         this.model.save(null, { success: function(model,response){                
+         console.log("save model!"); 
+
+     /*
+        var s3upload = new S3Upload({
+
+	//file_dom_selector: '#files',
+        obj_to_upload: this.model.get("audio"),
+        s3_sign_put_url: '/sign_s3',
+        onProgress: function(percent, message) {
+            $('#status').html('Upload progress: ' + percent + '% ' + message);
+        },
+        onFinishS3Put: function(public_url) {
+            $('#status').html('Upload completed. Uploaded to: '+ public_url);
+            $("#avatar_url").val(public_url);
+            $("#preview").html('<img src="'+public_url+'" style="width:300px;" />');
+        },
+        onError: function(status) {
+            $('#status').html('Upload error: ' + status);
+        }
+    }); */
+
+   $.get("api/getSTS",function(response) {
+           console.log(response);
+          this.uploadToS3(response.Credentials);
+    }.bind(this));
+
+}
+
+               
+/* $.get("api/gets3access",{ fname : "file.wav"},function(response) {
+       
+             $.ajax({
+               url: response, // the presigned URL
+               type: 'PUT',
+               data: 'hi there',
+                   //this.model.get("audio").contents.split(',').pop(),
+                success: function() { console.log('Uploaded data successfully.'); },
+                error: function(err){ console.log('Error upload',err);}
+               
+               });
+            }.bind(this));*/
+ 
+         /*if(this.question_type=="video"){
+
+          
+          
+         //var xmlHttp = null;
+         //xmlHttp = new XMLHttpRequest();
+         //xmlHttp.open( "GET", "api/gets3access", false );
+         //xmlHttp.send({ fname: "file.wav" });
+         //presignedUrl = xmlHttp.responseText;
+         //console.log(xmlHttp);
+         //console.log(presignedUrl);
+
+
+}else{
+          
+        this.model.save(null, { success: function(model,response){                
              console.log(response);                                                                                   
              console.log("triger question-done");
              this.model.trigger("question-done");
          }.bind(this), error: function(model,response){ console.log("error"); }} );
+      }
          //this.trigger('question-done');
          //console.log("end of save function");
-    }
+    }*/
 
 
     
