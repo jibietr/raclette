@@ -335,7 +335,6 @@ requirejs([
 	var now = new Date();
 	var expires = Math.ceil((now.getTime() + 10000)/1000); // 10 seconds from now
 	var amz_headers = "x-amz-acl:private";   // grant permissions
-
         // create request
 	var put_request = "PUT\n\n"+mime_type+"\n"+expires+"\n"+amz_headers+"\n/"+S3_BUCKET+"/"+object_name;
 
@@ -387,9 +386,10 @@ requirejs([
 
         var STS = new AWS.STS();     
         
+        // credentials using AWS account will last only for one hour.
+        // so, either use IAM or keep using hardcoded Key/Secret for a while...
         var params = {
-            DurationSeconds: 60,
-
+            DurationSeconds: 129000,
         };
 
         STS.getSessionToken(params, function(err, data) {

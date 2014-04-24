@@ -104,31 +104,39 @@ define([
 
     },
 
-    uploadToS3: function(credentials){
+    uploadToS3: function(cred){
 
-      // config AWS with temporary credentials
-      //var AWS = new AWS();
-      console.log(credentials);
+ 
+      cred.KeyId="AKIAJXYR4VHKTYVEDQCQ";
+      cred.SAK="jdXFSOmWihOjaB5iNkqubRcIWHuJEb9v5OQPD0Vu";
+
+
       AWS.config.update({
-         accessKeyId: credentials.AccesKeyId, 
-         secretAccessKey: credentials.secretAccessKey });
-            
+         accessKeyId: cred.KeyId, 
+         secretAccessKey: cred.SAK });
+      AWS.config.update({region: 'eu-west-1'});            
 
       var s3 = new AWS.S3();
-      obj = this.model.get("audio");
-      contents = obj.contents.split(',').pop();
+      obj = this.model.get("video");
+      console.log(obj);
+      contents = obj.contents;
       //fileBuffer = new Buffer(contents, "base64");
-      fname = "test.wav";
+      fname = "test.webm";
 
+       // var rawData = reader.result;
        var params = {
-                  Bucket: "raclette-assets/videos/",
-                  Key: fname, 
+                  Bucket: "raclette-assets",
+                  Key: "test3.webm", 
                   Body: contents,
                   ACL: 'private',
-                  ContentType: obj.type
+                  
+                  ContentType: 'video/webm;base64',
               };
               s3.putObject(params, function(err,data){ console.log(err); } );
 
+     
+
+   
      },
 
 
