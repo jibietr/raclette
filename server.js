@@ -385,17 +385,19 @@ requirejs([
     app.get( '/api/getSTS', function( request, response ) {
 
         var STS = new AWS.STS();     
-        
-        // credentials using AWS account will last only for one hour.
-        // so, either use IAM or keep using hardcoded Key/Secret for a while...
         var params = {
             DurationSeconds: 129000,
-        };
-
+        }; 
+        
         STS.getSessionToken(params, function(err, data) {
           if (err) console.log("error sts",err, err.stack); // an error occurred
           else {    
              console.log("send data",data);           // successful response
+             // HACK: we are modifying this to temporary pass the Key and Secret credentials...
+             data.Credentials.AccessKeyId=AWS_ACCESS_KEY;
+             data.Credentials.SecretAccessKey=AWS_SECRET_KEY;
+             // create Id in server so we make sure they are different
+             data.uploadId = (new Date).getTime().toString() + Math.floor((Math.random()*1000)+1).toString(); 
              response.send(data);
           }
         });
@@ -642,6 +644,7 @@ requirejs([
        user._id = request.body.userid + request.body.qid;
        //console.log(request);
        //console.log(typeof request.body.work_time);
+       // TODO: add uplaod Id
        var answer = {
             '_id': { 'S': user._id },
             'userid': { 'S': 'XXXXX' },
@@ -661,15 +664,6 @@ requirejs([
         }, function(err, data) {
              if( !err ) {
 		//console.log( 'entry created. try to upload file' );
-                if(request.body.qtype=="video"){
-                     
-                    console.log("should save video here");
-                    //console.log(request.body.qtype);
-		    s3_multimedia_upload(request.body, response);
-                    //_upload(response, request.body.audio, answer._id);
-                    //_upload(response, request.body.video, answer._id);
-                }
-                console.log("done"); 
                 response.send(answer);
 	     } else {
                 console.log("Error",err);

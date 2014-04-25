@@ -77,6 +77,7 @@ define([
            var cameraPreview =  this.$("#camera-preview").get(0);
            this.Recorder = new Recorder({ el: cameraPreview, model: this.model });
            // if video, save model has to be a callback on stop recording 
+           //this.listenTo(this.model,'video-Ddata-ready',this.saveModel);
            this.listenTo(this.model,'video-data-ready',this.saveModel);
            this.Recorder.startRecording();
         }
@@ -101,114 +102,60 @@ define([
         console.log(answer);
         this.model.set("content",answer);
         this.saveModel();
+        
 
     },
 
-    uploadToS3: function(cred){
 
- 
-      cred.KeyId="AKIAJXYR4VHKTYVEDQCQ";
-      cred.SAK="jdXFSOmWihOjaB5iNkqubRcIWHuJEb9v5OQPD0Vu";
+    uploadToS3usingSTS: function(){
 
+      // send a getSTS request
+      // TODO: manage credentials...
+      $.get("api/getSTS",function(response) {
+           console.log(response);
+          this.uploadToS3withHarcodedCredentials(response.Credentials);
+      }.bind(this));
 
+    },
+    
+
+    uploadToS3withHarcodedCredentials: function(cred){
+
+      // update AWS with temporary credentials
       AWS.config.update({
-         accessKeyId: cred.KeyId, 
-         secretAccessKey: cred.SAK });
+         accessKeyId: cred.AccessKeyId, 
+         secretAccessKey: cred.SecretAccessKey });
       AWS.config.update({region: 'eu-west-1'});            
 
       var s3 = new AWS.S3();
-      obj = this.model.get("video");
-      console.log(obj);
-      contents = obj.contents;
-      //fileBuffer = new Buffer(contents, "base64");
-      fname = "test.webm";
+      fname = "video.webm"; 
 
-       // var rawData = reader.result;
-       var params = {
+      var params = {
                   Bucket: "raclette-assets",
-                  Key: "test3.webm", 
-                  Body: contents,
+                  Key: fname, 
+                  Body: this.model.get("video"),//this hast to be a string
                   ACL: 'private',
-                  
-                  ContentType: 'video/webm;base64',
+                  ContentType: 'video/webm',
               };
-              s3.putObject(params, function(err,data){ console.log(err); } );
-
-     
-
-   
+              s3.putObject(params, function(err,data){ 
+                   console.log("Error",err);
+                   console.log("Data",err);
+      } );
      },
 
 
     saveModel: function(){
          console.log("save model!"); 
 
-     /*
-        var s3upload = new S3Upload({
-
-	//file_dom_selector: '#files',
-        obj_to_upload: this.model.get("audio"),
-        s3_sign_put_url: '/sign_s3',
-        onProgress: function(percent, message) {
-            $('#status').html('Upload progress: ' + percent + '% ' + message);
-        },
-        onFinishS3Put: function(public_url) {
-            $('#status').html('Upload completed. Uploaded to: '+ public_url);
-            $("#avatar_url").val(public_url);
-            $("#preview").html('<img src="'+public_url+'" style="width:300px;" />');
-        },
-        onError: function(status) {
-            $('#status').html('Upload error: ' + status);
-        }
-    }); */
-
-   $.get("api/getSTS",function(response) {
-           console.log(response);
-          this.uploadToS3(response.Credentials);
-    }.bind(this));
-
-}
-
-               
-/* $.get("api/gets3access",{ fname : "file.wav"},function(response) {
-       
-             $.ajax({
-               url: response, // the presigned URL
-               type: 'PUT',
-               data: 'hi there',
-                   //this.model.get("audio").contents.split(',').pop(),
-                success: function() { console.log('Uploaded data successfully.'); },
-                error: function(err){ console.log('Error upload',err);}
-               
-               });
-            }.bind(this));*/
- 
-         /*if(this.question_type=="video"){
-
-          
-          
-         //var xmlHttp = null;
-         //xmlHttp = new XMLHttpRequest();
-         //xmlHttp.open( "GET", "api/gets3access", false );
-         //xmlHttp.send({ fname: "file.wav" });
-         //presignedUrl = xmlHttp.responseText;
-         //console.log(xmlHttp);
-         //console.log(presignedUrl);
-
-
-}else{
-          
         this.model.save(null, { success: function(model,response){                
              console.log(response);                                                                                   
              console.log("triger question-done");
              this.model.trigger("question-done");
          }.bind(this), error: function(model,response){ console.log("error"); }} );
-      }
-         //this.trigger('question-done');
-         //console.log("end of save function");
-    }*/
+      
+    }
 
-
+    
     
     });
     //console.log("load QuestionView");

@@ -70,7 +70,7 @@ function RecordRTC(mediaStream, config) {
         }
 
         function _callback() {
-            if (callback && mediaRecorder) {
+           if (callback && mediaRecorder) {
                 var url = URL.createObjectURL(mediaRecorder.recordedBlob);
                 callback(url);
             }
@@ -85,13 +85,18 @@ function RecordRTC(mediaStream, config) {
         }
     }
 
+
+
     function getDataURL(callback, _mediaRecorder) {
+        console.log("Invoqued Get Data Url");
         if (!callback) throw 'Pass a callback function over getDataURL.';
 
         _getDataURL();
 
         function _getDataURL() {
-            if (!!window.Worker) {
+            
+            if (!!window.Worker) {// in chrome goes here
+                //console.log("_blob",_blob);
                 var webWorker = processInWebWorker(function readFile(_blob) {
                     postMessage(new FileReaderSync().readAsDataURL(_blob));
                 });
@@ -99,9 +104,12 @@ function RecordRTC(mediaStream, config) {
                 webWorker.onmessage = function(event) {
                     callback(event.data);
                 };
+                //                console.log("_mediaRecorder",_mediaRecorder.recordedBlob);
+                console.log("mediaRecorder",mediaRecorder.recordedBlob);
 
                 webWorker.postMessage(_mediaRecorder ? _mediaRecorder.recordedBlob : mediaRecorder.recordedBlob);
             } else {
+                console.lgo("use file reader");
                 var reader = new FileReader();
                 reader.readAsDataURL(_mediaRecorder ? _mediaRecorder.recordedBlob : mediaRecorder.recordedBlob);
                 reader.onload = function(event) {
@@ -115,9 +123,12 @@ function RecordRTC(mediaStream, config) {
                     'this.onmessage =  function (e) {readFile(e.data);}'], {
                         type: 'application/javascript'
                     }));
-
+            console.log(blob);
             var worker = new Worker(blob);
             URL.revokeObjectURL(blob);
+            console.log(blob);
+
+
             return worker;
         }
     }

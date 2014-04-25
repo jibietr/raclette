@@ -4,8 +4,9 @@ define([
     'bootstrap',
     'jquery.form',
     'backbone',
-    'RecordRTC'],
-  function($,_,bootstrap,form,Backbone,recRTC) {
+    'RecordRTC',
+    'aws-sdk',],
+  function($,_,bootstrap,form,Backbone,recRTC,aws) {
 
     var recorder = Backbone.View.extend({
 
@@ -50,15 +51,14 @@ define([
     stopRecording: function(){
          console.log("stop rec");
                 this.recordAudio.stopRecording(function() {
-                    if (this.isFirefox) this.onStopRecordingCallback();
+                    if (this.isFirefox) this.getBlobOnStopRecordingCallback();
                 });
-
+                // if !isFirefox, we have to stop the two channels
                 if (!this.isFirefox) {
                     this.recordVideo.stopRecording();
-                    console.log(" from stop recording");
-                    console.log(this.recordVideo);
-                    this.onStopRecordingCallback();
-                 }
+                    //this.getBlobOnStopRecordingCallback();
+                    this.uploadRecording();
+                }
     },
 
 
@@ -74,6 +74,22 @@ define([
                     }.bind(this));
     },
 
+
+    getBlobOnStopRecordingCallback: function() {
+      // Get Blob is not asyncrhounous
+      if(!this.isFirefox){
+         audioBlob = this.recordAudio.getBlob();
+         videoBlob = this.recordVideo.getBlob();
+         this.el.src = '';                                                                                 
+         this.el.poster = 'img/ajax-loader.gif';                                                           
+         this.postBlobsCallback(audioBlob,videoBlob);
+
+      }else{                
+         audioBlob = this.recordAudio.getBlob();         
+         this.postBlobsCallback(audioBlob,videoBlob);
+      }
+    },
+
     postFilesCallback: function(audioDataURL, videoDataURL){
                 //fileName = "video_file_test";
                 var files = { };
@@ -83,7 +99,6 @@ define([
                     type: this.isFirefox ? 'video/webm' : 'audio/wav',
                     contents: audioDataURL
                 };
-
                 if (!isFirefox) {
                     videoJSON = {
                         extension: 'webm',
@@ -91,17 +106,79 @@ define([
                         contents: videoDataURL
                     };
                 }
-                //this.model.set("passedFromRecorder",true);
-                //files.isFirefox = this.isFirefox;
-                //this is what we are sending to post
-                
                 this.model.set({ audio: audioJSON, video: videoJSON});
                 //console.log("save from postFIles");
                 console.log("save model from recrder");
                 this.model.trigger('video-data-ready');
 
-      }
+    },
 
+    uploadRecording: function(){
+      // request credentials
+      $.get("api/getSTS",function(response) {
+        console.log(response);
+        credentials = response.Credentials;
+        this.model.uploadId = response.uploadId;
+        
+        if(!this.isFirefox){
+           this.el.src = '';                                                                                 
+           this.el.poster = 'img/ajax-loader.gif';
+           this.numObjToUpload = 2;
+           this.numObjUploaded = 0;
+
+           this.uploadBlobToS3("audio",credentials);
+           this.uploadBlobToS3("video",credentials);
+        }else{                
+           //audioBlob = this.recordAudio.getBlob();         
+           //this.postBlobsCallback(audioBlob,videoBlob);
+        }
+     }.bind(this));
+
+    },
+      
+
+
+    uploadBlobToS3: function(type,cred){
+      console.log("Upload type",type);
+      // update AWS with teemporary credentials
+      console.log(cred.AccessKeyId);
+      console.log(cred.SecretAccessKey);
+      AWS.config.update({
+         accessKeyId: cred.AccessKeyId,
+         secretAccessKey: cred.SecretAccessKey });
+      AWS.config.update({region: 'eu-west-1'});
+
+      var s3 = new AWS.S3();
+      if(type=="audio"){
+        upload_key = this.model.uploadId + ".wav";
+        content_type = "audio/wav";
+        blob = this.recordAudio.getBlob();
+      }else{
+        upload_key = this.model.uploadId + ".webm";
+        content_type = "video/webm";
+        blob = this.recordVideo.getBlob();
+      }
+      //console.log(Blob);
+      var params = {
+                  Bucket: "raclette-assets/videos/",
+                  Key: upload_key,
+                  Body: blob,
+                  ACL: 'private',
+                  ContentType: content_type,
+      }; 
+      console.log(params);
+      console.log("obj to pupload",this.numObjToUpload);
+      s3.putObject(params,function(err,data){
+       console.log("err",err);
+       console.log("data",data);
+       this.numObjUploaded = this.numObjUploaded + 1;
+       console.log(this.numObjToUpload);
+       console.log(this.numObjUploaded);
+       if(this.numObjUploaded == this.numObjToUpload){
+            console.log("trigger video-data-ready");
+	   this.model.trigger('video-data-ready');
+       }}.bind(this));
+    }
 
 
 
