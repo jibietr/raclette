@@ -311,8 +311,8 @@ requirejs([
     var AWS_SECRET_KEY = process.env.AWS_SECRET_KEY;
     var S3_BUCKET = process.env.PARAM1;
     var TAB_QUESTIONS = process.env.PARAM2;
-    var TAB_USERS = process.env.PARAM3;
-    var TAB_ANSWERS = process.env.PARAM4;
+    var TAB_USERS = process.env.PARAM2 + "-users";
+    var TAB_ANSWERS = process.env.PARAM2 + "-answers";
 
     //var s3 = new AWS.S3();
     console.log("setup AWS params 3");
