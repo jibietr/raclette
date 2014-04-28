@@ -78,7 +78,11 @@ define([
       },{
         pattern: 'pdf',
         msg: 'File must be a pdf'
-      }]
+      }],
+      source: {
+	required: true,
+        msg: 'required'
+      }
 
 
     }

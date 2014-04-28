@@ -287,6 +287,7 @@ requirejs([
 	  status: request.body.status,
 	  major: request.body.major,
 	  positions: positions,
+          source: request.body.source,
 	  joined: request.body.joined
 	});
 
@@ -536,6 +537,7 @@ requirejs([
             'degree': { 'S': user.degree },
             'status': { 'S': user.status },
             'positions' : { 'SS': user.positions },
+            'source' : { 'S': user.source },
             'major': { 'S': user.major }
           };
 

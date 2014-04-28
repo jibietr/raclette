@@ -160,14 +160,30 @@
                     <span class="help-block hidden"></span>
 		  </div>
 		<!--/form-->
-
-
-		
-
-
 	      </div>
 
 	    </div>
+	  </div>
+
+
+          <div class="panel panel-default">
+	  
+             <div class="panel-body">
+		<!--form role="form"-->
+	          <div class="form-group">
+                  <div class="row">		    
+                  <div class="col-md-9">
+                  <label for="source" class="control-label">Before we finish...</label>
+                  <div>
+
+                  Tell us how did you find the job annoucement</div>
+                  <select id="source" class="form-control" name="source" placeholder="Select one option..."></select>
+                  <span class="help-block hidden"></span>
+
+                  </div></div>
+		  </div>
+		<!--/form-->
+	      </div>
 	  </div>
 
 
@@ -188,5 +204,7 @@ $('#status').selectize();
 $('#positions').selectize({    
     maxItems: null,
 });
+$('#source').selectize();
+
 </script>
                                 
