@@ -7,10 +7,20 @@ define([
 
     // silly trick to valide that file is a pdf ...
     _.extend(Backbone.Validation.validators, {
-      pdf: function(value, attr, customValue, model) {
+      file_size: function(value, attr, customValue, model) {
+        console.log("valide size");
         if(value){
-          extension = value.split('.').pop();
-          if(extension!="pdf"){ return "error"; }
+          size = value.split(' ').pop();
+          console.log("size",size);
+          if(size>2097152){ return "error"; }
+        }
+      },
+      is_pdf: function(value, attr, customValue, model) {
+        console.log("valide pdf");
+        if(value){
+          type = value.split(' ')[0];
+          console.log("extension",type);
+          if(type!="application/pdf"){ return "error"; }
         }
       }
     });
@@ -61,29 +71,35 @@ define([
         required: true,
         msg: 'choose at least one position'   
       },
-      cover_letter: {
-	required: true,
-        msg: 'required'
-      },
       cover_letter: [{
         required: true,
-        msg: 'Please upload a cover letter pdf'
+        msg: 'Please upload your cover letter in pdf'
       },{
-        pattern: 'pdf',
+        is_pdf: 1,
         msg: 'File must be a pdf'
+      },{
+        file_size: 1,
+        msg: 'File is too big. Upload a file smaller than 2MB'
       }],
       resume: [{
         required: true,
-        msg: 'Please upload a resume pdf'
+        msg: 'Please upload your resume in pdf'
       },{
-        pattern: 'pdf',
+        is_pdf: 1,
         msg: 'File must be a pdf'
+      },{
+        file_size: 1,
+        msg: 'File is too big. Upload a file smaller than 2MB'
       }],
       source: {
 	required: true,
         msg: 'required'
       },
       admission: {
+	required: true,
+        msg: 'required'
+      },
+      graduation: {
 	required: true,
         msg: 'required'
       }

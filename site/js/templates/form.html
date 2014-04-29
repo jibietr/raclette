@@ -8,7 +8,6 @@
     <div class="row-fluid form">
       <div class="col-md-8">
 	 <form id="addUser" role="form">
-       
 	  <div class="panel panel-default">
 	    <div class="panel-heading">
 	      <h4 class="panel-title">
@@ -19,14 +18,13 @@
 	    </div>
 	    <div id="collapseOne" class="panel-collapse collapse in">
 	      <div class="panel-body">
-		Upload your resume in English. File size must be 2 MB or less. (required)
-                <!--form class="form" role="form" id="myform"-->   
+		<div class="form-group">Upload your resume in English (file size must be 2 MB or less). 
+                Include the names of 3 references on it.</div>                    
 		  <div class="form-group">
 		    <label for="resume" class="control-label">File input</label>
                     <input  type="file" id="resume" name="resume" multiple="multiple" >
                     <span class="help-block hidden"></span>
-		  </div>
-		<!--/form-->
+                  </div>
 	      </div>
 	    </div>
 	  </div>
@@ -60,7 +58,7 @@
 		  </div>
 		  <div class="form-group">
                     <div class="row">		    
-                    <div class="col-md-4">
+                    <div class="col-md-5">
 		    <label for="nationality" class="control-label">Nationality</label>
                     <select id="nationality" class="form-control" name="nationality" placeholder="Select a country..."></select>
                     <span class="help-block hidden"></span>
@@ -82,7 +80,10 @@
 	    </div>
 	    <div id="collapseFour" class="panel-collapse collapse in">
 	      <div class="panel-body">
-		<!--form id="addUser" role="form"-->
+	          <div class="form-group">
+                  Add the following information about the highest degree that you have 
+                  obtained or you are currently pursuing.
+                  </div>
 		  <div class="form-group">
                     <div class="row">		    
                     <div class="col-md-6">
@@ -93,7 +94,7 @@
 		  </div>
                    <div class="form-group">
                     <div class="row">		    
-                    <div class="col-md-4">
+                    <div class="col-md-5">
 		    <label for="country" class="control-label">Country</label>
                     <select id="country" class="form-control" name="country" placeholder="Select a country..."></select>
                     <span class="help-block hidden"></span>
@@ -108,14 +109,33 @@
                     </div></div>
 		  </div>
 
-		  <div class="form-group">
-                    <div class="row">		    
+                  <div class="row">		    
                     <div class="col-md-4">
-		   <label for="status" class="control-label">Degree status</label>
-                    <select id="status" class="form-control" name="status" placeholder="Select a degree status..."></select>
-                    <span class="help-block hidden"></span>
-                    </div></div>
-		  </div>
+		      <div class="form-group">
+		        <label for="status" class="control-label">Degree status</label>
+                        <select id="status" class="form-control" name="status" placeholder="Select a degree status..."></select>
+                        <span class="help-block hidden"></span>
+                       </div>
+                    </div> 
+                    <div class="col-md-3">      
+                      <div class="form-group" style="display: none">
+                        <label for="graduation" class="control-label">Expected graduation</label>
+
+<div class="input-group date" id="graduation" data-date="02/2014" data-date-format="mm/yyyy" data-date-viewmode="years" data-date-minviewmode="months">
+   <input name="graduation" class="form-control" type="text" placeholder="mm/yyyy" readonly><span class="input-group-addon add-on"><i class="icon-calendar"></i></span>
+</div>
+
+
+
+                      <span class="help-block hidden"></span>
+                      </div>
+		    </div>
+                   </div>
+
+
+
+
+
                    <div class="form-group">
                     <div class="row">		    
                     <div class="col-md-4">
@@ -150,28 +170,30 @@
                   <select id="positions" class="form-control" name="positions" placeholder="Select one or more..."></select>
                   <span class="help-block hidden"></span>
                   </div></div>
+                  </div>
 
-	          <div class="form-group">
+	          <div class="form-group" style="display: none">
                   <div class="row">		    
                   <div class="col-md-9">
-                    <div id="hide_admission" style="display: none">
                      <label for="major" class="control-label">EPFL admission</label>
                      <div>Idiap Phd students must be enrolled to an EPFL doctoral school. Have you already applied to it?</div>
                      <select id="admission" class="form-control" name="admission"></select>
                      <span class="help-block hidden"></span>
-                    </div>
-	          </div></div></div>
+	          </div>
+                  </div>
+                  </div>
 
 
                   <div class="form-group">
+                  <div class="row">		    
+                  <div class="col-md-9">
                     <label for="cover_letter" class="control-label">Motivation letter</label>
-                    <div>
-                    Upload your cover letter in English. File size must be 2 MB or less. (required)
-                    </div>
+                    <div>Upload your motivation letter in English (file size must be 2 MB or less).</div>
                     <input type="file" id="cover_letter" name="cover_letter" multiple="multiple" >
                     <span class="help-block hidden"></span>
 		  </div>
-		<!--/form-->
+                  </div>
+                  </div>
 	      </div>
 
 	    </div>
@@ -212,41 +234,58 @@
 $('#nationality').selectize();
 $('#country').selectize();
 $('#degree').selectize();
-$('#status').selectize();
+var $status = $('#status').selectize();
+var sel_status = $status[0].selectize;
 $('#source').selectize();
-
+$('#graduation').datepicker();
 var $positions = $('#positions').selectize({    
     maxItems: null,
 });
-var selectize = $positions[0].selectize;
-//var $admission = $('#admission').selectize();
-
+var sel_graduation = $positions[0].selectize;
+$('#admission').selectize();
 
 // if phd, add admission question
 function show_admissions(value,item){
   //console.log("item_added",value,item);
   //
   if(value.split("-")[0]=="PHD"){ 
-    console.log($('#hide_admission'));
     $('#hide_admission').show();
-    
+     $el = $('#admission');
+    $group = $el.closest('.form-group');
+    $group.show();
   }
 }
-
 function hide_admissions(value){
   // if value is phd, we need to check if there is still
   // other options selected...
-  var values = selectize.getValue();
+  var values = sel_graduation.getValue();
   var valid = false; //false
   //console.log("hide",values);
   for (var i=0;i<values.length;i++){
     if(values[i].split("-")[0]=="PHD") valid = true;
   }
-  if(!valid)  $('#hide_admission').hide();
+  if(!valid){ 
+    $el = $('#admission');
+    $group = $el.closest('.form-group');
+    $group.hide();
+  }
   
 }
 
-selectize.on('item_add',show_admissions);
-selectize.on('item_remove',hide_admissions);
+// if attending, add expected graduation
+function show_graduation(value,item){
+  $el = $('#graduation');
+  $group = $el.closest('.form-group');
+  if(value=="AT")  $group.show();
+  else $group.hide();
+  
+}
+
+sel_graduation.on('item_add',show_admissions);
+sel_graduation.on('item_remove',hide_admissions);
+sel_status.on('item_add',show_graduation);
+//sel_status.on('item_remove',hide_graduation);
+
+
 </script>
                                 

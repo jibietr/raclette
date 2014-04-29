@@ -19,6 +19,7 @@ requirejs.config({
         'jquery.iframe': 'lib/jquery.iframe-transport',
         'jquery.serializeObject': 'lib/jquery.serializeObject',
         'selectize': 'lib/standalone/selectize',
+        'datepicker' : 'lib/bootstrap-datepicker',
         'backbone-validation': 'lib/backbone-validation',
         's3upload': 'lib/s3upload',
         'lodash' : 'lib/lodash.min',

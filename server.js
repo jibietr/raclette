@@ -541,6 +541,7 @@ requirejs([
             'major': { 'S': user.major }
           };
        if(user.admission!="NA") item.admission = { 'S' : user.admission }; 
+       if(user.graduation!="NA") item.graduation = {'S' : user.graduation};
 
        dd = new AWS.DynamoDB();
        dd.putItem({
