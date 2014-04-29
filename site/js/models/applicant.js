@@ -38,10 +38,10 @@ define([
        },
       email: [{
         required: true,
-        msg: 'Please enter an email address'
+        msg: 'please enter an email address'
       },{
         pattern: 'email',
-        msg: 'Please enter a valid email'
+        msg: 'please enter a valid email'
       }],
       nationality: {
 	required: true,
@@ -73,23 +73,23 @@ define([
       },
       cover_letter: [{
         required: true,
-        msg: 'Please upload your cover letter in pdf'
+        msg: 'please upload your cover letter in pdf'
       },{
         is_pdf: 1,
-        msg: 'File must be a pdf'
+        msg: 'file must be a pdf'
       },{
         file_size: 1,
-        msg: 'File is too big. Upload a file smaller than 2MB'
+        msg: 'file is too big. Upload a file smaller than 2MB'
       }],
       resume: [{
         required: true,
-        msg: 'Please upload your resume in pdf'
+        msg: 'please upload your resume in pdf'
       },{
         is_pdf: 1,
-        msg: 'File must be a pdf'
+        msg: 'file must be a pdf'
       },{
         file_size: 1,
-        msg: 'File is too big. Upload a file smaller than 2MB'
+        msg: 'file is too big. Upload a file smaller than 2MB'
       }],
       source: {
 	required: true,

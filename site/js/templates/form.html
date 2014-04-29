@@ -21,9 +21,8 @@
 		<div class="form-group">Upload your resume in English (file size must be 2 MB or less). 
                 Include the names of 3 references on it.</div>                    
 		  <div class="form-group">
-		    <label for="resume" class="control-label">File input</label>
+                    <label for="resume" class="control-label">File input</label><span class="help-block hidden"></span>
                     <input  type="file" id="resume" name="resume" multiple="multiple" >
-                    <span class="help-block hidden"></span>
                   </div>
 	      </div>
 	    </div>
@@ -41,27 +40,24 @@
 	      <div class="panel-body">
 		<!--form id="addUser" role="form"-->
 		  <div class="form-group">
-                    <label for="name" class="control-label">Legal name</label>
+                    <label for="name" class="control-label">Legal name</label><span class="help-block hidden"></span>
                     <div class="row">		    
                     <div class="col-md-6">
 		    <input type="text" class="form-control" id="name" name="name">
-                    <span class="help-block hidden"></span>
                     </div></div>
 		  </div>
 		  <div class="form-group">
                     <div class="row">		    
                     <div class="col-md-6">
-		    <label for="email" class="control-label">Email address</label>
+		    <label for="email" class="control-label">Email address</label><span class="help-block hidden"></span>
 		    <input type="email" class="form-control" id="email" name="email">
-                    <span class="help-block hidden"></span>
                     </div></div>
 		  </div>
 		  <div class="form-group">
                     <div class="row">		    
                     <div class="col-md-5">
-		    <label for="nationality" class="control-label">Nationality</label>
+		    <label for="nationality" class="control-label">Nationality</label><span class="help-block hidden"></span>
                     <select id="nationality" class="form-control" name="nationality" placeholder="Select a country..."></select>
-                    <span class="help-block hidden"></span>
                     </div>
                     </div>
 		  </div>
@@ -82,52 +78,45 @@
 	      <div class="panel-body">
 	          <div class="form-group">
                   Add the following information about the highest degree that you have 
-                  obtained or you are currently pursuing.
+                  obtained or you are currently pursuing:
                   </div>
 		  <div class="form-group">
                     <div class="row">		    
                     <div class="col-md-6">
-		    <label for="school" class="control-label">School name</label>
+		    <label for="school" class="control-label">School name</label><span class="help-block hidden"></span>
 		    <input type="text" class="form-control" id="school" name="school" placeholder="">
-                    <span class="help-block hidden"></span>
                     </div></div>
 		  </div>
                    <div class="form-group">
                     <div class="row">		    
                     <div class="col-md-5">
-		    <label for="country" class="control-label">Country</label>
+		    <label for="country" class="control-label">Country</label><span class="help-block hidden"></span>
                     <select id="country" class="form-control" name="country" placeholder="Select a country..."></select>
-                    <span class="help-block hidden"></span>
                     </div></div>
 		  </div>
 		  <div class="form-group">
                     <div class="row">		    
                     <div class="col-md-4">
-		   <label for="degree" class="control-label">Degree</label>
+		   <label for="degree" class="control-label">Degree</label><span class="help-block hidden"></span>
                     <select id="degree" class="form-control" name="degree" placeholder="Select a degree..."></select>
-                    <span class="help-block hidden"></span>
                     </div></div>
 		  </div>
 
                   <div class="row">		    
                     <div class="col-md-4">
 		      <div class="form-group">
-		        <label for="status" class="control-label">Degree status</label>
+		        <label for="status" class="control-label">Degree status</label><span class="help-block hidden"></span>
                         <select id="status" class="form-control" name="status" placeholder="Select a degree status..."></select>
-                        <span class="help-block hidden"></span>
                        </div>
                     </div> 
-                    <div class="col-md-3">      
+                    <div class="col-md-4">      
                       <div class="form-group" style="display: none">
-                        <label for="graduation" class="control-label">Expected graduation</label>
-
+                        <label for="graduation" class="control-label">Expected graduation</label><span class="help-block hidden"></span>
 <div class="input-group date" id="graduation" data-date="02/2014" data-date-format="mm/yyyy" data-date-viewmode="years" data-date-minviewmode="months">
    <input name="graduation" class="form-control" type="text" placeholder="mm/yyyy" readonly><span class="input-group-addon add-on"><i class="icon-calendar"></i></span>
 </div>
 
-
-
-                      <span class="help-block hidden"></span>
+                      
                       </div>
 		    </div>
                    </div>
@@ -139,9 +128,8 @@
                    <div class="form-group">
                     <div class="row">		    
                     <div class="col-md-4">
-                  <label for="major" class="control-label">Major / Area of study</label>
+                  <label for="major" class="control-label">Major / Area of study</label><span class="help-block hidden"></span>
 		    <input type="text" class="form-control" id="major" name="major" placeholder="">
-                    <span class="help-block hidden"></span>
                     </div></div>
 		  </div>
 		  
@@ -164,21 +152,19 @@
 	          <div class="form-group">
                   <div class="row">		    
                   <div class="col-md-9">
-                  <label for="major" class="control-label">Open position</label>
+                  <label for="major" class="control-label">Open position</label><span class="help-block hidden"></span>
                   <div>
-                  Tell us what job opening are you applying to (multiple options allowed)</div>
+                  Tell us what job opening are you applying to (multiple options allowed):</div>
                   <select id="positions" class="form-control" name="positions" placeholder="Select one or more..."></select>
-                  <span class="help-block hidden"></span>
                   </div></div>
                   </div>
 
 	          <div class="form-group" style="display: none">
                   <div class="row">		    
                   <div class="col-md-9">
-                     <label for="major" class="control-label">EPFL admission</label>
+                     <label for="major" class="control-label">EPFL admission</label><span class="help-block hidden"></span>
                      <div>Idiap Phd students must be enrolled to an EPFL doctoral school. Have you already applied to it?</div>
                      <select id="admission" class="form-control" name="admission"></select>
-                     <span class="help-block hidden"></span>
 	          </div>
                   </div>
                   </div>
@@ -187,10 +173,9 @@
                   <div class="form-group">
                   <div class="row">		    
                   <div class="col-md-9">
-                    <label for="cover_letter" class="control-label">Motivation letter</label>
-                    <div>Upload your motivation letter in English (file size must be 2 MB or less).</div>
+                    <label for="cover_letter" class="control-label">Motivation letter</label><span class="help-block hidden"></span>
+                    <div>Upload your motivation letter in English (file size must be 2 MB or less):</div>
                     <input type="file" id="cover_letter" name="cover_letter" multiple="multiple" >
-                    <span class="help-block hidden"></span>
 		  </div>
                   </div>
                   </div>
@@ -207,13 +192,10 @@
 	          <div class="form-group">
                   <div class="row">		    
                   <div class="col-md-9">
-                  <label for="source" class="control-label">Before we finish...</label>
+                  <label for="source" class="control-label">Before we finish...</label><span class="help-block hidden"></span>
                   <div>
-
                   Tell us how did you find the job annoucement</div>
                   <select id="source" class="form-control" name="source" placeholder="Select one option..."></select>
-                  <span class="help-block hidden"></span>
-
                   </div></div>
 		  </div>
 		<!--/form-->
