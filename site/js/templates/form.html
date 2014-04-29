@@ -150,7 +150,19 @@
                   <select id="positions" class="form-control" name="positions" placeholder="Select one or more..."></select>
                   <span class="help-block hidden"></span>
                   </div></div>
-		  </div>
+
+	          <div class="form-group">
+                  <div class="row">		    
+                  <div class="col-md-9">
+                    <div id="hide_admission" style="display: none">
+                     <label for="major" class="control-label">EPFL admission</label>
+                     <div>Idiap Phd students must be enrolled to an EPFL doctoral school. Have you already applied to it?</div>
+                     <select id="admission" class="form-control" name="admission"></select>
+                     <span class="help-block hidden"></span>
+                    </div>
+	          </div></div></div>
+
+
                   <div class="form-group">
                     <label for="cover_letter" class="control-label">Motivation letter</label>
                     <div>
@@ -201,10 +213,40 @@ $('#nationality').selectize();
 $('#country').selectize();
 $('#degree').selectize();
 $('#status').selectize();
-$('#positions').selectize({    
-    maxItems: null,
-});
 $('#source').selectize();
 
+var $positions = $('#positions').selectize({    
+    maxItems: null,
+});
+var selectize = $positions[0].selectize;
+//var $admission = $('#admission').selectize();
+
+
+// if phd, add admission question
+function show_admissions(value,item){
+  //console.log("item_added",value,item);
+  //
+  if(value.split("-")[0]=="PHD"){ 
+    console.log($('#hide_admission'));
+    $('#hide_admission').show();
+    
+  }
+}
+
+function hide_admissions(value){
+  // if value is phd, we need to check if there is still
+  // other options selected...
+  var values = selectize.getValue();
+  var valid = false; //false
+  //console.log("hide",values);
+  for (var i=0;i<values.length;i++){
+    if(values[i].split("-")[0]=="PHD") valid = true;
+  }
+  if(!valid)  $('#hide_admission').hide();
+  
+}
+
+selectize.on('item_add',show_admissions);
+selectize.on('item_remove',hide_admissions);
 </script>
                                 

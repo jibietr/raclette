@@ -540,10 +540,11 @@ requirejs([
             'source' : { 'S': user.source },
             'major': { 'S': user.major }
           };
+       if(user.admission!="NA") item.admission = { 'S' : user.admission }; 
 
        dd = new AWS.DynamoDB();
        dd.putItem({
-          'TableName': 'users',
+          'TableName': TAB_USERS,
           'Item': item
         }, function(err, data) {
              if( !err ) {
