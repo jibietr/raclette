@@ -9,14 +9,17 @@ define([
     'text!templates/degrees.html',
     'text!templates/status.html',
     'text!templates/open_positions.html',
+    'text!templates/source.html',
+    'text!templates/admission.html',
     'models/applicant',
     'models/file',
     'jquery.iframe',
     'selectize',
+    'datepicker',
     'backbone-validation',
     'jquery.serializeObject',
     's3upload'],
-  function($,_,bootstrap,form,Backbone,TmplForm,TmplCountry,TmplDegree,TmplStatus,TmplOpen,Applicant,File,itrans,selectize,validation,serialize,s3upload) {
+  function($,_,bootstrap,form,Backbone,TmplForm,TmplCountry,TmplDegree,TmplStatus,TmplOpen,TmplSource,TmplAdm,Applicant,File,itrans,selectize,datepicker,validation,serialize,s3upload) {
 
     // these are nested views..
     // http://codehustler.org/blog/rendering-nested-views-backbone-js/
@@ -102,25 +105,47 @@ define([
 
        
        $('[type=file]').each(function(i,el){
-         formData[el.name] = $(el)[0].value;
+         // we pass extension and size to model
+         value = $(el)[0].value;
+         formData[el.name] = value; 
+         //pass file object
+         if(value){
+            var type = $(el)[0].files[0].type;
+            var size = $(el)[0].files[0].size;        
+            // backbone-validation does not accept objects
+            formData[el.name] = type + " " + size;  }
        });
 
-       //if('positions' in formData){
        var positions = [];
-       
-       // positions is not in formData unless it has at least one element
-       // this seems to be an issue with selectize.js
-       // so we need to check that exists
+       // positions may not exist if there was no selection
+       // (this seems to be an issue with selectize.js)
+       // convert positions to array
        if('positions' in formData){ 
-        if( typeof formData['positions'] === 'string' ) {
+        if( typeof formData['positions'] === 'string' ) { 
           positions.push(formData['positions']);
-       }else{
-         formData['positions'].forEach(function(entity){
+        }else{
+          formData['positions'].forEach(function(entity){
             positions.push(entity);
-         });
-       }}
+          });
+        }
+       }
        formData['positions'] = positions;
-       //console.log(formData);
+       console.log(formData);
+
+       // add value to admissions if it is internship and no phd
+       // in practice, we do not need to check for internship, because
+       // if missing, the model won't be valid anyway
+       var valid = false;
+       for (var i=0;i< positions.length;i++){
+         if(positions[i].split("-")[0]=="PHD") valid = true;
+       }
+       if(!valid) formData['admission'] = 'NA';
+       console.log("admissions",formData['admission']);
+
+       //
+       if(formData['status']=="GR"){
+         formData['graduation']="NA";
+       }
 
        // validates model
        // 
@@ -184,6 +209,8 @@ define([
 	    this.degreeView = new NestedView(_.template(TmplDegree));
 	    this.statusView = new NestedView(_.template(TmplStatus));
             this.positionsView = new NestedView(_.template(TmplOpen));
+            this.sourceView = new NestedView(_.template(TmplSource));
+            this.admView = new NestedView(_.template(TmplAdm));
 
             this.model = new Applicant();
             Backbone.Validation.bind(this);
@@ -208,6 +235,8 @@ define([
             this.renderNested( this.degreeView, '#degree' );            
             this.renderNested( this.statusView, '#status' );
             this.renderNested( this.positionsView, '#positions' );
+            this.renderNested( this.sourceView, '#source' );
+            this.renderNested( this.admView, '#admission' );
             // initialize select from array?            
 	    return this;
 	}
