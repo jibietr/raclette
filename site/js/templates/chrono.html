@@ -1,24 +1,37 @@
-
-
-    <div class="container">
-      <div id="VideoQuestionContainder">       
-	<div class="container">
-          <div class="row-fluid header">
-          <% if (type == "countdown") { %>
-           <p>We will start in <%= time_message %> seconds.</p> 
-           <button type="submit" class="btn btn-default" id="start">Start</button></span>
-          <% } %>
-          <% if (type == "normal") { %>
-           <p>You started <%= time_message %> seconds ago</p> 
-          <button type="submit" class="btn btn-default" id="stop">Stop</button></span>
-          <% } %>
-           </div>
-         
-
-
-	</div>
-      </div>
-    </div>
+<div class="container-fuid text-center">
+  <% if (status == "wait") { %>
+  <p>Starting in</p> 
+  <div id="counter" class="counter-4">
+    <div id="minutes" class="unit"><%= min %></div>
+    <div class="divider">:</div>
+    <div id="seconds" class="unit"><%= sec %></div>
+  </div>
+  <br>
+  <div class="row">
+  <% if (warning) { %>
+    <button type="submit" class="btn btn-warning" id="stop-wait">Start</button>
+  <% } else { %>
+    <button type="submit" class="btn btn-primary" id="stop-wait">Start</button>
+  <% } %>
+  </div>
+  <% } %>
+  <% if (status == "active") { %>
+  <p>Time remaining</p>
+  <div id="counter" class="counter-4">
+    <div id="minutes" class="unit"><%= min %></div>
+    <div class="divider">:</div>
+    <div id="seconds" class="unit"><%= sec %></div>
+  </div>
+  <br>
+  <div class="row">
+  <% if (warning) { %>
+    <button type="submit" class="btn btn-warning" id="stop-action">Stop</button>
+  <% } else { %>
+    <button type="submit" class="btn btn-danger" id="stop-action">Stop</button>
+  <% } %>
+  </div>
+  <% } %>
+</div>
    
 
 

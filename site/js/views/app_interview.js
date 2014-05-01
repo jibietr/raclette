@@ -6,8 +6,9 @@ define([
     'collections/questionnaire',
     'models/panel',
     'views/question',
-    'views/panel'],
-  function($,_,bootstrap,Backbone,Questionnaire,Panel,QuestionView,PanelView) {
+    'views/panel',
+    'views/login'],
+  function($,_,bootstrap,Backbone,Questionnaire,Panel,QuestionView,PanelView,LoginView) {
 
     var questionnaireView = Backbone.View.extend({
 
@@ -19,8 +20,8 @@ define([
          success: function(collection,response){ 
            console.log(collection);
            //console.log(response);
-           //this.renderStart();
-           this.initInterview();
+         // this.renderLogin();
+          this.renderStart();           //this.initInterview();
         }.bind(this), error: function(model,response){
           console.log(response);
           
@@ -28,9 +29,9 @@ define([
      },
 
      events:{
-        'click #submit':'saveQuestion',
-        'click #start': 'initInterview',
-        'click #continue': 'goToNext' 
+        'click #submit-question':'saveQuestion',
+        'click #start-interview': 'initInterview',
+        'click #continue-interview': 'goToNext' 
      },
 
      initInterview: function(){
@@ -38,6 +39,13 @@ define([
          this.renderQuestion();
      },
      
+    renderLogin: function(){
+        
+        var panelView = new LoginView();
+        this.$el.html(panelView.render().el);
+        return this;
+    },
+
     renderStart: function(){
        
         var panel = new Panel({ type: 'start', num_questions: this.collection.length });
