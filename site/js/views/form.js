@@ -2,7 +2,7 @@ define([
     'jquery',
     'underscore',
     'bootstrap',
-    'jquery.form',
+    //'jquery.form',
     'backbone',
     'text!templates/form.html',
     'text!templates/countries.html',
@@ -17,9 +17,8 @@ define([
     'selectize',
     'datepicker',
     'backbone-validation',
-    'jquery.serializeObject',
-    's3upload'],
-  function($,_,bootstrap,form,Backbone,TmplForm,TmplCountry,TmplDegree,TmplStatus,TmplOpen,TmplSource,TmplAdm,Applicant,File,itrans,selectize,datepicker,validation,serialize,s3upload) {
+    'jquery.serializeObject'],
+  function($,_,bootstrap,Backbone,TmplForm,TmplCountry,TmplDegree,TmplStatus,TmplOpen,TmplSource,TmplAdm,Applicant,File,itrans,selectize,datepicker,validation,serialize) {
 
     // these are nested views..
     // http://codehustler.org/blog/rendering-nested-views-backbone-js/
