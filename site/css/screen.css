@@ -262,6 +262,10 @@ body {
   background-color: #ffffff;
 }
 
+.white-panel{
+  background-color: #ffffff;
+} 
+
 /* container based on bootstrap well class */
 #QuestionContainer{
   min-height: 20px;
