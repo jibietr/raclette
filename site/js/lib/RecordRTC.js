@@ -63,6 +63,7 @@ function RecordRTC(mediaStream, config) {
         console.warn('stopped recording ' + (IsChrome ? config.type : 'audio+video') + ' stream.');
 
         if ((config.type == 'audio' && !IsChrome) || (config.type == 'video' && IsChrome)) {
+            console.log("call stop");
             mediaRecorder.stop(_callback);
         } else {
             mediaRecorder.stop();
@@ -824,7 +825,8 @@ function WhammyRecorder(mediaStream) {
         isStopDrawing = true;
         whammy.frames = frames;
         frames = [];
-
+        console.log("stop video here");
+        //this.whammy.pause();
         this.recordedBlob = whammy.compile();
 
         if (callback) callback(this.recordedBlob);

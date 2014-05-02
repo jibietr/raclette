@@ -62,7 +62,7 @@ define([
         this.listenTo(this.question,'question-done',this.goToWait);
         //this.$el.html(questionView.render().el);
         //this.renderChrono();
-        console.log("render new view");
+        //console.log("render new view");
 
     },
 

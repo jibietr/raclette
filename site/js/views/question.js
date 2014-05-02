@@ -29,8 +29,8 @@ define([
       
 
     events: {
-       'click #start': 'stopWait',
-       'click #stop': 'stopActive'
+       'click #stop-wait': function(){ this.chronoView.stop(); },
+       'click #stop-active': 'stopActive'
     }, 
 
     // render question and timer                                                                                    
@@ -53,35 +53,51 @@ define([
 
     renderCountdown: function(){
         var time = this.model.get('time_wait');
-        this.chronoView = new ChronoView({ seconds: time , type: 'countdown' });
+        this.chronoView = new ChronoView({ seconds: time , type: 'countdown' , status: 'wait' });
         this.listenTo(this.chronoView, 'chrono_stop', this.stopWait);
         this.$("#ChronoContainer").html(this.chronoView.render().el);
      },
 
     renderChrono: function(){
         var time = this.model.get('time_response');
-        this.chronoView = new ChronoView({ seconds: time , type: 'normal'  });
+        this.chronoView = new ChronoView({ seconds: time , type: 'countdown' , status: 'active' });
         this.listenTo(this.chronoView, 'chrono_stop', this.stopActive);
         this.$("#ChronoContainer").html(this.chronoView.render().el);
      },
 
-    stopWait: function(){
+    stopWait: function(time){
         // stop countdown
         // TODO: save question
-        this.model.set("wait_time",this.chronoView.getTime());
-        this.chronoView.close();
+        
+        //this.chronoView.close();
+        // this.chronoView.stop();
         // start count up
-        this.renderChrono();
+       this.model.set("wait_time",time);  
+
         // if question is video type, then start recording
         if(this.question_type=="video"){
+           console.log("stop wait");
            var cameraPreview =  this.$("#camera-preview").get(0);
-           this.Recorder = new Recorder({ el: cameraPreview, model: this.model });
+           var infoPanel = this.$("#InfoContainer");
+           this.Recorder = new Recorder({ el: cameraPreview, model: this.model});
+           this.Recorder.setInfoPanel(infoPanel);
+           //console.log("start recording from stop wait");
            // if video, save model has to be a callback on stop recording 
            //this.listenTo(this.model,'video-Ddata-ready',this.saveModel);
            this.listenTo(this.model,'video-data-ready',this.saveModel);
            this.Recorder.startRecording();
+           this.listenTo(this.Recorder,'getUserMedia-ready',this.startActive);
+        }else{
+
+           this.startActive();
         }
 
+    },
+
+
+    startActive: function(){
+      this.chronoView.remove();
+      this.renderChrono();
     },
 
     stopActive: function(){

@@ -11,23 +11,64 @@ define([
     var recorder = Backbone.View.extend({
 
 
+    // we could do this in initialization ...   
+    setInfoPanel: function(el){
+       this.info = el;
+    },
+
+    setInfo: function(type){
+      this.clearInfo(); // clear classes if any
+      if(type=="request"){  
+        this.info.find("p").addClass('text-warning').text("Please accept access to webcam and microphone.");
+        this.info.addClass('bg-warning').removeClass('hidden');
+      }else if(type=="error"){
+
+        this.info.find("p").addClass('text-danger').text("Oops! You denied access to your webcam.");
+        this.info.addClass('bg-danger').removeClass('hidden');
+      }else if(type=="uploading"){
+        this.info.find("p").addClass('text-info').text("Wait while we upload the video.");
+        this.info.addClass('bg-info').removeClass('hidden');
+
+      }
+    },
+
+    clearInfo: function(){
+       this.info.removeClass("bg-warning").removeClass("bg-danger").addClass("hidden");
+       this.info.find("p").removeClass('text-danger').addClass('text-warning').removeClass('text-info');
+    },
+
+
     startRecording: function(){  
+      console.log("start recording");
+      this.setInfo("request");
       this.isFirefox = !!navigator.mozGetUserMedia;
-      console.log("parent");
-      console.log(this.el);
-      // fetch video player DOM element from jquery response
-      //this.preview = this.$("#camera-preview").get(0);
-  
+
+/*      var vga_video_constraints = {
+	    mandatory: {
+	      minWidth: 1280,
+	      minHeight: 720,
+	  },
+          optional: []
+      };*/
+
       navigator.getUserMedia({
             audio: true,
-            video: true
+            video: { 
+               mandatory:  {
+               minWidth: 1280,
+               minHeight: 720
+            }}
         }, function(stream) {
-             
+
+            // this is executed on accepted
+            this.clearInfo();          
+            // thrigger getusermedia-ready to start chrono
+            this.trigger("getUserMedia-ready");
             this.el.src = window.URL.createObjectURL(stream);
             this.el.play();
             // RecordRTC is defined in RecordRTC.js
             // make sure that requirejs reference for RecordRTC is diff e.g. recRTC
-
+            console.log("stream",stream);
             this.recordAudio = RecordRTC(stream, {
                 bufferSize: 16384
             });
@@ -43,12 +84,14 @@ define([
                 console.log(this.recordVideo);
             }
         }.bind(this), function(error) {
-            alert(JSON.stringify(error));
-        });
+            // 
+            this.setInfo("error",error);
+        }.bind(this));
      
     },
 
     stopRecording: function(){
+         this.setInfo("uploading");
          console.log("stop rec");
                 this.recordAudio.stopRecording(function() {
                     if (this.isFirefox) this.getBlobOnStopRecordingCallback();

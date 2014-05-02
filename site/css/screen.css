@@ -1,4 +1,3 @@
-
 /* large desktop */ 
 @media (min-width: 980px) {
     body {
@@ -132,6 +131,7 @@ li {
 }
 
 
+
 /* selectize does not deal with errors */
 .has-error .selectize-input {
   border-color: #a94442;
@@ -147,3 +147,135 @@ li {
   display: inline;
   padding-left: 10px;
 }
+
+/* this is for the landing page */
+/*html,body {
+  height:100%;
+}
+
+h1 {
+  font-family: 'Antic Slab', serif;
+  font-size:80px;
+  color:#DDCCEE;
+}*/
+
+.lead {
+    color:#DDCCEE;
+}
+
+
+/* Custom container */
+.container-full {
+  margin: 0 auto;
+  width: 100%;
+  min-height:100%;
+  /*background-color:#110022;
+  color:#eee;*/
+  overflow:hidden;
+}
+
+/*.container-full a {
+  color:#efefef;
+  text-decoration:none;
+}*/
+
+.v-center {
+  margin-top:7%;
+}
+  
+
+
+
+
+
+/*
+* chrono style by @paullarosbot
+*/
+
+body {
+    background:   #e6e6e6;
+
+}
+
+#counter {
+    font-size: 74px;
+    line-height: 1em;
+    height: 1em;
+}
+
+
+
+.divider {
+    display: inline-block;
+    float: left;
+    line-height: 1em;
+    height: 1em;
+    overflow: hidden;
+}
+
+.unit {
+    display: inline-block;
+    float: left;
+    height: 1em;
+    line-height: 1em;
+    overflow: hidden;
+}
+
+.unit:after {
+    /*content: "00\A 01\A 02\A 03\A 04\A 05\A 06\A 07\A 08\A 09\A 10\A 11\A 12\A 13\A 14\A 15\A 16\A 17\A 18\A 19\A 20\A 21\A 22\A 23\A 24\A 25\A 26\A 27\A 28\A 29\A 30\A 31\A 32\A 33\A 34\A 35\A 36\A 37\A 38\A 39\A 40\A 41\A 42\A 43\A 44\A 45\A 46\A 47\A 48\A 49\A 50\A 51\A 52\A 53\A 54\A 55\A 56\A 57\A 58\A 59\A";*/
+    position: relative;
+    white-space: pre;
+    animation: unit steps(60) infinite;
+    -webkit-animation: unit steps(60) infinite;
+    animation-play-state: paused;
+    -webkit-animation-play-state: paused;
+}
+
+
+.interview{
+  background: #FFFFFF;
+}
+
+#MainContainer{
+  padding-left: 0px;
+}
+
+.container{
+  padding-left: 0px;
+}
+
+/* margin auto requires fixed width */
+.counter-4{
+  width: 186px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.counter-2{
+  width: 82px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+
+#Announcement{
+  background-color: #ffffff;
+}
+
+/* container based on bootstrap well class */
+#QuestionContainer{
+  min-height: 20px;
+  padding: 19px;
+  margin-bottom: 5px;
+  background-color: #ffffff;
+  border-bottom: 1px solid #e6e6e6;
+  -webkit-box-shadow: inset 0 1px 1px rgba(0,0,0,.05);
+  box-shadow: inset 0 1px 1px rgba(0,0,0,.05);
+}
+
+.alert{
+  padding-top: 15px;
+  padding-bottom: 15px;
+} 
+
+
