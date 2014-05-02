@@ -43,9 +43,21 @@ define([
       this.setInfo("request");
       this.isFirefox = !!navigator.mozGetUserMedia;
 
+/*      var vga_video_constraints = {
+	    mandatory: {
+	      minWidth: 1280,
+	      minHeight: 720,
+	  },
+          optional: []
+      };*/
+
       navigator.getUserMedia({
             audio: true,
-            video: true
+            video: { 
+               mandatory:  {
+               minWidth: 1280,
+               minHeight: 720
+            }}
         }, function(stream) {
 
             // this is executed on accepted
@@ -56,7 +68,7 @@ define([
             this.el.play();
             // RecordRTC is defined in RecordRTC.js
             // make sure that requirejs reference for RecordRTC is diff e.g. recRTC
-
+            console.log("stream",stream);
             this.recordAudio = RecordRTC(stream, {
                 bufferSize: 16384
             });
