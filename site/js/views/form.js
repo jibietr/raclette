@@ -30,6 +30,9 @@ define([
         
         $group.removeClass('has-error');
         $group.find('.help-block').html('').addClass('hidden');
+        
+        $("#InfoContainer").addClass('hidden');
+
     },
     invalid: function (view, attr, error, selector) { 
         var $el = view.$('[name=' + attr + ']'), 
@@ -37,6 +40,10 @@ define([
      
         $group.addClass('has-error');
         $group.find('.help-block').html(error).removeClass('hidden');
+ 
+        $("#InfoContainer").removeClass('bg-info').addClass('bg-warning')
+        $("#InfoContainer").find("p").removeClass('text-info').addClass('text-warning').text("Form incompleted. Please review the fields above.");
+        $("#InfoContainer").removeClass('hidden');
     } 
    });
 
@@ -149,8 +156,7 @@ define([
 
        // validates model
        // 
-       this.uploadFiles(this.model);
-       /*this.model.save(formData,{
+       this.model.save(formData,{
          success: function(model,response) { 
            console.log("success"); 
            console.log(model);
@@ -160,7 +166,9 @@ define([
            console.log("error"); 
            this.trigger('form-submitted','error');//,'Ooops! Something ;
          }.bind(this)}
-       );*/
+       );
+
+       
 
      
       },
@@ -170,9 +178,11 @@ define([
       
        // this is a temporal solution to giving some feedback 
        // f
-       $("#InfoContainer").find("p").addClass('text-warning').text("Wait while we upload the files.");
+       $("#InfoContainer").removeClass('bg-warning').addClass('bg-info')
+       $("#InfoContainer").find("p").removeClass('text-warning').addClass('text-info').text("Wait while we upload the files.");
        $("#InfoContainer").removeClass('hidden');
        $("#Loader").removeClass('hidden');
+
 
        console.log("upload files using this model",model);
        var id = model.get("_id");

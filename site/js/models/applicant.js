@@ -38,10 +38,10 @@ define([
        },
       email: [{
         required: true,
-        msg: 'please enter an email address'
+        msg: 'please enter a valid email address'
       },{
         pattern: 'email',
-        msg: 'please enter a valid email'
+        msg: 'please enter a valid email address'
       }],
       nationality: {
 	required: true,
@@ -73,7 +73,7 @@ define([
       },
       cover_letter: [{
         required: true,
-        msg: 'please upload your cover letter in pdf'
+        msg: 'please upload your motivation letter in pdf'
       },{
         is_pdf: 1,
         msg: 'file must be a pdf'
