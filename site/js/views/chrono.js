@@ -12,7 +12,10 @@ define([
       className: 'ChronoContainer',
       template: _.template(Tmpl_chrono),
       
- 
+
+    events: {
+       'click #stop-chrono': 'stop' ,
+    }, 
      
    initialize: function(params){
       console.log("init chrono");
@@ -76,7 +79,7 @@ define([
     // this is controled from outside
     stop: function(){ 
       time = this.getTime();
-      //console.log("stop from chrono");
+      console.log("stop from chrono");
       clearTimeout(this.timer_warn);
       clearInterval(this.timer_count);
       clearInterval(this.timer_stop);       

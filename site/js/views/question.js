@@ -28,10 +28,10 @@ define([
       template_text:  _.template(Tmpl_text),
       
 
-    events: {
+  /*  events: {
        'click #stop-wait': function(){ this.chronoView.stop(); },
        'click #stop-active': 'stopActive'
-    }, 
+    }, */
 
     // render question and timer                                                                                    
     render: function() {
@@ -79,8 +79,10 @@ define([
            console.log("stop wait");
            var cameraPreview =  this.$("#camera-preview").get(0);
            var infoPanel = this.$("#InfoContainer");
+           var volume = this.$("#meter");
            this.Recorder = new Recorder({ el: cameraPreview, model: this.model});
            this.Recorder.setInfoPanel(infoPanel);
+           this.Recorder.setVolume(volume);
            //console.log("start recording from stop wait");
            // if video, save model has to be a callback on stop recording 
            //this.listenTo(this.model,'video-Ddata-ready',this.saveModel);
@@ -101,6 +103,8 @@ define([
     },
 
     stopActive: function(){
+
+
         this.model.set("work_time",this.chronoView.getTime());
         this.chronoView.close();
         if(this.question_type=="video"){

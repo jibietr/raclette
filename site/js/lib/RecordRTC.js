@@ -52,7 +52,8 @@ function RecordRTC(mediaStream, config) {
         // Merge all data-types except "function"
         mediaRecorder = mergeProps(mediaRecorder, config);
 
-        mediaRecorder.record();
+        // jibietr: let video recorder start on call back
+        if( config.type != 'video') mediaRecorder.record();
 
         return this;
     }
@@ -770,8 +771,13 @@ function CanvasRecorder(htmlElement) {
 
 function WhammyRecorder(mediaStream) {
     this.record = function() {
-        if (!this.width) this.width = video.offsetWidth || 320;
-        if (!this.height) this.height = video.offsetHeight || 240;
+
+        console.log("Stream dimensions from record: " + video.videoWidth + "x" + video.videoHeight);
+
+        //if (!this.width) this.width = video.offsetWidth || 320;
+        //if (!this.height) this.height = video.offsetHeight || 240;
+        if (!this.height) this.height = video.videoHeight || 320;
+        if (!this.width) this.width = video.videoWidth || 240;
 
         if (!this.video) {
             this.video = {
@@ -792,6 +798,8 @@ function WhammyRecorder(mediaStream) {
 
         video.width = this.video.width;
         video.height = this.video.height;
+ 
+         console.log("Dimensions from record: " + this.width + "x" + this.height);
 
         drawFrames();
     };
@@ -841,6 +849,16 @@ function WhammyRecorder(mediaStream) {
     video.autoplay = true;
     video.src = URL.createObjectURL(mediaStream);
     video.play();
+
+    video.addEventListener("playing", function () {
+       this.record() }.bind(this));
+
+      /*setTimeout(function () {
+        console.log("Stream dimensions whayym callback: " + video.videoWidth + "x" + video.videoHeight);
+      }, 1);*/
+    //});
+
+
 
     var lastTime = new Date().getTime();
 
