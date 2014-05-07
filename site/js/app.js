@@ -2,7 +2,6 @@ requirejs([
     'jquery',
     'underscore',
     'backbone',
-    'views/test_rtc',
     'views/app_interview'],
 function($,_,Backbone,Test,View) {
 
