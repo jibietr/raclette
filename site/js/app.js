@@ -3,7 +3,7 @@ requirejs([
     'underscore',
     'backbone',
     'views/app_interview'],
-function($,_,Backbone,Test,View) {
+function($,_,Backbone,View) {
 
     var appView = new View();
     //var appView = new Test();

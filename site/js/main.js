@@ -7,7 +7,7 @@ requirejs.config({
         'views' : 'views',
         'templates' : 'templates',
         'text' :  'lib/text',
-        '04A5202F.htm': '04A5202F.htm',       
+      //  '04A5202F.htm': '04A5202F.htm',       
         'jquery' : 'lib/jquery',
         'underscore' : 'lib/underscore-min',
         'backbone' : 'lib/backbone-min',

@@ -6,7 +6,7 @@ define([
     'backbone',
     'scriptcam',
     'aws-sdk'],
-  function($,_,bootstrap,form,Backbone,recRTC,aws) {
+  function($,_,bootstrap,form,Backbone,Cam,aws) {
 
     var recorder = Backbone.View.extend({
 
@@ -206,17 +206,28 @@ define([
     
     startRecording: function(){
 
-          s3_path = "https://s3-eu-west-1.amazonaws.com/raclette-public/"
+          //s3_path = "https://s3-eu-west-1.amazonaws.com/raclette-public/"
+          //console.log("path",__dirname);
 	  $("#webcam").scriptcam({ 
-              path: s3_path,
+              //path: s3_path,
 	      //width: 640,
 	      //height: 480,
               fileName: 'jibietr',
-              connected: function(){ console.log("connected")}
+              showDebug: true,
+              connected: this.onScriptcamConnected.bind(this),
+              onError: function(errorId,errorMsg){ console.log(errorId,errosMsg);}
               });
     },
 
+    onScriptcamConnected: function(){
+       console.log("connected");
+       // trigger this if actually starts recording not here
+       //this.trigger("getUserMedia-ready");
+       Cam.startRecording();
 
+    },
+
+    
     startRecording_old: function(){  
       console.log("start recording");
       this.setInfo("request");
@@ -278,6 +289,13 @@ define([
     },
 
     stopRecording: function(){
+         //this.setInfo("uploading");
+         // shall i stop ..
+
+         
+    },
+
+     stopRecording_old: function(){
          this.setInfo("uploading");
          // shall i stop ..
          this.recording = false;
