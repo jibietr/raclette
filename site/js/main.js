@@ -7,7 +7,7 @@ requirejs.config({
         'views' : 'views',
         'templates' : 'templates',
         'text' :  'lib/text',
-        
+        '04A5202F.htm': '04A5202F.htm',       
         'jquery' : 'lib/jquery',
         'underscore' : 'lib/underscore-min',
         'backbone' : 'lib/backbone-min',
@@ -23,6 +23,8 @@ requirejs.config({
         's3upload': 'lib/s3upload',
         'lodash' : 'lib/lodash.min',
         'aws-sdk': 'lib/aws-sdk-2.0.0-rc13.min',
+        'scriptcam': 'lib/scriptcam',
+        'swfobject': 'lib/swfobject',
     },
     shim: {
         'jquery' : {
@@ -49,6 +51,9 @@ requirejs.config({
         },
         's3upload': {
            deps: ['jquery','lodash']
+        },
+        'scriptcam': {
+           deps: ['jquery','swfobject']
         },
 
         }

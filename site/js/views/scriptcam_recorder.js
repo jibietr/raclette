@@ -4,7 +4,7 @@ define([
     'bootstrap',
     'jquery.form',
     'backbone',
-    'RecordRTC',
+    'scriptcam',
     'aws-sdk'],
   function($,_,bootstrap,form,Backbone,recRTC,aws) {
 
@@ -204,10 +204,20 @@ define([
     },
 
     
+    startRecording: function(){
+
+          s3_path = "https://s3-eu-west-1.amazonaws.com/raclette-public/"
+	  $("#webcam").scriptcam({ 
+              path: s3_path,
+	      //width: 640,
+	      //height: 480,
+              fileName: 'jibietr',
+              connected: function(){ console.log("connected")}
+              });
+    },
 
 
-
-    startRecording: function(){  
+    startRecording_old: function(){  
       console.log("start recording");
       this.setInfo("request");
       this.isFirefox = !!navigator.mozGetUserMedia;

@@ -5,7 +5,7 @@ define([
     'jquery.form',
     'backbone',
     'views/chrono',
-    'views/recorder',
+    'views/scriptcam_recorder',
     's3upload',
     'aws-sdk',
     'text!templates/question.html',
