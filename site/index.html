@@ -20,10 +20,23 @@
 
     <link rel="stylesheet" href="css/screen.css">
     <link rel="stylesheet" href="css/selectize.bootstrap3.css">
+
+
+    <!--script src='http://static.opentok.com/webrtc/v2.2/js/opentok.min.js'></script-->
+    <script src="//static.opentok.com/v1.1/js/TB.min.js"></script>
    
   </head>
   <body>
 
+
+    <h1>recorder is here</h1>
+    <div id="recorderContainer"></div>
+    <div id="playerContainer"></div>
+
+    <div id="archivedContainer"></div>
+
+
+    <div id="myPublisherDiv"></div>
 
   <!-- This will be filled with questions -->
         <div id="application">  
@@ -32,8 +45,85 @@
 
 
 </body>
-</html>
 
+
+    <script type="text/javascript">
+      // Initialize API key, session, and token...
+      // Think of a session as a room, and a token as the key to get in to the room
+      // Sessions and tokens are generated on your server and passed down to the client
+
+          // Initialize API key, session, and token...
+          // Think of a session as a room, and a token as the key to get in to the room
+          // Sessions and tokens are generated on your server and passed down to the client
+          var apiKey = "44757122";
+          var sessionId = "1_MX40NDc1NzEyMn5-VGh1IE1heSAwOCAwNzozNzowNiBQRFQgMjAxNH4wLjgxMTY0ODV-fg";
+    /*      var token = "T1==cGFydG5lcl9pZD00NDc1NzEyMiZzZGtfdmVyc2lvbj10YnJ1YnktdGJyYi12MC45MS4yMDExLTAyLTE3JnNpZz05YzQ4MzA0MDkwYWY3Yzk1ZWVmNzc1NmJjZTEzOTg4ZWJlZWZmY2MzOnJvbGU9cHVibGlzaGVyJnNlc3Npb25faWQ9MV9NWDQwTkRjMU56RXlNbjUtVkdoMUlFMWhlU0F3T0NBd056b3pOem93TmlCUVJGUWdNakF4Tkg0d0xqZ3hNVFkwT0RWLWZnJmNyZWF0ZV90aW1lPTEzOTk1NTk4MjYmbm9uY2U9MC4wOTEyNjMyNTA4MTYyMzYxJmV4cGlyZV90aW1lPTEzOTk2NDYyMjcmY29ubmVjdGlvbl9kYXRhPQ==";
+
+          // Initialize session, set up event listeners, and connect
+          var session = TB.initSession(sessionId);
+          session.addEventListener('sessionConnected', sessionConnectedHandler);
+          session.connect(apiKey, token);
+          
+          function sessionConnectedHandler(event) {
+            var publisher = TB.initPublisher(apiKey, 'myPublisherDiv');
+            session.publish(publisher);
+          }
+
+  */
+
+      var TOKEN = "T1==cGFydG5lcl9pZD00NDc1NzEyMiZzZGtfdmVyc2lvbj10YnJ1YnktdGJyYi12MC45MS4yMDExLTAyLTE3JnNpZz05MDIzMGZjNmM5ZDdhZDFlY2Q4MWUyNGM0NDYzNjEwNDRkY2Y2YzJlOnJvbGU9bW9kZXJhdG9yJnNlc3Npb25faWQ9bXlpZG1vZGVyYXRvciZjcmVhdGVfdGltZT0xMzk5NTYwMTk2Jm5vbmNlPTAuMDU2NDA2NzY2MDE3Mjc3NTY1JmV4cGlyZV90aW1lPTEzOTk1NjM3NzgmY29ubmVjdGlvbl9kYXRhPQ==";
+
+      recorderManager = TB.initRecorderManager(apiKey);
+
+      var recDiv = document.createElement("div");
+      var recDivId = "recorder" + new Date().getTime().toString();
+      recDiv.setAttribute("id", recDivId);
+      console.log(recDiv);
+      document.getElementById("recorderContainer").appendChild(recDiv); // Replace with the ID of the container DOM element.
+      
+      
+      var style_params = { buttonDisplayMode: "off",
+        showControlBar: false };
+      props = { width: "640", height: "480", style:{showControlBar:false}};
+
+      console.log("using the following props",props);
+      recorder = recorderManager.displayRecorder(TOKEN, recDivId);
+      recorder.addEventListener("archiveSaved", archiveSavedHandler);
+
+      function archiveSavedHandler(event) {
+        console.log("archive saved handler");
+        recorderManager.removeRecorder(recorder);
+        console.log(event.archives[0].archiveId);
+        loadArchive(event.archives[0].archiveId); // You will want to save the archive ID on your server, for future playback.
+      }
+
+      function loadArchive(archiveId) {
+        console.log("load archive");
+        playerDiv = document.createElement("div");
+        var playerDivId = "player" + archiveId;
+        playerDiv.setAttribute("id", playerDivId);
+        document.getElementById("playerContainer").appendChild(playerDiv);
+   
+        player = recorderManager.displayPlayer(archiveId, TOKEN, playerDivId, props);
+      }
+  
+      function loadArchiveContainer(archiveId,containerId){
+        console.log("load archive");
+        playerDiv = document.createElement("div");
+        var playerDivId = "player" + archiveId;
+        playerDiv.setAttribute("id", playerDivId);
+        document.getElementById(containerId).appendChild(playerDiv);
+        
+        props = { width: "640", height: "480"};
+        props.style = { showPreviewTime: false };
+        console.log(props);
+        player = recorderManager.displayPlayer(archiveId, TOKEN, playerDivId);
+      }
+      //loadArchiveContainer("4031ba79-8ed3-4b05-9114-f2e5207fcda7","archivedContainer");
+      loadArchiveContainer("ef5b4a9c-7cab-4888-b9e6-5b2b98a2c671","archivedContainer");
+
+    </script>
+</html>
    
 
 
