@@ -166,10 +166,14 @@ define([
            this.trigger('form-submitted','error');//,'Ooops! Something ;
          }.bind(this)}
        );
+      },
 
-       
 
-     
+      setInfo: function(){
+       $("#InfoContainer").removeClass('bg-warning').addClass('bg-info')
+       $("#InfoContainer").find("p").removeClass('text-warning').addClass('text-info').text("Wait while we upload the files.");
+       $("#InfoContainer").removeClass('hidden');
+       $("#Loader").removeClass('hidden');
       },
 
       // this is going to do a second check...
@@ -177,12 +181,8 @@ define([
       
        // this is a temporal solution to giving some feedback 
        // f
-       $("#InfoContainer").removeClass('bg-warning').addClass('bg-info')
-       $("#InfoContainer").find("p").removeClass('text-warning').addClass('text-info').text("Wait while we upload the files.");
-       $("#InfoContainer").removeClass('hidden');
-       $("#Loader").removeClass('hidden');
-
-
+       this.setInfo();
+  
        console.log("upload files using this model",model);
        var id = model.get("_id");
        fileData = { 
@@ -204,14 +204,81 @@ define([
                               }.bind(this)});
 
 
+      },
+
+      submitAll: function(){
+        
+       e.preventDefault();
+      
+       // use serialize object to get form data
+       var formData = $('#addUser').serializeObject();
+       
+       // jquery does not include file type. let's get them directly     
+       $('[type=file]').each(function(i,el){
+         // we pass extension and size to model
+         value = $(el)[0].value;
+         formData[el.name] = value; 
+         //pass file object
+         if(value){
+            var type = $(el)[0].files[0].type;
+            var size = $(el)[0].files[0].size;        
+            // backbone-validation does not accept objects
+            formData[el.name] = type + " " + size;  }
+       });
+
+       var positions = [];
+       // positions may not exist if there was no selection
+       // (this seems to be an issue with selectize.js)
+       // convert positions to array
+       if('positions' in formData){ 
+        if( typeof formData['positions'] === 'string' ) { 
+          positions.push(formData['positions']);
+        }else{
+          formData['positions'].forEach(function(entity){
+            positions.push(entity);
+          });
+        }
+       }
+       formData['positions'] = positions;
+       console.log(formData);
+
+       // add value to admissions if it is internship and no phd
+       // in practice, we do not need to check for internship, because
+       // if missing, the model won't be valid anyway
+       var valid = false;
+       for (var i=0;i< positions.length;i++){
+         if(positions[i].split("-")[0]=="PHD") valid = true;
+       }
+       if(!valid) formData['admission'] = 'NA';
+       console.log("admissions",formData['admission']);
+
+       if(formData['status']=="GR"){
+         formData['graduation']="NA";
+       }
+
+       // validates model otherwise rises error (this already includes file validation!!)
+       // TODO:
+       // validate model, if valid, send info and save
+
+       // i think data is were we need to send the model!!
+       if(this.model.isValid()){
+          this.setInfo();
+          this.model.save(formData,{iframe: true,
+                              files: $('form :file'),
+                              data: formData,
+                              success: function(model,response) { 
+                                   console.log("success"); 
+                                   //console.log(model);
+                                   this.trigger('form-submitted','success')//,'Submitted!');
+                               }.bind(this),
+                              error: function(model,response){ 
+                                   console.log("error"); 
+                                   this.trigger('form-submitted','error');//,'Ooops! Something ;
+                              }.bind(this)});
+       }
+      
+
       }
-
-    /*  renderEnd: function(message){
-        $(this.el).html("<p>"+message+"</p>");
-        return this;
-     }*/
-
-
 
 
     });
