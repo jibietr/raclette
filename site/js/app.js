@@ -2,12 +2,14 @@ requirejs([
     'jquery',
     'underscore',
     'backbone',
-    'views/app_interview'],
-function($,_,Backbone,View) {
+    'routes/client'],
+function($,_,Backbone,Router) {
 
-    var appView = new View();
-    //var appView = new Test();
-    console.log("loaded app.js");
+    var router = new Router();
+    //console.log(app.root);
+    // check rest of related rooter stuff here
+    // http://addyosmani.github.io/backbone-fundamentals/#routers
+    Backbone.history.start();
   
 });
 

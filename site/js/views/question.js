@@ -5,7 +5,7 @@ define([
     'jquery.form',
     'backbone',
     'views/chrono',
-    'views/scriptcam_recorder',
+    'views/opentok_recorder',
     's3upload',
     'aws-sdk',
     'text!templates/question.html',
@@ -81,14 +81,12 @@ define([
            var infoPanel = this.$("#InfoContainer");
            var volume = this.$("#meter");
            this.Recorder = new Recorder({ el: cameraPreview, model: this.model});
-           //this.Recorder.setInfoPanel(infoPanel);
-           //this.Recorder.setVolume(volume);
-           //console.log("start recording from stop wait");
-           // if video, save model has to be a callback on stop recording 
-           //this.listenTo(this.model,'video-Ddata-ready',this.saveModel);
-           this.listenTo(this.model,'video-data-ready',this.saveModel);
-           this.Recorder.startRecording();
-           this.listenTo(this.Recorder,'getUserMedia-ready',this.startActive);
+           this.Recorder.setInfoPanel(infoPanel);
+           //this.Recorder = new Recorder({ el: cameraPreview, model: this.model});
+           this.Recorder.requestSession();
+           this.listenTo(this.model,'recordStarted',this.renderChrono);
+           //this.Recorder.startRecording();
+           
         }else{
 
            this.startActive();
@@ -104,68 +102,26 @@ define([
 
     stopActive: function(){
 
-
+        console.log("stop active");
         this.model.set("work_time",this.chronoView.getTime());
         this.chronoView.close();
         if(this.question_type=="video"){
+           // get 
+           var answer = this.Recorder.getArchiveId();
+           this.model.set("content",answer);
+           this.listenTo(this.model,'recordStopped',this.saveModel);
            this.Recorder.stopRecording();
-           //this.Rec
         }else if(this.question_type=="text"){
-           this.readForm();
+           var answer = $('#textAnswer').val();
+           console.log(answer);
+           this.model.set("content",answer);
+           this.saveModel();
         }
   
     },
 
-    readForm: function(){
-        console.log("read form");
-        var answer = $('#textAnswer').val();
-        console.log(answer);
-        this.model.set("content",answer);
-        this.saveModel();
-        
-
-    },
-
-
-    uploadToS3usingSTS: function(){
-
-      // send a getSTS request
-      // TODO: manage credentials...
-      $.get("api/getSTS",function(response) {
-           console.log(response);
-          this.uploadToS3withHarcodedCredentials(response.Credentials);
-      }.bind(this));
-
-    },
-    
-
-    uploadToS3withHarcodedCredentials: function(cred){
-
-      // update AWS with temporary credentials
-      AWS.config.update({
-         accessKeyId: cred.AccessKeyId, 
-         secretAccessKey: cred.SecretAccessKey });
-      AWS.config.update({region: 'eu-west-1'});            
-
-      var s3 = new AWS.S3();
-      fname = "video.webm"; 
-
-      var params = {
-                  Bucket: "raclette-assets",
-                  Key: fname, 
-                  Body: this.model.get("video"),//this hast to be a string
-                  ACL: 'private',
-                  ContentType: 'video/webm',
-              };
-              s3.putObject(params, function(err,data){ 
-                   console.log("Error",err);
-                   console.log("Data",err);
-      } );
-     },
-
-
     saveModel: function(){
-         console.log("save model!"); 
+         console.log("save model!",this.model); 
 
         this.model.save(null, { success: function(model,response){                
              console.log(response);                                                                                   

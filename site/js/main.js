@@ -7,7 +7,7 @@ requirejs.config({
         'views' : 'views',
         'templates' : 'templates',
         'text' :  'lib/text',
-      //  '04A5202F.htm': '04A5202F.htm',       
+        'routes': 'routes',
         'jquery' : 'lib/jquery',
         'underscore' : 'lib/underscore-min',
         'backbone' : 'lib/backbone-min',
@@ -25,6 +25,9 @@ requirejs.config({
         'aws-sdk': 'lib/aws-sdk-2.0.0-rc13.min',
         'scriptcam': 'lib/scriptcam',
         'swfobject': 'lib/swfobject',
+        'tbjs': 'lib/TB.min',
+        //'tb': 'https://swww.tokbox.com/webrtc/v2.2/js/TB.min',
+
     },
     shim: {
         'jquery' : {
@@ -56,5 +59,10 @@ requirejs.config({
            deps: ['jquery','swfobject']
         },
 
+
         }
 });
+
+
+
+

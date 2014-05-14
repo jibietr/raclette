@@ -245,6 +245,11 @@ body {
   background-color: #ffffff;
 }
 
+
+#Announcement h4 {
+  font-weight: bold;
+}
+
 /* container based on bootstrap well class */
 #QuestionContainer{
   min-height: 20px;
