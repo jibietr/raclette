@@ -1,10 +1,12 @@
-define(['underscore','fs','opentok'],function(_,fs,OpenTok) {
+define(['underscore','fs'
+   //'opentok'],function(_,fs,OpenTok) {
+   ],function(_,fs) {
     // Start with the constructor
     // empty constructor    function Router(me) {
 
     var Router = function() {};
 
-    Router.prototype.startSession = function(req, res) {
+    /*    Router.prototype.startSession = function(req, res) {
       console.log("request start session");
 
       req.opentok.createSession('', function(error, result){
@@ -15,14 +17,14 @@ define(['underscore','fs','opentok'],function(_,fs,OpenTok) {
 	req.opentokSession = result;
 
         console.log("session:",req.opentokSession);
-        console.log("role:",OpenTok.RoleConstants.MODERATOR);
+        //console.log("role:",OpenTok.RoleConstants.MODERATOR);
 
         res.send({
 	    apiKey: req.config.apiKey,
 	    session: req.opentokSession,
 	    token: req.opentok.generateToken({
 	      session_id: req.opentokSession,
-	      role:OpenTok.RoleConstants.MODERATOR,
+	      //role: OpenTok.RoleConstants.MODERATOR,
 	      connection_data: 'host'
 	    })
         });
@@ -129,7 +131,7 @@ define(['underscore','fs','opentok'],function(_,fs,OpenTok) {
              res.send('User does not exist');
            }
         });
-    };
+    }; */
  
 
     Router.prototype.submitAll = function(req, res){

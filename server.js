@@ -26,9 +26,9 @@ requirejs.config({
             deps: ['underscore-min', 'jquery'],
             exports: 'Backbone'
         },
-        'site/js/lib/opentok' : {
+      /*  'site/js/lib/opentok' : {
             deps: ['jasmine-node','nock']
-       }
+       }*/
      
     }
 });
@@ -43,8 +43,10 @@ requirejs([
     'backbone',
     'crypto',
     'aws-sdk',
-    'router',
-    'opentok'], 
+    'router'
+    //'opentok'
+    ], 
+  // function(express,path,$,fs,_,Backbone,crypto,AWS,Router,OpenTok){
   function(express,path,$,fs,_,Backbone,crypto,AWS,Router,OpenTok){
     var application_root = __dirname;
     var app = express();
@@ -69,42 +71,42 @@ requirejs([
     
     var routes = new Router();
      
-    // this is copied-pasted from opentok-example
+  /*  // this is copied-pasted from opentok-example
     var config = {
       port: process.env.PORT,
       apiKey: process.env.API_KEY,
       apiSecret: process.env.API_SECRET
-    };
+    };*/
     
-    app.request.config = config;  
+   // app.request.config = config;  
     
     //if(!config['TB.js']) {
     //  config['TB.js'] = 'https://swww.tokbox.com/webrtc/v2.2/js/TB.min.js';
     //}
 
-    if(!config.apiEndpoint) {
+  /*  if(!config.apiEndpoint) {
       config.apiEndpoint = 'https://api.opentok.com';
     }
 
     if(!(config.apiKey && config.apiSecret)) {
       console.error('You must set apiKey and apiSecret in .env');
       process.exit();
-    }
+    }*/
 
-    var opentok = new OpenTok.OpenTokSDK(config.apiKey, config.apiSecret);
+  /*  var opentok = new OpenTok.OpenTokSDK(config.apiKey, config.apiSecret);
     if(config.anvil) {
       opentok.api_url = config.anvil;
     }
-    app.request.opentok = opentok;
+    app.request.opentok = opentok;*/
 
     // these are routes served ...
 
 
-    app.get('/start-archive/:session', routes.startArchive);
+  /*  app.get('/start-archive/:session', routes.startArchive);
     app.get('/stop-archive/:archive', routes.stopArchive);
     app.get('/start-session', routes.startSession);
     app.post('/api/answers', routes.saveAnswer);
-    app.get('/api/session/:id', routes.startInterview);
+    app.get('/api/session/:id', routes.startInterview);*/
     app.post('/api/submitAll', routes.submitAll);
     //app.get('/faq', routes.getFAQ);
 
