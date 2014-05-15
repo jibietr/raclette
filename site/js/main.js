@@ -7,6 +7,7 @@ requirejs.config({
         'views' : 'views',
         'templates' : 'templates',
         'text' :  'lib/text',
+        'routes': 'routes',
         'jquery' : 'lib/jquery',
         'underscore' : 'lib/underscore-min',
         'backbone' : 'lib/backbone-min',
@@ -23,6 +24,11 @@ requirejs.config({
         //'s3upload': 'lib/s3upload',
         //'lodash' : 'lib/lodash.min',
         'aws-sdk': 'lib/aws-sdk-2.0.0-rc13.min',
+        'scriptcam': 'lib/scriptcam',
+        'swfobject': 'lib/swfobject',
+        'tbjs': 'lib/TB.min',
+        //'tb': 'https://swww.tokbox.com/webrtc/v2.2/js/TB.min',
+
     },
     shim: {
         'jquery' : {
@@ -53,6 +59,10 @@ requirejs.config({
         'jquery.iframe':{
            deps: ['jquery']
         },
-    
+
         }
 });
+
+
+
+

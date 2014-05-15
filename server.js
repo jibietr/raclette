@@ -1,4 +1,3 @@
-
 //Module dependencies.
 
 var requirejs = require('requirejs');
@@ -13,6 +12,7 @@ requirejs.config({
         'views' : 'views',
         'templates' : 'templates',
         'text' :  'lib/text',
+        'routes': 'routes',
      
     },
     //this should be client side..
@@ -26,7 +26,10 @@ requirejs.config({
         'lib/backbone-min': {
             deps: ['underscore-min', 'jquery'],
             exports: 'Backbone'
-        }
+        },
+        'lib/opentok' : {
+            deps: ['jasmine-node','nock']
+       }
      
     }
 });
@@ -40,12 +43,13 @@ requirejs([
     'underscore',
     'backbone',
     'crypto',
-    'aws-sdk'], 
-  function(express,path,$,fs,_,Backbone,crypto,AWS){
+    'aws-sdk',
+    'routes/router',
+    'opentok'], 
+  function(express,path,$,fs,_,Backbone,crypto,AWS,Router,OpenTok){
     var application_root = __dirname;
     var app = express();
    
-
     // Configure seer
     // So far the serverem will load the static content in site/index.html
     app.configure( function() {
@@ -62,32 +66,46 @@ requirejs([
 	app.use( express.errorHandler({ dumpExceptions: true, showStack: true }));
         
     });
+
     
+    var routes = new Router();
+     
+    // this is copied-pasted from opentok-example
+    var config = {
+      port: process.env.PORT,
+      apiKey: process.env.API_KEY,
+      apiSecret: process.env.API_SECRET
+    };
+    
+    app.request.config = config;  
+    
+    //if(!config['TB.js']) {
+    //  config['TB.js'] = 'https://swww.tokbox.com/webrtc/v2.2/js/TB.min.js';
+    //}
 
+    if(!config.apiEndpoint) {
+      config.apiEndpoint = 'https://api.opentok.com';
+    }
 
+    if(!(config.apiKey && config.apiSecret)) {
+      console.error('You must set apiKey and apiSecret in .env');
+      process.exit();
+    }
 
+    var opentok = new OpenTok.OpenTokSDK(config.apiKey, config.apiSecret);
+    if(config.anvil) {
+      opentok.api_url = config.anvil;
+    }
+    app.request.opentok = opentok;
 
-    //Get a list of all users
-   //  app.get( '/api/users', function( request, response ) {
-   // 	return UserModel.find( function( err, users ) {
-   // 	    if( !err ) {
-   // 		return response.send( users );
-   // 	    } else {
-   // 		return console.log( err );
-   // 	    }
-   // 	});
-   //  });
+    // these are routes served ...
 
-
-    /* app.get( '/api/questions', function( request, response ) {
-    	return QuestionModel.find( function( err, questions ) {
-    	    if( !err ) {
-    		return response.send(questions);
-    	    } else {
-    		return console.log( err );
-    	    }
-    	});
-     });*/
+    app.get('/start-archive/:session', routes.startArchive);
+    app.get('/stop-archive/:archive', routes.stopArchive);
+    app.get('/start-session', routes.startSession);
+    app.post('/api/answers', routes.saveAnswer);
+    app.get('/api/session/:id', routes.startInterview);
+    //app.get('/faq', routes.getFAQ);
 
 
     app.get( '/api/questions', function( request, response ) {
@@ -129,14 +147,7 @@ requirejs([
      });
 
 
-   //  app.get( '/api/answers', function( request, response ) {
-   // 	return AnswerModel.find( function( err, answers ) {
-   // 	    if( !err ) {
-   // 		return response.send( answers );
-   // 	    } else {
-   // 		return console.log( err );
-   // 	    }	});
-   //  });
+
 
 
    //  app.post('/api/upload_video',function(request, response) {
@@ -314,6 +325,15 @@ requirejs([
     var TAB_QUESTIONS = process.env.PARAM2;
     var TAB_USERS = process.env.PARAM2 + "-users";
     var TAB_ANSWERS = process.env.PARAM2 + "-answers";
+    var TAB_SESSIONS = process.env.PARAM2 + "-sessions";
+
+    app.request.aws_params = {
+      bucket: S3_BUCKET,
+      users: TAB_USERS,
+      questions: TAB_QUESTIONS, 
+      answers: TAB_ANSWERS,
+      sessions: TAB_SESSIONS
+    };
 
     //var s3 = new AWS.S3();
     console.log("setup AWS params 3");
@@ -581,7 +601,8 @@ requirejs([
                         return res.send(error);
 		    }else{
 			console.log("worked, data: "+ JSON.stringify(data));
-		    }		    if (count == max_files) {
+		    }		    
+                    if (count == max_files) {
                         //response.statusCode = 200;
                         console.log("done with all uploads");
                         // we are save returning this
@@ -598,49 +619,8 @@ requirejs([
 
     });
 
-    // insert new answer with collection.create
-    // app.post( '/api/answers', function(request,response) {
-    //   console.log("POST to /api/apianswers");
-
-    //   // save to mongodb
-    //   var answer = new AnswerModel({
-    //    userid: request.body.userid, 
-    //    qtype: request.body.qtype,
-    //    qid: request.body.qid,
-    //    content: request.body.content,  
-    //    created: request.body.created, 
-    //    wait_time: request.body.wait_time,
-    //    work_time: request.body.work_time,
-    //   }); 
-       
-    //   console.log("save in mongodb");
-    //   answer.save( function( err ) {
-    // 	    if( !err ) { 
-    //             //console.log(answer);
-    //             //console.log(request.body.qtype);
-    //             //if(answer.qtype=="video"){
-                
-    //             if(request.body.qtype=="video"){
-                     
-    //                 console.log("should save video here");
-    //                 //console.log(request.body.qtype);
-    //                 _upload(response, request.body.audio, answer._id);
-    //                 _upload(response, request.body.video, answer._id);
-    //             }
-    //             //_upload(request.body.audio,
-    // 		console.log( 'answer created!!!' );
-    //             console.log(answer);
-    //             return response.send(answer);
-    // 	    } else {
-    // 		return console.log( err );
-    // 	    }
-    // 	    return response.send(answer);
-    //         //return response.send({});
-    //   });
-
-    // });
-
-    app.post( '/api/answers', function(request,response) {
+    // insert new answer with collection.createa
+ /*   app.post( '/api/answers', function(request,response) {
       console.log("POST to /api/apianswers");
 
        var user = request.body;
@@ -680,7 +660,7 @@ requirejs([
            return response.send(answer);  
         });
 
-    });
+    });*/
  
  
 
@@ -689,4 +669,5 @@ requirejs([
     app.listen( port, function() {
       console.log( 'Express server listening on port %d in %s mode', port, app.settings.env );
     });
+
 });
