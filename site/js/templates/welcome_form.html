@@ -11,8 +11,19 @@
         <div class="form-group">
           <input type="checkbox" id="checkbox"> I agree.<span class="help-block hidden"></span>
         </div>
+        <div id="captcha"></div>
         <button type="submit" class="btn btn-primary" id="agree">Start</button></span>
       </div>
     </div>
   </div>
 </div>
+<script type="text/javascript" src="http://www.google.com/recaptcha/api/js/recaptcha_ajax.js"></script>
+<script type="text/javascript">
+Recaptcha.create("6Le0oPMSAAAAAJFutLb15QyPWv4BX8STGJT-AJ5p",
+    "captcha",
+    {
+      theme: "red",
+      callback: Recaptcha.focus_response_field
+    }
+  );
+</script>
