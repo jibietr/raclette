@@ -4,30 +4,29 @@ var requirejs = require('requirejs');
 
 requirejs.config({
     nodeRequire: require,
-    baseUrl: 'site/js',
+    baseUrl: '.',
 
-    paths: {
-        'models': 'models',
-        'collections' : 'collections',
-        'views' : 'views',
-        'templates' : 'templates',
-        'text' :  'lib/text',
-        'routes': 'routes',
-     
-    },
+    //paths: {
+        //'models': 'models',
+        //'collections' : 'collections',
+        //'views' : 'views',
+        //'templates' : 'templates',
+        //'text' :  'lib/text',
+        
+    //},
     //this should be client side..
     shim: {
-        'lib/jquery' : {
+        'site/js/lib/jquery' : {
             exports: '$'  
         },
-        'lib/underscore-min' : {
+        'site/js/lib/underscore-min' : {
             exports: '_'  
        },
-        'lib/backbone-min': {
+        'site/js/lib/backbone-min': {
             deps: ['underscore-min', 'jquery'],
             exports: 'Backbone'
         },
-        'lib/opentok' : {
+        'site/js/lib/opentok' : {
             deps: ['jasmine-node','nock']
        }
      
@@ -44,7 +43,7 @@ requirejs([
     'backbone',
     'crypto',
     'aws-sdk',
-    'routes/router',
+    'router',
     'opentok'], 
   function(express,path,$,fs,_,Backbone,crypto,AWS,Router,OpenTok){
     var application_root = __dirname;
