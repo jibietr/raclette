@@ -11,7 +11,7 @@ define([
     'text!templates/open_positions.html',
     'text!templates/source.html',
     'text!templates/admission.html',
-    'models/applicant',
+    'models/applicant_v2',
     'models/file',
     'jquery.iframe',
     'selectize',
@@ -26,12 +26,8 @@ define([
     valid: function (view, attr, selector) {
         var $el = view.$('[name=' + attr + ']'), 
             $group = $el.closest('.form-group');
-        
         $group.removeClass('has-error');
         $group.find('.help-block').html('').addClass('hidden');
-        
-        $("#InfoContainer").addClass('hidden');
-
     },
     invalid: function (view, attr, error, selector) { 
         var $el = view.$('[name=' + attr + ']'), 
@@ -40,13 +36,13 @@ define([
         $group.addClass('has-error');
         $group.find('.help-block').html(error).removeClass('hidden');
  
+        $("#Loader").addClass('hidden');
         $("#InfoContainer").removeClass('bg-info').addClass('bg-warning')
         $("#InfoContainer").find("p").removeClass('text-info').addClass('text-warning').text("Form incompleted. Please review the fields above.");
         $("#InfoContainer").removeClass('hidden');
+        
     } 
    });
-
-
 
 
     var NestedView = Backbone.View.extend({
@@ -86,8 +82,8 @@ define([
 
     events: {
        'hidden.bs.collapse': 'set_hidden_glyph',
-       'show.bs.collapse': 'set_show_glyph',
-       'click #submit':'submit'
+       'show.bs.collapse': 'set_show_glyph',       
+       'click #submit':'submitAll'
     },
 
       set_hidden_glyph: function(e){
@@ -97,6 +93,7 @@ define([
       set_show_glyph: function(e){
        $(e.target).prev().find("span").removeClass("glyphicon-chevron-right").addClass("glyphicon-chevron-down");
       },
+
 
 
       submit: function(e){
@@ -154,7 +151,7 @@ define([
        }
 
        // validates model
-       // 
+       this.setInfo();
        this.model.save(formData,{
          success: function(model,response) { 
            console.log("success"); 
@@ -169,12 +166,6 @@ define([
       },
 
 
-      setInfo: function(){
-       $("#InfoContainer").removeClass('bg-warning').addClass('bg-info')
-       $("#InfoContainer").find("p").removeClass('text-warning').addClass('text-info').text("Wait while we upload the files.");
-       $("#InfoContainer").removeClass('hidden');
-       $("#Loader").removeClass('hidden');
-      },
 
       // this is going to do a second check...
       uploadFiles: function(model){
@@ -206,8 +197,17 @@ define([
 
       },
 
-      submitAll: function(){
+    setInfo: function(){
+       $("#InfoContainer").removeClass('bg-warning').addClass('bg-info')
+       $("#InfoContainer").find("p").removeClass('text-warning').addClass('text-info').text("Wait while we upload the files.");
+       $("#InfoContainer").removeClass('hidden');
+       $("#Loader").removeClass('hidden');
+    },
+
+
+      submitAll: function(e){
         
+       // prevent from default routing
        e.preventDefault();
       
        // use serialize object to get form data
@@ -231,6 +231,7 @@ define([
        // (this seems to be an issue with selectize.js)
        // convert positions to array
        if('positions' in formData){ 
+        console.log("convert to array");
         if( typeof formData['positions'] === 'string' ) { 
           positions.push(formData['positions']);
         }else{
@@ -250,7 +251,6 @@ define([
          if(positions[i].split("-")[0]=="PHD") valid = true;
        }
        if(!valid) formData['admission'] = 'NA';
-       console.log("admissions",formData['admission']);
 
        if(formData['status']=="GR"){
          formData['graduation']="NA";
@@ -261,8 +261,15 @@ define([
        // validate model, if valid, send info and save
 
        // i think data is were we need to send the model!!
-       if(this.model.isValid()){
-          this.setInfo();
+       //this.model.isValid();
+
+       //console.log("check model",this.model);
+       //this.model.set(formData);
+       //if(this.model.isValid()){
+       //   console.log(y"model valid");
+       //   this.setInfo();
+         console.log('upload this form',formData);
+         this.setInfo();
           this.model.save(formData,{iframe: true,
                               files: $('form :file'),
                               data: formData,
@@ -275,7 +282,9 @@ define([
                                    console.log("error"); 
                                    this.trigger('form-submitted','error');//,'Ooops! Something ;
                               }.bind(this)});
-       }
+       //}else{
+        //  console.log("model not valid",this.model);
+       //x}
       
 
       }
@@ -303,7 +312,7 @@ define([
 
       },
       invalid: function(view, attr, error) {
-        console.log("model is invalid");
+        console.log("model is inval);
         console.log(attr);
              }}
             );*/

@@ -2,11 +2,10 @@ define([
     'jquery',
     'underscore',
     'bootstrap',
-    'jquery.form',
+    //'jquery.form', this was reffered as form
     'backbone',
     'views/chrono',
     'views/opentok_recorder',
-    's3upload',
     'aws-sdk',
     'text!templates/question.html',
     'text!templates/video.html',
@@ -14,7 +13,7 @@ define([
     'text!templates/wait.html',
     'text!templates/end.html',
     'text!templates/text.html'],
-  function($,_,bootstrap,form,Backbone,ChronoView,Recorder,s3upload,aws_sdk,Tmpl_question,Tmpl_video,Tmpl_start,Tmpl_wait,Tmpl_end,Tmpl_text) {
+  function($,_,bootstrap,Backbone,ChronoView,Recorder,aws_sdk,Tmpl_question,Tmpl_video,Tmpl_start,Tmpl_wait,Tmpl_end,Tmpl_text) {
 
     var questionView = Backbone.View.extend({
       //id: 'question',

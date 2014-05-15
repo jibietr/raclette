@@ -100,11 +100,13 @@ requirejs([
 
     // these are routes served ...
 
+
     app.get('/start-archive/:session', routes.startArchive);
     app.get('/stop-archive/:archive', routes.stopArchive);
     app.get('/start-session', routes.startSession);
     app.post('/api/answers', routes.saveAnswer);
     app.get('/api/session/:id', routes.startInterview);
+    app.post('/api/submitAll', routes.submitAll);
     //app.get('/faq', routes.getFAQ);
 
 
@@ -327,13 +329,6 @@ requirejs([
     var TAB_ANSWERS = process.env.PARAM2 + "-answers";
     var TAB_SESSIONS = process.env.PARAM2 + "-sessions";
 
-    app.request.aws_params = {
-      bucket: S3_BUCKET,
-      users: TAB_USERS,
-      questions: TAB_QUESTIONS, 
-      answers: TAB_ANSWERS,
-      sessions: TAB_SESSIONS
-    };
 
     //var s3 = new AWS.S3();
     console.log("setup AWS params 3");
@@ -343,6 +338,15 @@ requirejs([
     console.log(S3_BUCKET);
     AWS.config.update({accessKeyId: AWS_ACCESS_KEY, secretAccessKey: AWS_SECRET_KEY});
     AWS.config.update({region: 'eu-west-1'});
+
+    app.request.aws_params = {
+      aws: AWS,
+      bucket: S3_BUCKET,
+      users: TAB_USERS,
+      questions: TAB_QUESTIONS, 
+      answers: TAB_ANSWERS,
+      sessions: TAB_SESSIONS
+    };
 
 
      //this seems to do a good job..

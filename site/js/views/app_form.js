@@ -10,7 +10,9 @@ define([
 
     var appForm = Backbone.View.extend({
     
-      el: '#application',
+      //el: '#application',
+      tagName: 'div',
+      id: 'app-form',
  
       initialize: function()  {
         this.renderStart();

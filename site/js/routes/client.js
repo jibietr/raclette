@@ -3,9 +3,10 @@ define([
     'underscore',
     'bootstrap',
     'backbone',
-    'views/faq',
-    'views/app_interview'],
-  function($,_,bootstrap,Backbone,FAQ,AppInt) {
+    //'views/faq', // FAQ 
+    //'views/app_interview', // AppInt
+    'views/app_form'],
+  function($,_,bootstrap,Backbone,AppForm) {
 
 
     var router = Backbone.Router.extend({
@@ -17,12 +18,12 @@ define([
 
         showFAQ: function(){
           console.log('Show FAQ');
-          this.loadView(new FAQ());
+          //this.loadView(new FAQ());
         },
 
 	defaultRoute: function(other){
-          console.log('Invalid. You attempted to reach:' + other);
-          this.loadView(new AppInt());           
+          console.log('Default page. You attempted to reach:' + other);
+          this.loadView(new AppForm());           
 	  
 	},
         // clean after yourself        
