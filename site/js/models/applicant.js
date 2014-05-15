@@ -28,7 +28,7 @@ define([
 
     var applicant = Backbone.Model.extend({
 
-     url: '/s3/users',
+     url: '/api/submitAll',
 
      // this will be used by backbone-validation
      validation: {

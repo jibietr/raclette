@@ -3,10 +3,10 @@ define([
     'underscore',
     'bootstrap',
     'backbone',
-    //'views/faq', // FAQ 
+    'views/faq', 
     //'views/app_interview', // AppInt
     'views/app_form'],
-  function($,_,bootstrap,Backbone,AppForm) {
+  function($,_,bootstrap,Backbone,FAQ,AppForm) {
 
 
     var router = Backbone.Router.extend({
@@ -18,7 +18,7 @@ define([
 
         showFAQ: function(){
           console.log('Show FAQ');
-          //this.loadView(new FAQ());
+          this.loadView(new FAQ());
         },
 
 	defaultRoute: function(other){

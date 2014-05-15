@@ -2,7 +2,6 @@ define([
     'jquery',
     'underscore',
     'bootstrap',
-    //'jquery.form',
     'backbone',
     'text!templates/form.html',
     'text!templates/countries.html',
@@ -11,7 +10,7 @@ define([
     'text!templates/open_positions.html',
     'text!templates/source.html',
     'text!templates/admission.html',
-    'models/applicant_v2',
+    'models/applicant',
     'models/file',
     'jquery.iframe',
     'selectize',
@@ -306,16 +305,7 @@ define([
 
             this.model = new Applicant();
             Backbone.Validation.bind(this);
-/*, {
-      valid: function(view, attr) {
-        console.log("model is valid");
 
-      },
-      invalid: function(view, attr, error) {
-        console.log("model is inval);
-        console.log(attr);
-             }}
-            );*/
             console.log("backbone validation binding");
 
 	},
@@ -329,7 +319,6 @@ define([
             this.renderNested( this.positionsView, '#positions' );
             this.renderNested( this.sourceView, '#source' );
             this.renderNested( this.admView, '#admission' );
-            // initialize select from array?            
 	    return this;
 	}
     });

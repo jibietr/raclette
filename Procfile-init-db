@@ -1,1 +1,0 @@
-web: node push-interview-to-dynamodb.js
