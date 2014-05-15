@@ -8,7 +8,7 @@ define([
     // silly trick to valide that file is a pdf ...
     _.extend(Backbone.Validation.validators, {
       file_size: function(value, attr, customValue, model) {
-        console.log("valide size");
+        //console.log("valide size");
         if(value){
           size = value.split(' ').pop();
           console.log("size",size);
@@ -16,7 +16,7 @@ define([
         }
       },
       is_pdf: function(value, attr, customValue, model) {
-        console.log("valide pdf");
+        //console.log("valide pdf");
         if(value){
           type = value.split(' ')[0];
           console.log("extension",type);

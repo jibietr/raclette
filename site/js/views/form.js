@@ -132,7 +132,7 @@ define([
         }
        }
        formData['positions'] = positions;
-       console.log(formData);
+       //console.log(formData);
 
        // add value to admissions if it is internship and no phd
        // in practice, we do not need to check for internship, because
@@ -142,7 +142,7 @@ define([
          if(positions[i].split("-")[0]=="PHD") valid = true;
        }
        if(!valid) formData['admission'] = 'NA';
-       console.log("admissions",formData['admission']);
+       //console.log("admissions",formData['admission']);
 
        //
        if(formData['status']=="GR"){
@@ -153,12 +153,12 @@ define([
        this.setInfo();
        this.model.save(formData,{
          success: function(model,response) { 
-           console.log("success"); 
-           console.log(model);
+           //console.log("success"); 
+           //console.log(model);
            this.uploadFiles(model);
          }.bind(this),
            error: function(model,response){ 
-           console.log("error"); 
+           //console.log("error"); 
            this.trigger('form-submitted','error');//,'Ooops! Something ;
          }.bind(this)}
        );
@@ -173,7 +173,7 @@ define([
        // f
        this.setInfo();
   
-       console.log("upload files using this model",model);
+       //console.log("upload files using this model",model);
        var id = model.get("_id");
        fileData = { 
           resume: "resume_" + id +  ".pdf", 
@@ -184,12 +184,12 @@ define([
                               files: $('form :file'),
                               data: fileData,
                               success: function(model,response) { 
-                                   console.log("success"); 
+                                   //console.log("success"); 
                                    //console.log(model);
                                    this.trigger('form-submitted','success')//,'Submitted!');
                                }.bind(this),
                               error: function(model,response){ 
-                                   console.log("error"); 
+                                   //console.log("error"); 
                                    this.trigger('form-submitted','error');//,'Ooops! Something ;
                               }.bind(this)});
 
@@ -230,7 +230,7 @@ define([
        // (this seems to be an issue with selectize.js)
        // convert positions to array
        if('positions' in formData){ 
-        console.log("convert to array");
+        //console.log("convert to array");
         if( typeof formData['positions'] === 'string' ) { 
           positions.push(formData['positions']);
         }else{
@@ -240,7 +240,7 @@ define([
         }
        }
        formData['positions'] = positions;
-       console.log(formData);
+       //console.log(formData);
 
        // add value to admissions if it is internship and no phd
        // in practice, we do not need to check for internship, because
@@ -267,18 +267,18 @@ define([
        //if(this.model.isValid()){
        //   console.log(y"model valid");
        //   this.setInfo();
-         console.log('upload this form',formData);
+         //console.log('upload this form',formData);
          this.setInfo();
           this.model.save(formData,{iframe: true,
                               files: $('form :file'),
                               data: formData,
                               success: function(model,response) { 
-                                   console.log("success"); 
+                                   //console.log("success"); 
                                    //console.log(model);
                                    this.trigger('form-submitted','success')//,'Submitted!');
                                }.bind(this),
                               error: function(model,response){ 
-                                   console.log("error"); 
+                                   //sconsole.log("error"); 
                                    this.trigger('form-submitted','error');//,'Ooops! Something ;
                               }.bind(this)});
        //}else{
@@ -306,7 +306,7 @@ define([
             this.model = new Applicant();
             Backbone.Validation.bind(this);
 
-            console.log("backbone validation binding");
+            //console.log("backbone validation binding");
 
 	},
 

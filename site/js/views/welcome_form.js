@@ -22,7 +22,7 @@ define([
     },
 
     checkTOS: function() {
-        console.log(this.$el.find('.help-block'));
+        //console.log(this.$el.find('.help-block'));
         if($('#checkbox').is(":checked")){
           $group = this.$el.find('.form-group');
           $group.removeClass('has-error');

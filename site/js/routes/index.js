@@ -17,12 +17,12 @@ define([
 	},
 
         showFAQ: function(){
-          console.log('Show FAQ');
+          //console.log('Show FAQ');
           this.loadView(new FAQ());
         },
 
 	defaultRoute: function(other){
-          console.log('Default page. You attempted to reach:' + other);
+          //console.log('Default page. You attempted to reach:' + other);
           this.loadView(new AppForm());           
 	  
 	},
@@ -32,7 +32,7 @@ define([
           if(this.view) this.view.remove();
           this.view = view;
           $("#application").html(this.view.render().$el);
-          console.log("this view",this.view);
+          //console.log("this view",this.view);
         }
     });
 
