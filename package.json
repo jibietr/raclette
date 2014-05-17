@@ -1,4 +1,4 @@
-B1;2c{
+{
     "name": "raclette",
     "version": "0.0.1",
     "description": "the idiap-scg recruitment system",
@@ -16,7 +16,7 @@ B1;2c{
       "path": "0.4.9",
       "request": "~2.33.0", 
       "crypto": "0.0.3",
-      "querystring": "0.2.0",
+      "querystring": "0.2.0"
     }
 }
 
