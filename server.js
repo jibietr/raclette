@@ -322,7 +322,7 @@ requirejs([
     });
 
     // 
-
+    console.log("process params env",process.env);
     var AWS_ACCESS_KEY = process.env.AWS_ACCESS_KEY_ID;
     var AWS_SECRET_KEY = process.env.AWS_SECRET_KEY;
     var S3_BUCKET = process.env.PARAM1;
