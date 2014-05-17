@@ -22,6 +22,7 @@ define([
         welcomeView = new WelcomeView();
         this.listenTo(welcomeView,'tos-agree',this.renderForm);
         this.$el.html(welcomeView.render().el);
+        //welcomeView.showRecaptcha();
         this.current_view = welcomeView;
         return this;
       },
@@ -39,6 +40,7 @@ define([
       renderEnd: function(response){
         this.current_view.remove();
         endView = new EndView();
+        console.log("response",response);
         this.$el.html(endView.render(response).el);
         this.current_view = endView;
         return this;

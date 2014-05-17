@@ -107,7 +107,8 @@ requirejs([
     app.get('/start-session', routes.startSession);
     app.post('/api/answers', routes.saveAnswer);
     app.get('/api/session/:id', routes.startInterview);*/
-    app.post('/api/submitAll', routes.submitAll);
+    app.post('/api/submitAll', routes.submitUserDoc);
+   app.post('/api/check_recaptcha', routes.checkRecaptcha);
     //app.get('/faq', routes.getFAQ);
 
 
@@ -340,18 +341,20 @@ requirejs([
     AWS.config.update({accessKeyId: AWS_ACCESS_KEY, secretAccessKey: AWS_SECRET_KEY});
     AWS.config.update({region: 'eu-west-1'});
 
-    app.request.aws_params = {
+    app.request.env_params = {
       aws: AWS,
       bucket: S3_BUCKET,
       users: TAB_USERS,
       questions: TAB_QUESTIONS, 
       answers: TAB_ANSWERS,
-      sessions: TAB_SESSIONS
+      sessions: TAB_SESSIONS,
+      captcha_private: process.env.CAPTCHA_PRIVATE,
+      hash_key: process.env.HASH_KEY
     };
-
+   
 
      //this seems to do a good job..
-     app.get('/sign_s3', function(req, res){
+  /*   app.get('/sign_s3', function(req, res){
         // extract name and mime from object to upload
         // TODO: check on name...
 	var object_name = req.query.s3_object_name;
@@ -474,7 +477,7 @@ requirejs([
 	      };
 	      s3.putObject(params, handler);
     }
-
+*/
    
  
     function InitDB(params){
@@ -541,7 +544,7 @@ requirejs([
 
 
     //Insert a new user
-    app.post( '/s3/users', function( request, response ,next) {
+   /* app.post( '/s3/users', function( request, response ,next) {
 
 
        // create unique hashstag
@@ -622,7 +625,7 @@ requirejs([
           s3_upload_file(req.files[key],fname,handler);
         }
 
-    });
+    });*/
 
     // insert new answer with collection.createa
  /*   app.post( '/api/answers', function(request,response) {

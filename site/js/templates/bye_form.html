@@ -7,6 +7,9 @@
             <% if (status == "error") { %>
            <p>Oops! Something went wrong! Please try again or contact us at idiapsc.jobs@gmail.com if the problem persists.</p>
            <% } %>
+           <% if (status == "exists") { %>
+           <p>A submission associated to this email address already exists. If you think this may be an error, please contact us at idiapsc.jobs@gmail.com.</p>
+           <% } %>
             </div>
          </div>
 </div>

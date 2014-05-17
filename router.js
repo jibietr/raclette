@@ -1,6 +1,6 @@
-define(['underscore','fs'
-   //'opentok'],function(_,fs,OpenTok) {
-   ],function(_,fs) {
+define(['jquery','underscore','fs','http','querystring','crypto'
+   //'opentok'],function($,_,fs,OpenTok,) {
+   ],function($,_,fs,http,querystring,crypto) {
     // Start with the constructor
     // empty constructor    function Router(me) {
 
@@ -137,8 +137,14 @@ define(['underscore','fs'
     Router.prototype.submitAll = function(req, res){
  
        // create unique Hash as id
-       var user_hash = (new Date).getTime().toString() + Math.floor((Math.random()*1000)+1).toString();
+       //var date hash = (new Date).getTime().toString() + Math.floor((Math.random()*1000)+1).toString();
+       var user_hash = crypto.createHmac('sha1', req.env_params.hash_key).update(req.body.email).digest('base64');
+       // truncate hash
+       //http://stackoverflow.com/questions/4567089/hash-function-that-produces-short-hashes
+
        var user = req.body;
+
+   
        user._id = user_hash;
 
        uploadFiles(req, user_hash, function(){
@@ -165,11 +171,14 @@ define(['underscore','fs'
 	     if(user.admission!="NA") item.admission = { 'S' : user.admission }; 
 	     if(user.graduation!="NA") item.graduation = {'S' : user.graduation};
 
-	     var AWS = req.aws_params.aws;
+	     var AWS = req.env_params.aws;
 	     dd = new AWS.DynamoDB();
 	     dd.putItem({
-		'TableName': req.aws_params.users,
-		'Item': item
+		'TableName': req.env_params.users,
+		'Item': item,
+                'Expected': {
+                  '_id': { Exists:  false }
+                 }
 	      }, function(err, data) {
 	       if(!err) {
                  // upload and db sucess
@@ -190,11 +199,78 @@ define(['underscore','fs'
 
     };
 
-    function s3_upload_file(aws_params,file,fname,handler){
+    Router.prototype.submitUserDoc = function(req, res){
+ 
+       // create unique Hash as id
+       //var user_hash = (new Date).getTime().toString() + Math.floor((Math.random()*1000)+1).toString();
+       var user_hash = crypto.createHmac('sha1', req.env_params.hash_key).update(req.body.email).digest('hex');
+       user_hash = user_hash.substring(0,8);
+       var user = req.body;
+
+   
+       user._id = user_hash;
+
+         // if success, then try to save model to db
+         // even if we had positions convert to an array 
+         // iframe converts it back to a string...
+         var positions = [];
+          user.positions.split(',').forEach(function(target){
+            positions.push(target);
+	 });
+
+	 var item = {
+		  '_id': { 'S': user._id },
+		  'name': { 'S': user.name },
+		  'email': { 'S': user.email },
+		  'nationality': { 'S': user.nationality },
+		  'school': { 'S': user.school },
+		  'degree': { 'S': user.degree },
+		  'status': { 'S': user.status },
+		  'positions' : { 'SS': positions },
+		  'source' : { 'S': user.source },
+		  'major': { 'S': user.major },
+                  'date': { 'S': (new Date).getTime().toString() }
+		};
+	     if(user.admission!="NA") item.admission = { 'S' : user.admission }; 
+	     if(user.graduation!="NA") item.graduation = {'S' : user.graduation};
+
+	     var AWS = req.env_params.aws;
+	     dd = new AWS.DynamoDB();
+	     dd.putItem({
+		'TableName': req.env_params.users,
+		'Item': item,
+                'Expected': {
+                  '_id': { Exists:  false }
+                 }
+	      }, function(err, data) {
+	       if(!err) {
+                 // upload and db sucess
+		 console.log('submitall: upload and db success'); 
+                 // now submit files
+                 uploadFiles(req, user_hash, function(){
+                   res.send(user);
+                 },function(err){
+                   return res.send(err.message);
+                 });
+		 
+	       } else {
+	         console.log('submitall: upload sucess, db error',err);
+	         // note that error may content user attributes
+	         // which may trigger .save success
+	         // do not return full error object
+		 return res.send(err.message);
+	        }       
+	      });
+       
+
+
+    };
+
+    function s3_upload_file(env_params,file,fname,handler){
 
        console.log("s3 upload file" + file.name);
-       var AWS = aws_params.aws;
-       var bucket = aws_params.bucket;
+       var AWS = env_params.aws;
+       var bucket = env_params.bucket;
        var s3 = new AWS.S3();
        console.log("bucket",bucket);
        fs.readFile(file.path, function(err, fileBuffer){
@@ -241,11 +317,67 @@ define(['underscore','fs'
 		}
         for(var key in req.files){
           fname = key + "_" + hash + ".pdf" ;
-          s3_upload_file(req.aws_params,req.files[key],fname,handler);
+          s3_upload_file(req.env_params,req.files[key],fname,handler);
         }
 
     }
 
+    Router.prototype.checkRecaptcha = function(req, res){
+
+       //http://stackoverflow.com/questions/7450465/i-keep-receiving-invalid-site-private-key-on-my-recaptcha-validation-request
+       var API_HOST = 'www.google.com';
+       var API_END_POINT = '/recaptcha/api/verify';
+       
+
+       var entry = req.body;
+       var query = { 'privatekey': req.env_params.captcha_private,
+         'remoteip': req.connection.remoteAddress,
+         'challenge': entry.challenge,
+         'response': entry.response };
+
+      var data_qs = querystring.stringify(query);
+      console.log("quiery",data_qs);
+
+      var req_options = {
+	    host: API_HOST,
+	    path: API_END_POINT,
+	    port: 80,
+	    method: 'POST',
+	    headers: {
+		'Content-Type': 'application/x-www-form-urlencoded',
+		'Content-Length': data_qs.length
+	    }
+	};
+     console.log("options",req_options);
+    var request = http.request(req_options, function(response) {
+        var body = '';
+        response.on('error', function(err) {
+            //self.error_code = 'recaptcha-not-reachable';
+            return res.send(err);
+            //callback(false, 'recaptcha-not-reachable');
+        });
+        response.on('data', function(chunk) {
+            body += chunk;
+        });
+        response.on('end', function() {
+            var success, error_code, parts;
+            parts = body.split('\n'); //true or false
+            result = parts[0];
+            error_code = parts[1];
+            console.log("he",result,error_code);
+            if (result !== 'true') {
+                // to trigger err, avoid sending JSON
+                return res.send("Captcha failed. Try again");
+            }
+            // return model ; 
+            return res.send(entry); //everything went well
+           
+        });
+    });
+    request.write(data_qs, 'utf8');
+    request.end();
+
+    };
 
 
 

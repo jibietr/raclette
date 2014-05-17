@@ -19,6 +19,7 @@ requirejs.config({
         'backbone-validation': 'lib/backbone-validation',
         'aws-sdk': 'lib/aws-sdk-2.0.0-rc13.min',
         'tbjs': 'lib/TB.min',
+        'recaptcha': 'lib/recaptcha_ajax',
 
     },
     shim: {

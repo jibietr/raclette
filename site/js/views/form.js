@@ -16,33 +16,13 @@ define([
     'selectize',
     'datepicker',
     'backbone-validation',
-    'jquery.serializeObject'],
-  function($,_,bootstrap,Backbone,TmplForm,TmplCountry,TmplDegree,TmplStatus,TmplOpen,TmplSource,TmplAdm,Applicant,File,itrans,selectize,datepicker,validation,serialize) {
+    'jquery.serializeObject',
+    'recaptcha',
+    'models/recaptcha'],
+  function($,_,bootstrap,Backbone,TmplForm,TmplCountry,TmplDegree,TmplStatus,TmplOpen,TmplSource,TmplAdm,Applicant,File,itrans,selectize,datepicker,validation,serialize,recaptcha,RecaptchaEntry) {
 
     // these are nested views..
     // http://codehustler.org/blog/rendering-nested-views-backbone-js/
-    _.extend(Backbone.Validation.callbacks, {
-    valid: function (view, attr, selector) {
-        var $el = view.$('[name=' + attr + ']'), 
-            $group = $el.closest('.form-group');
-        $group.removeClass('has-error');
-        $group.find('.help-block').html('').addClass('hidden');
-    },
-    invalid: function (view, attr, error, selector) { 
-        var $el = view.$('[name=' + attr + ']'), 
-            $group = $el.closest('.form-group');
-     
-        $group.addClass('has-error');
-        $group.find('.help-block').html(error).removeClass('hidden');
- 
-        $("#Loader").addClass('hidden');
-        $("#InfoContainer").removeClass('bg-info').addClass('bg-warning')
-        $("#InfoContainer").find("p").removeClass('text-info').addClass('text-warning').text("Form incompleted. Please review the fields above.");
-        $("#InfoContainer").removeClass('hidden');
-        
-    } 
-   });
-
 
     var NestedView = Backbone.View.extend({
       
@@ -65,15 +45,7 @@ define([
       tagName: 'div',
       className: 'ApplicantForm',
       template: _.template(TmplForm),
-      //template_country: _.template(Country),
 
-  /*  initialize: function(){
-         this.model = new Applicant();
-            Backbone.Validation.bind(this);
-       console.log("hello");
- 
-    },*/
-   
      renderNested: function( view, selector ) {
         var $element = ( selector instanceof $ ) ? selector : this.$el.find( selector );
         view.setElement( $element ).render();
@@ -85,21 +57,39 @@ define([
        'click #submit':'submitAll'
     },
 
-      set_hidden_glyph: function(e){
-        $(e.target).prev().find("span").removeClass("glyphicon-chevron-down").addClass("glyphicon-chevron-right");
-      },
+    set_hidden_glyph: function(e){
+      $(e.target).prev().find("span").removeClass("glyphicon-chevron-down").addClass("glyphicon-chevron-right");
+    },
 
-      set_show_glyph: function(e){
-       $(e.target).prev().find("span").removeClass("glyphicon-chevron-right").addClass("glyphicon-chevron-down");
-      },
+    set_show_glyph: function(e){
+      $(e.target).prev().find("span").removeClass("glyphicon-chevron-right").addClass("glyphicon-chevron-down");
+    },
 
+    setValidBlock: function(view, attr, selector){
+       var $el = view.$('[name=' + attr + ']'), 
+       $group = $el.closest('.form-group');
+       $group.removeClass('has-error');
+       $group.find('.help-block').html('').addClass('hidden');
+    },
+   
+    setInvalidBlock: function (view, attr, error, selector) {
+      var $el = view.$('[name=' + attr + ']'),
+      $group = $el.closest('.form-group');
+      $group.addClass('has-error');
+      $group.find('.help-block').html(error).removeClass('hidden');
+      $("#Loader").addClass('hidden');
+      this.setInfo('error','Form incompleted. Please review the fields above.');
+    },
 
+    readForm: function(){
+        var applicant  = new Applicant();
 
-      submit: function(e){
+        Backbone.Validation.bind(this, { 
+          model: applicant,
+          valid: this.setValidBlock.bind(this),
+          invalid: this.setInvalidBlock.bind(this)
+       }); 
 
-       
-       e.preventDefault();
-      
        // use serialize object to get form data
        var formData = $('#addUser').serializeObject();
        
@@ -148,149 +138,105 @@ define([
        if(formData['status']=="GR"){
          formData['graduation']="NA";
        }
-
-       // validates model
-       this.setInfo();
-       this.model.save(formData,{
-         success: function(model,response) { 
-           //console.log("success"); 
-           //console.log(model);
-           this.uploadFiles(model);
-         }.bind(this),
-           error: function(model,response){ 
-           //console.log("error"); 
-           this.trigger('form-submitted','error');//,'Ooops! Something ;
-         }.bind(this)}
-       );
-      },
-
-
-
-      // this is going to do a second check...
-      uploadFiles: function(model){
-      
-       // this is a temporal solution to giving some feedback 
-       // f
-       this.setInfo();
-  
-       //console.log("upload files using this model",model);
-       var id = model.get("_id");
-       fileData = { 
-          resume: "resume_" + id +  ".pdf", 
-          cover_letter: "cover_letter_" + id + ".pdf" 
-       };
-       var file = new File();
-       file.save(fileData,{iframe: true,
-                              files: $('form :file'),
-                              data: fileData,
-                              success: function(model,response) { 
-                                   //console.log("success"); 
-                                   //console.log(model);
-                                   this.trigger('form-submitted','success')//,'Submitted!');
-                               }.bind(this),
-                              error: function(model,response){ 
-                                   //console.log("error"); 
-                                   this.trigger('form-submitted','error');//,'Ooops! Something ;
-                              }.bind(this)});
-
-
-      },
-
-    setInfo: function(){
-       $("#InfoContainer").removeClass('bg-warning').addClass('bg-info')
-       $("#InfoContainer").find("p").removeClass('text-warning').addClass('text-info').text("Wait while we upload the files.");
-       $("#InfoContainer").removeClass('hidden');
-       $("#Loader").removeClass('hidden');
+       this.model = applicant;
+       return this.model.set(formData,{validate:true}); 
+   
     },
 
 
-      submitAll: function(e){
+    setInfo: function(type,message){
+      this.info = $("#InfoContainer");
+      this.clearInfo(); // clear classes if an 
+      if(type=='warning'){
+        //	  this.info.find("p").addClass('text-warning').text(message);
+        //  this.info.addClass('bg-warning').removeClass('hidden');
+      }else if(type=='error'){
+       this.info.addClass('bg-warning')
+       this.info.find("p").addClass('text-warning').text(message);
+       this.info.removeClass('hidden');
+      }else if(type=='info'){
+        $("#InfoContainer").removeClass('bg-warning').addClass('bg-info');
+        $("#InfoContainer").find("p").addClass('text-info').text(message);
+        $("#InfoContainer").removeClass('hidden');
+        $("#Loader").removeClass('hidden');
+      } 
+    },
+
+    clearInfo: function(){
+       this.info.removeClass("bg-warning").removeClass('bg-info').removeClass("bg-danger").addClass("hidden");
+       this.info.find("p").removeClass('text-danger').addClass('text-warning').removeClass('text-info');
+    },
+
+    submitAll: function(e){
         
        // prevent from default routing
        e.preventDefault();
-      
-       // use serialize object to get form data
-       var formData = $('#addUser').serializeObject();
-       
-       // jquery does not include file type. let's get them directly     
-       $('[type=file]').each(function(i,el){
-         // we pass extension and size to model
-         value = $(el)[0].value;
-         formData[el.name] = value; 
-         //pass file object
-         if(value){
-            var type = $(el)[0].files[0].type;
-            var size = $(el)[0].files[0].size;        
-            // backbone-validation does not accept objects
-            formData[el.name] = type + " " + size;  }
+       // set form
+       if(this.readForm() && this.setRecaptcha()) this.submitRecaptcha();
+       // set and submit recaptcha
+       //var this.setRecaptcha();
+        
+    },
+
+    showRecaptcha: function() {
+      Recaptcha.create("6LfaofMSAAAAAIOQJsdVA8UQRLHWuD7mkvcGoQ9T", "recaptcha", {
+             theme: "red"});
+    },
+
+    setRecaptcha: function() {
+      console.log("check recaptcha");
+      var params = { challenge: Recaptcha.get_challenge(),
+       response: Recaptcha.get_response() };
+      //before biding, view has to have model
+      //if there is no validation, nobody calls it!!
+      var recaptcha = new RecaptchaEntry();
+      Backbone.Validation.bind(this, { 
+        model: recaptcha,
+        valid: this.setValidBlock.bind(this),
+        invalid: this.setInvalidBlock.bind(this)
        });
+       this.recaptcha = recaptcha;
+       return recaptcha.set(params,{validate:true});
 
-       var positions = [];
-       // positions may not exist if there was no selection
-       // (this seems to be an issue with selectize.js)
-       // convert positions to array
-       if('positions' in formData){ 
-        //console.log("convert to array");
-        if( typeof formData['positions'] === 'string' ) { 
-          positions.push(formData['positions']);
-        }else{
-          formData['positions'].forEach(function(entity){
-            positions.push(entity);
-          });
-        }
-       }
-       formData['positions'] = positions;
-       //console.log(formData);
+    },
 
-       // add value to admissions if it is internship and no phd
-       // in practice, we do not need to check for internship, because
-       // if missing, the model won't be valid anyway
-       var valid = false;
-       for (var i=0;i< positions.length;i++){
-         if(positions[i].split("-")[0]=="PHD") valid = true;
-       }
-       if(!valid) formData['admission'] = 'NA';
-
-       if(formData['status']=="GR"){
-         formData['graduation']="NA";
-       }
-
-       // validates model otherwise rises error (this already includes file validation!!)
-       // TODO:
-       // validate model, if valid, send info and save
-
-       // i think data is were we need to send the model!!
-       //this.model.isValid();
-
-       //console.log("check model",this.model);
-       //this.model.set(formData);
-       //if(this.model.isValid()){
-       //   console.log(y"model valid");
-       //   this.setInfo();
-         //console.log('upload this form',formData);
-         this.setInfo();
-          this.model.save(formData,{iframe: true,
+    submitForm: function(){
+       this.setInfo('info','Wait while we upload the files.');
+       this.model.save(null,{iframe: true,
                               files: $('form :file'),
-                              data: formData,
+                              data: this.model.attributes,
                               success: function(model,response) { 
                                    //console.log("success"); 
                                    //console.log(model);
                                    this.trigger('form-submitted','success')//,'Submitted!');
                                }.bind(this),
                               error: function(model,response){ 
-                                   //sconsole.log("error"); 
-                                   this.trigger('form-submitted','error');//,'Ooops! Something ;
+                                   console.log("error",response)
+                                   console.log("error",response.responseText); 
+                                   if(response.responseText==="The conditional request failed"){
+                                     return this.trigger('form-submitted','exists');
+                                   }
+                                   return this.trigger('form-submitted','error');//,'Ooops! Something ;
                               }.bind(this)});
-       //}else{
-        //  console.log("model not valid",this.model);
-       //x}
+    },
       
+    submitRecaptcha: function(){
 
-      }
+      this.recaptcha.save(null,{
+         success: function(model,response){ 
+            Recaptcha.destroy();
+            console.log("Success")
+            this.submitForm();
+          }.bind(this),
+         error: function(model,response){ 
+          this.setInfo('error',response.responseText);
+          Recaptcha.reload();
+           }.bind(this),
+      });
+    }
 
 
-    });
-
+  });
 
     var customView = BaseView.extend({
 
@@ -302,12 +248,6 @@ define([
             this.positionsView = new NestedView(_.template(TmplOpen));
             this.sourceView = new NestedView(_.template(TmplSource));
             this.admView = new NestedView(_.template(TmplAdm));
-
-            this.model = new Applicant();
-            Backbone.Validation.bind(this);
-
-            //console.log("backbone validation binding");
-
 	},
 
 	render: function() {
@@ -319,6 +259,7 @@ define([
             this.renderNested( this.positionsView, '#positions' );
             this.renderNested( this.sourceView, '#source' );
             this.renderNested( this.admView, '#admission' );
+            this.showRecaptcha();
 	    return this;
 	}
     });
