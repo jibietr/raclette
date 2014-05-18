@@ -161,6 +161,7 @@ define(['jquery','underscore','fs','http','querystring','crypto'
 		  'name': { 'S': user.name },
 		  'email': { 'S': user.email },
 		  'nationality': { 'S': user.nationality },
+                  'country' : { 'S': user.country },
 		  'school': { 'S': user.school },
 		  'degree': { 'S': user.degree },
 		  'status': { 'S': user.status },
