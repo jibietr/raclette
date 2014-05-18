@@ -201,7 +201,7 @@ define([
     },
 
     submitForm: function(){
-       this.setInfo('info','Wait while we upload the files.');
+       this.setInfo('info','Wait while we upload the files. Please be patient.');
        this.model.save(null,{iframe: true,
                               files: $('form :file'),
                               data: this.model.attributes,
