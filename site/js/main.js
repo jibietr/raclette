@@ -11,22 +11,15 @@ requirejs.config({
         'jquery' : 'lib/jquery',
         'underscore' : 'lib/underscore-min',
         'backbone' : 'lib/backbone-min',
-        'jquery.form' : 'lib/jquery.form.min',
         'bootstrap' : 'lib/bootstrap.min',
-        'RecordRTC' : 'lib/RecordRTC',
-        'jquery.fileupload' : 'lib/jquery.fileupload',
-        'jquery.ui.widget' : 'lib/jquery.ui.widget',
         'jquery.iframe': 'lib/jquery.iframe-transport',
         'jquery.serializeObject': 'lib/jquery.serializeObject',
         'selectize': 'lib/standalone/selectize',
+        'datepicker' : 'lib/bootstrap-datepicker',
         'backbone-validation': 'lib/backbone-validation',
-        's3upload': 'lib/s3upload',
-        'lodash' : 'lib/lodash.min',
         'aws-sdk': 'lib/aws-sdk-2.0.0-rc13.min',
-        'scriptcam': 'lib/scriptcam',
-        'swfobject': 'lib/swfobject',
         'tbjs': 'lib/TB.min',
-        //'tb': 'https://swww.tokbox.com/webrtc/v2.2/js/TB.min',
+        'recaptcha': 'lib/recaptcha_ajax',
 
     },
     shim: {
@@ -44,7 +37,7 @@ requirejs.config({
             exports: 'Backbone'
         },
         'backbone-validation': {
-            deps: ['backbone'],
+            deps: ['backbone','underscore'],
         },
         'selectize':{
            deps: ['jquery']
@@ -52,13 +45,12 @@ requirejs.config({
         'jquery.serializeObject':{
            deps: ['jquery']
         },
-        's3upload': {
-           deps: ['jquery','lodash']
+        'datepicker':{
+           deps: ['bootstrap','jquery']
         },
-        'scriptcam': {
-           deps: ['jquery','swfobject']
+        'jquery.iframe':{
+           deps: ['jquery']
         },
-
 
         }
 });

@@ -4,32 +4,31 @@ var requirejs = require('requirejs');
 
 requirejs.config({
     nodeRequire: require,
-    baseUrl: 'site/js',
+    baseUrl: '.',
 
-    paths: {
-        'models': 'models',
-        'collections' : 'collections',
-        'views' : 'views',
-        'templates' : 'templates',
-        'text' :  'lib/text',
-        'routes': 'routes',
-     
-    },
+    //paths: {
+        //'models': 'models',
+        //'collections' : 'collections',
+        //'views' : 'views',
+        //'templates' : 'templates',
+        //'text' :  'lib/text',
+        
+    //},
     //this should be client side..
     shim: {
-        'lib/jquery' : {
+        'site/js/lib/jquery' : {
             exports: '$'  
         },
-        'lib/underscore-min' : {
+        'site/js/lib/underscore-min' : {
             exports: '_'  
        },
-        'lib/backbone-min': {
+        'site/js/lib/backbone-min': {
             deps: ['underscore-min', 'jquery'],
             exports: 'Backbone'
         },
-        'lib/opentok' : {
+      /*  'site/js/lib/opentok' : {
             deps: ['jasmine-node','nock']
-       }
+       }*/
      
     }
 });
@@ -44,8 +43,10 @@ requirejs([
     'backbone',
     'crypto',
     'aws-sdk',
-    'routes/router',
-    'opentok'], 
+    'router'
+    //'opentok'
+    ], 
+  // function(express,path,$,fs,_,Backbone,crypto,AWS,Router,OpenTok){
   function(express,path,$,fs,_,Backbone,crypto,AWS,Router,OpenTok){
     var application_root = __dirname;
     var app = express();
@@ -70,41 +71,44 @@ requirejs([
     
     var routes = new Router();
      
-    // this is copied-pasted from opentok-example
+  /*  // this is copied-pasted from opentok-example
     var config = {
       port: process.env.PORT,
       apiKey: process.env.API_KEY,
       apiSecret: process.env.API_SECRET
-    };
+    };*/
     
-    app.request.config = config;  
+   // app.request.config = config;  
     
     //if(!config['TB.js']) {
     //  config['TB.js'] = 'https://swww.tokbox.com/webrtc/v2.2/js/TB.min.js';
     //}
 
-    if(!config.apiEndpoint) {
+  /*  if(!config.apiEndpoint) {
       config.apiEndpoint = 'https://api.opentok.com';
     }
 
     if(!(config.apiKey && config.apiSecret)) {
       console.error('You must set apiKey and apiSecret in .env');
       process.exit();
-    }
+    }*/
 
-    var opentok = new OpenTok.OpenTokSDK(config.apiKey, config.apiSecret);
+  /*  var opentok = new OpenTok.OpenTokSDK(config.apiKey, config.apiSecret);
     if(config.anvil) {
       opentok.api_url = config.anvil;
     }
-    app.request.opentok = opentok;
+    app.request.opentok = opentok;*/
 
     // these are routes served ...
 
-    app.get('/start-archive/:session', routes.startArchive);
+
+  /*  app.get('/start-archive/:session', routes.startArchive);
     app.get('/stop-archive/:archive', routes.stopArchive);
     app.get('/start-session', routes.startSession);
     app.post('/api/answers', routes.saveAnswer);
-    app.get('/api/session/:id', routes.startInterview);
+    app.get('/api/session/:id', routes.startInterview);*/
+    app.post('/api/submitAll', routes.submitUserDoc);
+   app.post('/api/check_recaptcha', routes.checkRecaptcha);
     //app.get('/faq', routes.getFAQ);
 
 
@@ -298,6 +302,7 @@ requirejs([
 	  status: request.body.status,
 	  major: request.body.major,
 	  positions: positions,
+          source: request.body.source,
 	  joined: request.body.joined
 	});
 
@@ -317,7 +322,7 @@ requirejs([
     });
 
     // 
-
+    console.log("process params env",process.env);
     var AWS_ACCESS_KEY = process.env.AWS_ACCESS_KEY_ID;
     var AWS_SECRET_KEY = process.env.AWS_SECRET_KEY;
     var S3_BUCKET = process.env.PARAM1;
@@ -326,13 +331,6 @@ requirejs([
     var TAB_ANSWERS = process.env.PARAM2 + "-answers";
     var TAB_SESSIONS = process.env.PARAM2 + "-sessions";
 
-    app.request.aws_params = {
-      bucket: S3_BUCKET,
-      users: TAB_USERS,
-      questions: TAB_QUESTIONS, 
-      answers: TAB_ANSWERS,
-      sessions: TAB_SESSIONS
-    };
 
     //var s3 = new AWS.S3();
     console.log("setup AWS params 3");
@@ -343,9 +341,20 @@ requirejs([
     AWS.config.update({accessKeyId: AWS_ACCESS_KEY, secretAccessKey: AWS_SECRET_KEY});
     AWS.config.update({region: 'eu-west-1'});
 
+    app.request.env_params = {
+      aws: AWS,
+      bucket: S3_BUCKET,
+      users: TAB_USERS,
+      questions: TAB_QUESTIONS, 
+      answers: TAB_ANSWERS,
+      sessions: TAB_SESSIONS,
+      captcha_private: process.env.CAPTCHA_PRIVATE,
+      hash_key: process.env.HASH_KEY
+    };
+   
 
      //this seems to do a good job..
-     app.get('/sign_s3', function(req, res){
+  /*   app.get('/sign_s3', function(req, res){
         // extract name and mime from object to upload
         // TODO: check on name...
 	var object_name = req.query.s3_object_name;
@@ -468,7 +477,7 @@ requirejs([
 	      };
 	      s3.putObject(params, handler);
     }
-
+*/
    
  
     function InitDB(params){
@@ -535,7 +544,7 @@ requirejs([
 
 
     //Insert a new user
-    app.post( '/s3/users', function( request, response ,next) {
+   /* app.post( '/s3/users', function( request, response ,next) {
 
 
        // create unique hashstag
@@ -556,12 +565,15 @@ requirejs([
             'degree': { 'S': user.degree },
             'status': { 'S': user.status },
             'positions' : { 'SS': user.positions },
+            'source' : { 'S': user.source },
             'major': { 'S': user.major }
           };
+       if(user.admission!="NA") item.admission = { 'S' : user.admission }; 
+       if(user.graduation!="NA") item.graduation = {'S' : user.graduation};
 
        dd = new AWS.DynamoDB();
        dd.putItem({
-          'TableName': 'users',
+          'TableName': TAB_USERS,
           'Item': item
         }, function(err, data) {
              if( !err ) {
@@ -613,7 +625,7 @@ requirejs([
           s3_upload_file(req.files[key],fname,handler);
         }
 
-    });
+    });*/
 
     // insert new answer with collection.createa
  /*   app.post( '/api/answers', function(request,response) {

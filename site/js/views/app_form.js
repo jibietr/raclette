@@ -10,7 +10,9 @@ define([
 
     var appForm = Backbone.View.extend({
     
-      el: '#application',
+      //el: '#application',
+      tagName: 'div',
+      id: 'app-form',
  
       initialize: function()  {
         this.renderStart();
@@ -20,25 +22,27 @@ define([
         welcomeView = new WelcomeView();
         this.listenTo(welcomeView,'tos-agree',this.renderForm);
         this.$el.html(welcomeView.render().el);
-        
+        //welcomeView.showRecaptcha();
+        this.current_view = welcomeView;
         return this;
       },
 
 
       // render library by rendering each book in its collection
       renderForm: function() {
-        console.log("renderForm");
-        // uncomment this to start form view
+        this.current_view.remove();
         formView = new FormView(); 
         this.$el.html(formView.render().el);
         this.listenTo(formView,'form-submitted',this.renderEnd);        
-        
+        this.current_view = formView;
       },
 
       renderEnd: function(response){
-        console.log(response);
+        this.current_view.remove();
         endView = new EndView();
+        console.log("response",response);
         this.$el.html(endView.render(response).el);
+        this.current_view = endView;
         return this;
       },
 
