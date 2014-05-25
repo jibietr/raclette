@@ -1,31 +1,26 @@
-requirejs([
+// Note: use define here to return the app obj instantiated
+// check difference between require and define here
+// http://stackoverflow.com/questions/9507606/when-to-use-require-and-when-to-use-define
+define([
     'jquery',
     'underscore',
-    'backbone',
-    'routes/client',
-    'models/session'],
-function($,_,Backbone,Router,SessionModel) {
+    'backbone'],
+  function($,_,Backbone) {
+   
+    var app = {
+        root : "/",                     // The root path to run the application through.
+        URL : "/",                      // Base application URL
+        API : "/api"                   // Base API URL (used by models & collections)
 
-    var router = new Router();
-    var session = new SessionModel();
+    };
+    $.ajaxSetup({ cache: false });          // force ajax call on all browsers
 
-    // Copied from 
-    // https://github.com/alexanderscott/backbone-login/blob/master/public/main.js
-    // Check the auth status upon initialization,
-    // before rendering anything or matching routes
-    session.checkAuth({
-        // Start the backbone routing once we have captured a user's auth status
-        complete: function(){
-            // HTML5 pushState for URLs without hashbangs
-            var hasPushstate = !!(window.history && history.pushState);
-            if(hasPushstate) Backbone.history.start({ pushState: true, root: '/' } );
-            else Backbone.history.start();
-        }
-    });
-    //console.log(app.root);
-    // check rest of related rooter stuff here
-    // http://addyosmani.github.io/backbone-fundamentals/#routers
-    //Backbone.history.start();
+    console.log("run app.js",app);
+    // Things worth checking
+    //$.ajaxSetup({ cache: false });
+    // Global event aggregator
+    //app.eventAggregator = _.extend({}, Backbone.Events);
+    return app;
   
 });
 

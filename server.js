@@ -6,15 +6,6 @@ requirejs.config({
     nodeRequire: require,
     baseUrl: '.',
 
-    //paths: {
-        //'models': 'models',
-        //'collections' : 'collections',
-        //'views' : 'views',
-        //'templates' : 'templates',
-        //'text' :  'lib/text',
-        
-    //},
-    //this should be client side..
     shim: {
         'site/js/lib/jquery' : {
             exports: '$'  
@@ -32,7 +23,6 @@ requirejs.config({
      
     }
 });
-
 requirejs(['jquery', 'backbone'], function($, Backbone) { Backbone.$ = $; });
 requirejs([
     'express',
@@ -43,33 +33,70 @@ requirejs([
     'backbone',
     'crypto',
     'aws-sdk',
-    'router'
+    'router',
+    //'passport',
+    //'passport-local'
+    'params',
     //'opentok'
     ], 
   // function(express,path,$,fs,_,Backbone,crypto,AWS,Router,OpenTok){
-  function(express,path,$,fs,_,Backbone,crypto,AWS,Router,OpenTok){
+ // function(express,path,$,fs,_,Backbone,crypto,AWS,Router,Passport,PassportLocal){
+  function(express,path,$,fs,_,Backbone,crypto,AWS,Router,params){
     var application_root = __dirname;
     var app = express();
+
+    // we will replace this by DB stuff...
    
-    // Configure seer
+    // Configure server
     // So far the serverem will load the static content in site/index.html
-    app.configure( function() {
-      //parses requesody and populates request.body
-      app.use( express.bodyParser() );
-	//checks request.body for HTTP method overrides
-	app.use( express.methodOverride() );
-	//perform route lookup based on url and HTTP method
-	app.use( app.router );
-	//Where to serve static content
-        console.log('Use %s as dirname',application_root);
-        app.use( express.static( path.join( application_root, 'site') ) );
-	//Show all errors in development
-	app.use( express.errorHandler({ dumpExceptions: true, showStack: true }));
+    //app.configure( function() {
+    //parses requesody and populates request.body
+    app.use( express.bodyParser() );
+    //checks request.body for HTTP method overrides 
+    app.use( express.methodOverride() );
+
+    // passport initialize
+    app.use(express.cookieParser());
+    app.use(express.session({ secret: 'keyboard cat' }));
+    app.use(params.pass.initialize());
+    app.use(params.pass.session());
+    // this is for backbone-login
+    //app.use( express.cookieParser('my cookie secret') );// populates req.signedCookies
+    //app.use( express.cookieSession('my session secret') );  
+
+    //perform route lookup based on url and HTTP method
+    app.use( app.router );
+
+
+    //Where to serve static content
+    console.log('Use %s as dirname',application_root);
+    app.use( express.static( path.join( application_root, 'site') ) );
+    //Show all errors in development
+    app.use( express.errorHandler({ dumpExceptions: true, showStack: true }));
         
-    });
+    //});
+
+
+    // Simple route middleware to ensure user is authenticated.
+    //   Use this route middleware on any resource that needs to be protected.  If
+    //   the request is authenticated (typically via a persistent login session),
+    //   the request will proceed.  Otherwise, the user will be redirected to the
+    //   login page.
+    function ensureAuthenticated(req, res, next) {
+      console.log("Checking if req.body is auth",req);
+      if (req.isAuthenticated()) { return next(); }
+      //res.redirect('/login')
+      
+      //res.json({ user: _.omit(user, ['password', 'auth_token']) });
+      res.json({ error: "Client has no valid login cookies."  });
+
+    }
+
 
     
     var routes = new Router();
+
+
      
   /*  // this is copied-pasted from opentok-example
     var config = {
@@ -108,8 +135,30 @@ requirejs([
     app.post('/api/answers', routes.saveAnswer);
     app.get('/api/session/:id', routes.startInterview);*/
     app.post('/api/submitAll', routes.submitUserDoc);
-   app.post('/api/check_recaptcha', routes.checkRecaptcha);
+    app.post('/api/check_recaptcha', routes.checkRecaptcha);
+    //app.post('/api/user', routes.updateUser);
+    //app.post('/api/auth', routes.signIn);
     //app.get('/faq', routes.getFAQ);
+
+    // login a user
+    //app.post('/api/auth/login', routes.Login);
+    //app.get('/api/auth', routes.Auth);
+
+    app.get('/api/auth', ensureAuthenticated, function(req, res){
+     //res.render('account', { user: req.user });
+     res.json({ user: req.user});
+    });
+
+    //app.request.passport = Passport;
+    //app.post('/api/auth/login',  routes.Login);
+    app.post('/api/auth/signup', routes.Signup);
+
+    app.post('/api/auth/login', 
+      params.pass.authenticate('local', { session:true }),
+       function(req, res) {
+        //res.redirect('/');
+        res.json({ err: 'Login OK' } );
+      });
 
 
     app.get( '/api/questions', function( request, response ) {
@@ -153,58 +202,6 @@ requirejs([
 
 
 
-
-   //  app.post('/api/upload_video',function(request, response) {
-   //    // TODO: check for errors
-   //    // writing audio file to disk
-   //    var filename = new Date().toString(11);
-   //    //console.log(request.body.audio.extension);
-   //    console.log(request.body);
-   //    //_uploaresponse, request.body.audio, filename);
-   //    //_upload(response, request.body.video, filename);
-
-   //    //merge(response, files);
-   //    // this is a success
-   //    console.log("Done with upload");
-   //    response.send({});   
-
-   // });
-
-
-
-
-   // App.post('/upload',function(request,response){
-          
-   //       console.log(request.files.resume.path);
-   // 	fs.readFile(request.files.resume.path, function (err, data) {
-
-   // 	      //File Name
-   // 	      var fileName = request.files.resume.name
-
-   // 	     // If there's an error
-   // 	     if(!fileName)
-   // 	     {
-   // 		console.log("There was an error")
-   // 		//response.redirect("/");
-   // 		//response.end();
-   // 	     }
-   // 	     else
-   // 	     {
-   // 		//Path of upload folder where you want to upload fies
-   // 		var newPath = __dirname + "/docs/" + fileName;
-   //              console.log("write in " + newPath);
-   // 		// write file to uploads folder
-   // 	        fs.writeFile(newPath, data, function (err) {
-
-   // 		   // let's see uploaded file
-   // 		   //response.redirect("/uploads/" + fileName);
-   //                 //response.send("done!")
-   // 	       });
-   // 	     }
-   // 	  });
-
-   //   console.log(request);
-   // });
 
 
    
@@ -345,141 +342,17 @@ requirejs([
       aws: AWS,
       bucket: S3_BUCKET,
       users: TAB_USERS,
+      accounts: process.env.PARAM2 + "-accounts",
       questions: TAB_QUESTIONS, 
       answers: TAB_ANSWERS,
       sessions: TAB_SESSIONS,
       captcha_private: process.env.CAPTCHA_PRIVATE,
       hash_key: process.env.HASH_KEY
     };
+
+    //params.hash_key = process.env.HASH_KEY;
+    params.env = app.request.env_params;
    
-
-     //this seems to do a good job..
-  /*   app.get('/sign_s3', function(req, res){
-        // extract name and mime from object to upload
-        // TODO: check on name...
-	var object_name = req.query.s3_object_name;
-	var mime_type = req.query.s3_object_type;
-        
-        // create a temporal signature
-	var now = new Date();
-	var expires = Math.ceil((now.getTime() + 10000)/1000); // 10 seconds from now
-	var amz_headers = "x-amz-acl:private";   // grant permissions
-        // create request
-	var put_request = "PUT\n\n"+mime_type+"\n"+expires+"\n"+amz_headers+"\n/"+S3_BUCKET+"/"+object_name;
-
-	var signature = crypto.createHmac('sha1', AWS_SECRET_KEY).update(put_request).digest('base64');
-	signature = encodeURIComponent(signature.trim());
-	signature = signature.replace('%2B','+');
-
-	var url = 'https://'+S3_BUCKET+'.s3.amazonaws.com/'+object_name;
-
-	var credentials = {
-	    signed_request: url+"?AWSAccessKeyId="+AWS_ACCESS_KEY+"&Expires="+expires+"&Signature="+signature,
-	    url: url
-	};
-	res.write(JSON.stringify(credentials));
-	res.end();
-    });
-
-
-
-     app.get( '/api/gets3access', function( request, response ) {
-
-       var S3= new AWS.S3();     
-        console.log(request);
-
-        var fname = (new Date).getTime().toString() + ".txt";
-        //request.query.fname
-        var params = {
-		  Bucket: S3_BUCKET + "/videos/", 
-                  Key: fname,
-                  //ContentType: "audio/wav",
-                  //ACL: "public-write",
-	      };
-       console.log(params);
-
-       S3.getSignedUrl('putObject', params, function (err, url) {
-           console.log('errror ' + err);
-          console.log('Signed URL: ' + url);
-          console.log('Encoded URL: ' + encodeURIComponent(url));
-//          var credentials = { url:  };
-	  response.write(encodeURIComponent(url));
-	  response.end();
-
-       });
-
-    });
-
-
-    app.get( '/api/getSTS', function( request, response ) {
-
-        var STS = new AWS.STS();     
-        var params = {
-            DurationSeconds: 129000,
-        }; 
-        
-        STS.getSessionToken(params, function(err, data) {
-          if (err) console.log("error sts",err, err.stack); // an error occurred
-          else {    
-             console.log("send data",data);           // successful response
-             // HACK: we are modifying this to temporary pass the Key and Secret credentials...
-             data.Credentials.AccessKeyId=AWS_ACCESS_KEY;
-             data.Credentials.SecretAccessKey=AWS_SECRET_KEY;
-             // create Id in server so we make sure they are different
-             data.uploadId = (new Date).getTime().toString() + Math.floor((Math.random()*1000)+1).toString(); 
-             response.send(data);
-          }
-        });
-
-    });
-
-
-
-
-
-
-
-
-    function s3_upload_file(file,fname,handler){
-
-          console.log("s3 upload file" + file.name);
-	  var s3 = new AWS.S3();	
-	  fs.readFile(file.path, function(err, fileBuffer){
-              console.log("s3 put " + file.name);
-              var params = {
-		  Bucket: S3_BUCKET + "/docs/",
-		  Key: fname, // add new name
-		  Body: fileBuffer,
-		  ACL: 'private',
-		  ContentType: file.type
-	      };
-	      s3.putObject(params, handler);
-	  });
-    }
-
-
-
-    function s3_upload_video(file,fname,handler){
-
-          fname = fname + "." + file.extension;
-          console.log("s3 upload file" + fname);
-	  var s3 = new AWS.S3();	
-          file.contents = file.contents.split(',').pop();
-          fileBuffer = new Buffer(file.contents, "base64");
-
-	 
-              var params = {
-		  Bucket: S3_BUCKET + "/videos/",
-		  Key: fname, // add new name
-		  Body: fileBuffer,
-		  ACL: 'private',
-		  ContentType: file.type
-	      };
-	      s3.putObject(params, handler);
-    }
-*/
-   
- 
     function InitDB(params){
     var dd = new AWS.DynamoDB();
     // create table only if it does not exist
@@ -537,10 +410,30 @@ requirejs([
       },
       TableName: TAB_ANSWERS, // required
     };
+
+    var AccountsParams = {
+      AttributeDefinitions: [ // required
+	{
+	  AttributeName: '_id', // required
+	  AttributeType: 'S', // required
+	},
+      ],
+      KeySchema: [ // required
+	{
+	  AttributeName: '_id', // required
+	  KeyType: 'HASH', // required
+	},
+      ],
+      ProvisionedThroughput: { // required
+	ReadCapacityUnits: 1, // required
+	WriteCapacityUnits: 1, // required
+      },
+      TableName: app.request.env_params.accounts, // required
+    };
    
     InitDB(UserParams);
     setTimeout(InitDB(AnswerParams),1000);
-
+    setTimeout(InitDB(AccountsParams),1000);
 
 
     //Insert a new user

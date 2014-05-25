@@ -1,60 +1,41 @@
-requirejs.config({
-    deps: [ 'app' ],
-    baseUrl: 'js',
-    paths: {
-        'models': 'models',
-        'collections' : 'collections',
-        'views' : 'views',
-        'templates' : 'templates',
-        'text' :  'lib/text',
-        'routes': 'routes',
-        'jquery' : 'lib/jquery',
-        'underscore' : 'lib/underscore-min',
-        'backbone' : 'lib/backbone-min',
-        'bootstrap' : 'lib/bootstrap.min',
-        'jquery.iframe': 'lib/jquery.iframe-transport',
-        'jquery.serializeObject': 'lib/jquery.serializeObject',
-        'selectize': 'lib/standalone/selectize',
-        'datepicker' : 'lib/bootstrap-datepicker',
-        'backbone-validation': 'lib/backbone-validation',
-        'aws-sdk': 'lib/aws-sdk-2.0.0-rc13.min',
-        'tbjs': 'lib/TB.min',
-        'recaptcha': 'lib/recaptcha_ajax',
+requirejs([
+    'jquery',
+    'underscore',
+    'backbone',
+    'routes/index',
+    'app',
+    'models/session'],
+  function($,_,Backbone,Router,app,SessionModel) {
 
-    },
-    shim: {
-        'jquery' : {
-            exports: '$'  
-        },
-        'underscore' : {
-            exports: '_'  
-        },
-        'bootstrap': {
-            deps: ['jquery']
-        },
-        'backbone': {
-            deps: ['underscore', 'jquery'],
-            exports: 'Backbone'
-        },
-        'backbone-validation': {
-            deps: ['backbone','underscore'],
-        },
-        'selectize':{
-           deps: ['jquery']
-        }, 
-        'jquery.serializeObject':{
-           deps: ['jquery']
-        },
-        'datepicker':{
-           deps: ['bootstrap','jquery']
-        },
-        'jquery.iframe':{
-           deps: ['jquery']
-        },
+    // for some reason app is undefined...
+    console.log("app",app);
+    //var hi = app();
+    //console.log("router",Router);
+    
+    app.session = new SessionModel();
+    var router = new Router();
 
+    // Copied from 
+    // https://github.com/alexanderscott/backbone-login/blob/master/public/main.js
+    // Check the auth status upon initialization,
+    // before rendering anything or matching routes
+
+    console.log("start backbone routing once we captured user's auth status");
+    app.session.checkAuth({
+        // Start the backbone routing once we have captured a user's auth status
+        complete: function(){
+            // HTML5 pushState for URLs without hashbangs
+            var hasPushstate = !!(window.history && history.pushState);
+            // there is a strange behavior here that does not let me go to #faq
+            // so i comment it for the moment...
+            //if(hasPushstate) Backbone.history.start({ pushState: true, root: '/' } );
+            //else Backbone.history.start();
+            Backbone.history.start();
         }
+    });
+
+  
 });
 
 
-
-
+    

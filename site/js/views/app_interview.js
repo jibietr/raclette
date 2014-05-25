@@ -3,22 +3,22 @@ define([
     'underscore',
     'bootstrap',
     'backbone',
+    'app',
     'collections/questionnaire',
     'models/panel',
     'models/session',
     'views/question',
-    'views/panel',
-    'views/login'],
-  function($,_,bootstrap,Backbone,Questionnaire,Panel,Session,QuestionView,PanelView,LoginView) {
+    'views/panel'],
+  function($,_,bootstrap,Backbone,app,Questionnaire,Panel,Session,QuestionView,PanelView) {
 
     var questionnaireView = Backbone.View.extend({
 
-      //el: '#application',
       tagName: "div",
-      id: "questionnaire",
+      id: 'app-view',
 
       initialize: function() {
-	this.renderLogin();
+        this.initSession();
+        
       },
 
       events:{
@@ -31,12 +31,8 @@ define([
 	  this.question = this.collection.at(0);
 	  this.renderQuestion();
       },
-     
-      renderLogin: function(){
-	this.session = new Session();      
-	var panelView = new LoginView({ model: this.session});
-	this.listenTo(this.session,'loginSuccesful',this.initSession);
-	this.$el.html(panelView.render().el);
+ 
+      render: function(){
 	return this;
       },
 
@@ -65,7 +61,7 @@ define([
 
      renderQuestion: function() {
           // copy user id param from session
-          this.question.set('userid',this.session.get("userid"));
+          //this.question.set('userid',this.session.get("userid"));
 	  this.questionView = new QuestionView({
 		  model: this.question
 	      });
@@ -86,6 +82,9 @@ define([
 	  this.$el.html(this.waitView.render().el);
 	  return this;
       },
+
+
+     
      // this function will be called either by a submit or a                                                                          // crono-based stop event                                                                                                      
       goToWait: function(){
 	 // we need to read response and sync the question.                                                                              

@@ -3,47 +3,85 @@ define([
     'underscore',
     'bootstrap',
     'backbone',
-    'text!templates/login.html'],
-  function($,_,bootstrap,Backbone,TmplLogin) {
-
+    'app',
+    'text!templates/login-page.html',
+    'parsley',
+    'utils'],
+  function($,_,bootstrap,Backbone,app,TmplLogin) {
 
     var loginView = Backbone.View.extend({
-      //id: 'question',
+
       tagName: 'div',
-      //className: 'PanelContainer',
+      id: 'login-view',
       template_login: _.template(TmplLogin),
 
       events: { 
-         'click #check-code': 'checkCode' 
+        'click #login-btn': 'onLoginAttempt',
+        'click #signup-btn' : 'onSignupAttempt',
+
       }, 
          
       render: function() {
-        this.$el.html(this.template_login);
+        //this.$el.html(this.template_login);
+        console.log('render user',app.session.user);
+        this.$el.html(this.template_login({
+                user: app.session.user.toJSON()
+            }));
+            return this;
         return this;
       },
 
-      checkCode: function(){
-        var code = $('#code').val(); 
-        console.log("code",$('#code').val());
-        
-        //interview = new Interview({ id: code });
-        this.info = this.$("#InfoContainer");
-        this.model.set({ id: code });
-        console.log("info",this.info);
-        this.model.fetch({
-          success: function(model,response,error){
-           console.log("sucess",model);
-           this.clearInfo();
-           this.model = model;
-           this.model.trigger('loginSuccesful');
-          }.bind(this),
-          error: function(model,res,error){
-           console.log("error",error);
-           this.setInfo(res.responseText);
-          }.bind(this)
-          }
-         );
+      onLoginAttempt: function(evt){
+            if(evt) evt.preventDefault();
+            console.log('attempt to login');
+            if(this.$("#login-form").parsley('validate')){
+                console.log('passed');
+                app.session.login({
+                    username: this.$("#login-username-input").val(),
+                    password: this.$("#login-password-input").val()
+                }, {
+                    success: function(mod, res){
+                        console.log(mod, res);
+
+                    },
+                    error: function(mod, res){
+                        console.log("ERROR", mod, res);
+
+                    }
+                });
+            } else {
+                // Invalid clientside validations thru parsley                                                                  
+                console.log("Did not pass clientside validation");
+
+            }
       },
+
+	onSignupAttempt: function(evt){
+            if(evt) evt.preventDefault();
+            if(this.$("#signup-form").parsley('validate')){
+                app.session.signup({
+                    username: this.$("#signup-username-input").val(),
+                    password: this.$("#signup-password-input").val(),
+                    name: this.$("#signup-name-input").val()
+                }, {
+                    success: function(mod, res){
+                        console.log(mod, res);
+
+                    },
+                    error: function(mod, res){
+                        console.log("ERROR", mod, res);
+
+                    }
+                });
+            } else {
+                // Invalid clientside validations thru parsley                                                                  
+                console.log("Did not pass clientside validation");
+
+            }
+        },
+
+
+
 
       setInfo: function(message){
         this.clearInfo(); // clear classes if any 
