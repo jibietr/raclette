@@ -1,12 +1,12 @@
-define(['jquery','underscore','fs','http','querystring','crypto'
+define(['jquery','underscore','fs','http','querystring','crypto','params',
    //'opentok'],function($,_,fs,OpenTok,) {
-   ],function($,_,fs,http,querystring,crypto) {
+   ],function($,_,fs,http,querystring,crypto,params) {
     // Start with the constructor
     // empty constructor    function Router(me) {
 
     var Router = function() {};
 
-    /*    Router.prototype.startSession = function(req, res) {
+    Router.prototype.startSession = function(req, res) {
       console.log("request start session");
 
       req.opentok.createSession('', function(error, result){
@@ -54,46 +54,44 @@ define(['jquery','underscore','fs','http','querystring','crypto'
 
 
 
+    Router.prototype.saveAnswer = function(req, res){ 
 
-
-    Router.prototype.saveAnswer = function(request, response){ 
-
-      console.log("POST to /api/apianswers");
-       var user = request.body;
+      console.log("POST to /api/apianswers",req.body);
+       var user = req.body;
        //create simple user id
 
        // answer hash also encodes created data
-       var answer_hash = (new Date).getTime().toString() + Math.floor((Math.random()*1000)+1).toString();
+       var hash = (new Date).getTime().toString() + Math.floor((Math.random()*1000)+1).toString();
 
        // TODO: add uplaod Id
        var answer = {
-            '_id': { 'S': answer_hash },
-            'userid': { 'S': request.body.userid },
-            'qtype': { 'S': request.body.qtype },
-            'qid': { 'S': request.body.qid },
-            'work_time' : { 'N': String(request.body.work_time) },
+            '_id': { 'S': hash },
+            'userid': { 'S': req.user.id },
+            'qtype': { 'S': req.body.qtype },
+            'qid': { 'S': req.body.qid },
+            'work_time' : { 'N': String(req.body.work_time) },
           };
-       if('wait_time' in request.body) answer.wait_time = { 'N': String(request.body.wait_time) };
-       if('content' in request.body) answer.content = { 'S': request.body.content };
+       if('wait_time' in req.body) answer.wait_time = { 'N': String(req.body.wait_time) };
+       if('content' in req.body) answer.content = { 'S': req.body.content };
        console.log(answer);
 
-       dd = new AWS.DynamoDB();
+       dd = new params.env.aws.DynamoDB();
        dd.putItem({
-          'TableName': request.aws_params.answers,
-a          'Item': answer
+          'TableName': params.env.answers,
+          'Item': answer
         }, function(err, data) {
              if( !err ) {
 		 //console.log( 'entry created. try to upload file' );
-                response.send(answer);
+                res.send(answer);
 		      } else {
                 console.log("Error",err);
                 return console.log(err)
                 // note that error may content user attributes
                 // which may trigger .save success
                 // do not return full error object
-                return response.send(err.message);
+                return res.send(err.message);
 			      }     
-           return response.send(answer);  
+           return res.send(answer);  
         });
 
     };
@@ -131,8 +129,7 @@ a          'Item': answer
              res.send('User does not exist');
            }
         });
-    }; */
- 
+    };  
 
     Router.prototype.submitAll = function(req, res){
  
@@ -395,8 +392,9 @@ a          'Item': answer
 
    };
 
+
    // @desc: logins in a user
-   Router.prototype.Login = function(req, res){
+  /* Router.prototype.Login = function(req, res){
      // read user and pwd from user and check that exist in db
      // if exists, return cookie with user_id and auth_token
 
@@ -450,7 +448,71 @@ a          'Item': answer
 	  }       
      });
   
+   };*/
+
+
+   Router.prototype.GetQuestions = function(req, res){
+     // get status of interview, check status, and then retrieve questions
+     //console.log('Request questions',req);
+     console.log('Request questions for session with user',req.user);
+     // req.user is available thanks to passport
+     dd = new params.env.aws.DynamoDB();
+
+     function get_missing_questions(err,data){
+       params = this;
+       var dd = new params.env.aws.DynamoDB();
+
+       if(err) res.json({ err: 'Error checking session' + err });
+       else{
+         console.log('Scan questions in Table ', params.env.questions);
+         // get id last 
+         var last_response = '0';
+         if('last' in data.Item) last_response = data.Item.last.S;
+
+         var scan_params = {
+            TableName: params.env.questions, // require     
+            AttributesToGet: [
+            'qid', 'status', 'title', 'time_response', 'time_wait', 'qtype',
+          ], 
+           ScanFilter: { 'qid': 
+             { ComparisonOperator: 'GE',
+               AttributeValueList: [ { S: last_response } ],  
+             } 
+           },
+         };
+	 dd.scan(scan_params, function(err, data) {
+           if (err) console.log(err, err.stack); // an error occurred
+           else{     
+             console.log(data);           // successful response
+             questions = [];
+             data.Items.forEach(function(entry) {
+                console.log(entry);
+                var item = { 
+                   'qid': entry.qid.S,
+                   'title': entry.title.S,
+                   'qtype': entry.qtype.S,
+                   'time_response': entry.time_response.N,
+                };
+                if('time_wait' in entry) item.time_wait = entry.time_wait.N;
+                questions.push(item);
+             });
+             res.send(questions);
+           }
+         });
+        }
+     }
+
+     var item = {
+            'userid': { 'S': req.user.id }
+     };
+     dd.getItem({
+            'TableName': params.env.sessions,
+            'Key': item,
+     }, get_missing_questions.bind(params));
+
+     
    };
+
 
    // @desc: logins in a user
    Router.prototype.Signup = function(req, res){

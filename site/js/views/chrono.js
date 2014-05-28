@@ -12,7 +12,6 @@ define([
       className: 'ChronoContainer',
       template: _.template(Tmpl_chrono),
       
-
     events: {
        'click #stop-chrono': 'stop' ,
     }, 

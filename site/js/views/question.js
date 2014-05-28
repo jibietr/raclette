@@ -33,6 +33,16 @@ define([
     }, */
 
     // render question and timer                                                                                    
+    setRecorderView: function(recorder){
+      // attach publisher
+      this.recorderView = recorder;
+      //elem = this.$("#camera-preview").get(0);
+      elem = $(this.el).find("#opentok_container")[0];
+      console.log('attach recorder in question',elem);
+      this.recorderView.$el.appendTo(elem); 
+    },
+
+
     render: function() {
 
         this.question_type = this.model.get("qtype");
@@ -67,15 +77,17 @@ define([
     stopWait: function(time){
         // stop countdown
         // TODO: save question
-        
-        //this.chronoView.close();
-        // this.chronoView.stop();
-        // start count up
        this.model.set("wait_time",time);  
-
+       console.log('stop wait');
         // if question is video type, then start recording
-        if(this.question_type=="video"){
-           console.log("stop wait");
+       if(this.question_type=="video"){
+         if(this.model.get('test')){ 
+         // test recording using opentok default crendentials
+           this.recorderView.recorder.requestSession();
+           this.listenTo(this.recorderView.recorder,'recordStarted',this.renderChrono);
+
+         }
+         /*  console.log("stop wait");
            var cameraPreview =  this.$("#camera-preview").get(0);
            var infoPanel = this.$("#InfoContainer");
            var volume = this.$("#meter");
@@ -83,8 +95,8 @@ define([
            this.Recorder.setInfoPanel(infoPanel);
            //this.Recorder = new Recorder({ el: cameraPreview, model: this.model});
            this.Recorder.requestSession();
-           this.listenTo(this.model,'recordStarted',this.renderChrono);
-           //this.Recorder.startRecording();
+           
+           //this.Recorder.startRecording();*/
            
         }else{
 
@@ -106,10 +118,10 @@ define([
         this.chronoView.close();
         if(this.question_type=="video"){
            // get 
-           var answer = this.Recorder.getArchiveId();
+           var answer = this.recorderView.recorder.getArchiveId();
            this.model.set("content",answer);
-           this.listenTo(this.model,'recordStopped',this.saveModel);
-           this.Recorder.stopRecording();
+           this.listenTo(this.recorderView.recorder,'recordStopped',this.saveModel);
+           this.recorderView.recorder.stopRecording();
         }else if(this.question_type=="text"){
            var answer = $('#textAnswer').val();
            console.log(answer);

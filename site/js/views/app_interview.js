@@ -1,5 +1,5 @@
 define([
-    'jquery',
+   'jquery',
     'underscore',
     'bootstrap',
     'backbone',
@@ -7,33 +7,59 @@ define([
     'collections/questionnaire',
     'models/panel',
     'models/session',
+    'views/test',
     'views/question',
-    'views/panel'],
-  function($,_,bootstrap,Backbone,app,Questionnaire,Panel,Session,QuestionView,PanelView) {
+    'views/panel',
+    'models/opentok_setup',
+    'text!templates/setup.html',    
+    'text!templates/test.html',
+    'views/opentok'],
+  function($,_,bootstrap,Backbone,app,Questionnaire,Panel,Session,TestView,QuestionView,PanelView,Recorder,TmplSetup,TmplTest,OpentokView) {
 
     var questionnaireView = Backbone.View.extend({
 
       tagName: "div",
       id: 'app-view',
+      template_setup: _.template(TmplSetup),
+      template_test: _.template(TmplTest),
 
       initialize: function() {
-        this.initSession();
+        // this is what we do to set up the session
         
+        this.renderSetup(); //setup view
+        // attach opentok view to opentok container
+        //elem = $(this.el).find("#opentok_container")[0];
+        //this.opentokView = new OpentokView();
+        //this.opentokView.$el.appendTo(elem);
+        // render and start video are called only once.
+        // afterwards we keep attaching and detaching the view
+        //this.opentokView.render();
+        //this.opentokView.startVideo();
+
       },
 
       events:{
 	 'click #submit-question':'saveQuestion',
 	 'click #start-interview': 'initInterview',
-	 'click #continue-interview': 'goToNext' 
-      },
+	 'click #continue-interview': 'goToNext',
+         'click #setup-done': 'renderTest' ,
+     },
+
 
       initInterview: function(){
 	  this.question = this.collection.at(0);
-	  this.renderQuestion();
+	  this.rendeQuestion();
       },
  
+
       render: function(){
 	return this;
+      },
+
+      renderSetup: function(){
+        console.log('render setup');
+        this.$el.html(this.template_setup());
+ 	return this;
       },
 
       initSession: function(){
@@ -49,9 +75,39 @@ define([
 	}});        
       },
 
+     /* renderSetup: function(){
+	//TODO: delete view
+        this.$el.html(this.template_setup());
+        return this;
+      },*/
+
+      renderTest: function(){
+	//TODO: 
+        // what do we stop here?
+        //this.opentokView.$el.detach();
+        console.log('render test');
+        this.testView = new TestView();
+        //this.testView.setRecorderView(this.opentokView);
+        //this.opentokView.remove();
+        console.log('test view',this.testView);
+	this.$el.html(this.testView.render().el);
+
+        
+        this.testView.startVideo();
+        return this;
+        //this.$el.html(this.view.render().el);
+        //this.listenTo(this.question,'setup-done',this.renderTest);
+        //return this;
+      },
+
       renderPanel: function(){
-	var panel = new Panel({ type: 'start', num_questions: this.collection.length });
-	console.log(panel);
+        // if length==0, questionnare completed
+        if(this.collection.length===0){
+           var panel = new Panel({ type: 'end', num_questions: this.collection.length });
+        }else{
+           var panel = new Panel({ type: 'start', num_questions: this.collection.length });
+        }
+ 	console.log(panel);
 	var panelView = new PanelView({ 
 	 model: panel 
 	 });

@@ -21,7 +21,7 @@ requirejs.config({
         'tbjs': 'lib/TB.min',
         'recaptcha': 'lib/recaptcha_ajax',
         'parsley': 'lib/parsley',
-        'utils': 'lib/utils',
+        'utils': 'lib/utils', 
 
     },
     shim: {

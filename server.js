@@ -34,22 +34,15 @@ requirejs([
     'crypto',
     'aws-sdk',
     'router',
-    //'passport',
-    //'passport-local'
     'params',
-    //'opentok'
+    'opentok'
     ], 
-  // function(express,path,$,fs,_,Backbone,crypto,AWS,Router,OpenTok){
- // function(express,path,$,fs,_,Backbone,crypto,AWS,Router,Passport,PassportLocal){
-  function(express,path,$,fs,_,Backbone,crypto,AWS,Router,params){
+  function(express,path,$,fs,_,Backbone,crypto,AWS,Router,params,OpenTok){
     var application_root = __dirname;
     var app = express();
 
-    // we will replace this by DB stuff...
-   
     // Configure server
     // So far the serverem will load the static content in site/index.html
-    //app.configure( function() {
     //parses requesody and populates request.body
     app.use( express.bodyParser() );
     //checks request.body for HTTP method overrides 
@@ -60,13 +53,9 @@ requirejs([
     app.use(express.session({ secret: 'keyboard cat' }));
     app.use(params.pass.initialize());
     app.use(params.pass.session());
-    // this is for backbone-login
-    //app.use( express.cookieParser('my cookie secret') );// populates req.signedCookies
-    //app.use( express.cookieSession('my session secret') );  
 
     //perform route lookup based on url and HTTP method
     app.use( app.router );
-
 
     //Where to serve static content
     console.log('Use %s as dirname',application_root);
@@ -74,66 +63,48 @@ requirejs([
     //Show all errors in development
     app.use( express.errorHandler({ dumpExceptions: true, showStack: true }));
         
-    //});
-
-
-    // Simple route middleware to ensure user is authenticated.
-    //   Use this route middleware on any resource that needs to be protected.  If
-    //   the request is authenticated (typically via a persistent login session),
-    //   the request will proceed.  Otherwise, the user will be redirected to the
-    //   login page.
-    function ensureAuthenticated(req, res, next) {
-      console.log("Checking if req.body is auth",req);
-      if (req.isAuthenticated()) { return next(); }
-      //res.redirect('/login')
-      
-      //res.json({ user: _.omit(user, ['password', 'auth_token']) });
-      res.json({ error: "Client has no valid login cookies."  });
-
-    }
-
-
-    
     var routes = new Router();
 
 
-     
-  /*  // this is copied-pasted from opentok-example
+  
+
+    // this is copied-pasted from opentok-example
     var config = {
       port: process.env.PORT,
       apiKey: process.env.API_KEY,
       apiSecret: process.env.API_SECRET
-    };*/
+    };
     
-   // app.request.config = config;  
+    app.request.config = config;  
     
-    //if(!config['TB.js']) {
-    //  config['TB.js'] = 'https://swww.tokbox.com/webrtc/v2.2/js/TB.min.js';
-    //}
+    if(!config['TB.js']) {
+      config['TB.js'] = 'https://swww.tokbox.com/webrtc/v2.2/js/TB.min.js';
+    }
 
-  /*  if(!config.apiEndpoint) {
+    if(!config.apiEndpoint) {
       config.apiEndpoint = 'https://api.opentok.com';
     }
 
     if(!(config.apiKey && config.apiSecret)) {
       console.error('You must set apiKey and apiSecret in .env');
       process.exit();
-    }*/
+    }
 
-  /*  var opentok = new OpenTok.OpenTokSDK(config.apiKey, config.apiSecret);
+    var opentok = new OpenTok.OpenTokSDK(config.apiKey, config.apiSecret);
     if(config.anvil) {
       opentok.api_url = config.anvil;
     }
-    app.request.opentok = opentok;*/
+    app.request.opentok = opentok;
 
     // these are routes served ...
 
-
-  /*  app.get('/start-archive/:session', routes.startArchive);
+    // opentok related routes
+    app.get('/start-archive/:session', routes.startArchive);
     app.get('/stop-archive/:archive', routes.stopArchive);
     app.get('/start-session', routes.startSession);
     app.post('/api/answers', routes.saveAnswer);
-    app.get('/api/session/:id', routes.startInterview);*/
+    app.get('/api/session/:id', routes.startInterview);
+
     app.post('/api/submitAll', routes.submitUserDoc);
     app.post('/api/check_recaptcha', routes.checkRecaptcha);
     //app.post('/api/user', routes.updateUser);
@@ -144,136 +115,39 @@ requirejs([
     //app.post('/api/auth/login', routes.Login);
     //app.get('/api/auth', routes.Auth);
 
+
+    //app.request.passport = Passport;
+    //app.post('/api/auth/login',  routes.Login);
+    app.post('/api/auth/signup', routes.Signup);
+    //app.post('/api/auth/login', routes.Login);
+    // is not obvious to me how to integrate this as a route
+    app.post('/api/auth/login', params.pass.authenticate('local', { session: true }),
+       function(req, res) {
+          //res.redirect('/');
+          res.json({ err: 'Login Ok'});
+    });
+
+    // Simple route middleware to ensure user is authenticated.
+    //   Use this route middleware on any resource that needs to be protected.  If
+    //   the request is authenticated (typically via a persistent login session),
+    //   the request will proceed.  Otherwise, the user will be redirected to the
+    //   login page.
+    function ensureAuthenticated(req, res, next) {
+      console.log("Checking if req.body is auth",req);
+      if (req.isAuthenticated()) { return next(); }
+      //res.redirect('/login')
+      //res.json({ user: _.omit(user, ['password', 'auth_token']) });
+      res.json({ error: "Client has no valid login cookies."  });
+
+    }
     app.get('/api/auth', ensureAuthenticated, function(req, res){
      //res.render('account', { user: req.user });
      res.json({ user: req.user});
     });
 
-    //app.request.passport = Passport;
-    //app.post('/api/auth/login',  routes.Login);
-    app.post('/api/auth/signup', routes.Signup);
+    
+    app.get('/api/questions', routes.GetQuestions);
 
-    app.post('/api/auth/login', 
-      params.pass.authenticate('local', { session:true }),
-       function(req, res) {
-        //res.redirect('/');
-        res.json({ err: 'Login OK' } );
-      });
-
-
-    app.get( '/api/questions', function( request, response ) {
-
-        var dd = new AWS.DynamoDB();
-        console.log("Use Table",TAB_QUESTIONS);
-        var params = {
-          TableName: TAB_QUESTIONS, // required
-          AttributesToGet: [
-            'qid', 'title', 'time_response', 'time_wait', 'qtype',
-          ],};
-        dd.scan(params, function(err, data) {
-           if (err) console.log(err, err.stack); // an error occurred
-           else{      console.log(data);           // successful response
-             questions = [];
-             data.Items.forEach(function(entry) {
-                console.log(entry);
-                var item = { 
-                   'qid': entry.qid.S,
-                   'title': entry.title.S,
-                   'qtype': entry.qtype.S,
-                   'time_response': entry.time_response.N,
-                };
-                if('time_wait' in entry) item.time_wait = entry.time_wait.N;
-                questions.push(item);
-             });
-             response.send(questions);
-           }
-        });
-
-        /*
-    	return QuestionModel.find( function( err, questions ) {
-    	    if( !err ) {
-    		return response.send(questions);
-    	    } else {
-    		return console.log( err );
-    	    }
-    	});*/
-     });
-
-
-
-
-
-
-   
-     // it is not clear to me how save expects to get the model as a response to a success
-     // i thought user was to be send with the response, but it does not seem to be the case
-     function multiple_file_upload(user,files,response){
-
-        var count = 0;
-        var max_files = _.keys(files).length;
- 
-        var handler = function(error, content){
-		    count++;
-		    if (error){
-                        response.statusCode = 500;
-                        //response.write("Ooops. Something went wrong!");
-                        return response.send();
-		    }
-		    if (count == max_files) {
-                        response.statusCode = 200;
-                        //response.write("Form upload successful.");
-                        return response.send(user);
-		    }
-		}
-                
-                // iterate on files
-                //request.files.each
-        for(var file_type in files){
-          //TODO: i am not sure how _upload_file deals with the handler.
-          // does it feel error and content correctly?
-          _upload_file(files[file_type],file_type + "_" + user._id, handler);
-        }
-     }
-
-
-
-    function s3_multimedia_upload(answer, res){
-        // extract name and mime from object to upload
-        // TODO: check on name...
-        var count = 0;
-        var max_files = 2;
-            var handler = function(error, data){
-		    count++;
-		    if (error){
-                        console.log("error" + error);
-                        //response.write("Ooops. Something went wrong!");
-                        //                        return response.send();
-                        return res.send(error);
-		    }else{
-			console.log("worked");
-		    }		    
-                    if (count == max_files) {
-                        //response.statusCode = 200;
-                        console.log("done with all uploads");
-                        // we are save returning this
-                        var answer = { qid: 'XXX'};
-                        return res.send(answer);
-		    }
-		}
-        s3_upload_video(answer.audio,answer._id,handler);
-        s3_upload_video(answer.video,answer._id,handler);
-
-
-    }
-
-
-    function _upload_file(file, name, handler) {
-       fs.readFile(file.path, function (err, data) {
-	   var newPath = __dirname + "/docs/" + name;
-           console.log(newPath);
-	   fs.writeFile(newPath, data, handler);
-       });
-    }
 
     //Insert a new user
     app.post( '/api/users', function( request, response ,next) {
@@ -323,7 +197,7 @@ requirejs([
     var AWS_ACCESS_KEY = process.env.AWS_ACCESS_KEY_ID;
     var AWS_SECRET_KEY = process.env.AWS_SECRET_KEY;
     var S3_BUCKET = process.env.PARAM1;
-    var TAB_QUESTIONS = process.env.PARAM2;
+    var TAB_QUESTIONS = process.env.PARAM2 + '-questions';
     var TAB_USERS = process.env.PARAM2 + "-users";
     var TAB_ANSWERS = process.env.PARAM2 + "-answers";
     var TAB_SESSIONS = process.env.PARAM2 + "-sessions";

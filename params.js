@@ -35,7 +35,8 @@ function($,_,fs,http,querystring,crypto,Passport,PassportLocal) {
     });
 
     params.pass.deserializeUser(function(id, done) {
-      findById(id, function (err, user) {
+      findById(id, function (err, data) {
+        var user = { id: data.Item._id.S, username: data.Item.email.S };
         done(err, user);
       });
     });
@@ -86,6 +87,8 @@ function($,_,fs,http,querystring,crypto,Passport,PassportLocal) {
         });
       });
       }
+
+
     ));
 
 /*
