@@ -1,6 +1,6 @@
 define(['jquery','underscore','fs','http','querystring','crypto','params',
    //'opentok'],function($,_,fs,OpenTok,) {
-   ],function($,_,fs,http,querystring,crypto,params) {
+   ],function($,_,fs,http,querystring,crypto,par) {
     // Start with the constructor
     // empty constructor    function Router(me) {
 
@@ -38,6 +38,7 @@ define(['jquery','underscore','fs','http','querystring','crypto','params',
 	console.log('Error starting archive: ' + err.message);
 	return next(err);
       }
+      console.log('Archive started:',archive);
       res.send(archive);
       });
     };
@@ -52,32 +53,121 @@ define(['jquery','underscore','fs','http','querystring','crypto','params',
      }); 
     };
 
+    Router.prototype.getArchive = function(req, res, next) {
+      // req.params.archive
+      // I cannot pass a sign url to a video player so will make video public
+      // and then delete it
+      s3 = new par.env.aws.S3();
+      var bucket = 'opentok-videos' + '/' + req.config.apiKey + '/' + req.params.archive;
+      console.log('bucket',bucket,req.params);
+      var params = { Bucket: bucket, Key: 'archive.mp4', };
+      s3.getSignedUrl('getObject', params, function (err, ur) {
+        console.log('The URL is', ur);
+        if(err) res.send({error:err});
+        else res.send({url:ur});
+      });
+/*      bucket = 'opentok-videos/44757122/41904e29-2999-4800-bb24-dee39a02bf9a';
+      var params = { Bucket: bucket,  ACL: 'public-read'   };
+      //note that the actual file may be missing at the moment of  making permsission
+
+      s3.putBucketAcl(params,function (err, data) {
+        console.log('put object acl ', err,data);
+        if(err) res.send({error:err});
+        else console.log(data);
+        //else res.send({url:ur});
+      });*/
+
+
+    };
+
+
+    Router.prototype.getFullArchive = function(req, res, next) {
+      // req.params.archive
+      // I cannot pass a sign url to a video player so will make video public
+      // and then delete it
+       console.log('get full archive');
+       params = this;
+       var dd = new par.env.aws.DynamoDB();
+         console.log('check answers of user',req.user.id);
+         var query_params = {
+         TableName: par.env.answers, // require     
+            KeyConditions: { 'userid':
+             { ComparisonOperator: 'EQ',
+               AttributeValueList: [ { S: req.user.id} ],  
+             },
+             'qid':
+             { ComparisonOperator: 'GT',
+               AttributeValueList: [ { S: '0'} ],  
+             },
+             },
+             AttributesToGet: [
+                'qtype', 'content','qid'
+             ],
+            /*  QueryFilter:{  'qtype':
+             { ComparisonOperator: 'EQ',
+               AttributeValueList: [ { S: 'video'} ],  
+             },
+             },*/
+
+         };
+	 dd.query(query_params, function(err, data) {
+           if (err) console.log(err, err.stack); // an error occurred
+           else{     
+             console.log('response',data);           // successful response
+             answers = [];
+             data.Items.forEach(function(entry) {
+                // we should generate a signed url here...
+                //console.log(entry);
+                var item = { 
+                   'qid': entry.qid.S,
+                   //'title': entry.title.S,
+                   'qtype': entry.qtype.S,
+                   'content': entry.content.S,
+                };
+                //if('time_wait' in entry) item.time_wait = entry.time_wait.N;
+                answers.push(item);
+             });
+             answers = answers.reverse();
+             res.send(answers);
+           }
+         });
+     };
+
+
 
 
     Router.prototype.saveAnswer = function(req, res){ 
 
-      console.log("POST to /api/apianswers",req.body);
+      console.log("POST to /api/apianswers");
        var user = req.body;
        //create simple user id
 
        // answer hash also encodes created data
-       var hash = (new Date).getTime().toString() + Math.floor((Math.random()*1000)+1).toString();
+       var hash = req.user.id + ':' + req.body.qid ;
 
        // TODO: add uplaod Id
        var answer = {
+            'userid': { 'S': req.user.id },
+            //'userid': { 'S': req.user.id },
+            'qtype': { 'S': req.body.qtype },
+            'qid': { 'S': req.body.qid },
+            'work_time' : { 'N': String(req.body.work_time) },
+          };
+      /* var answer = {
             '_id': { 'S': hash },
             'userid': { 'S': req.user.id },
             'qtype': { 'S': req.body.qtype },
             'qid': { 'S': req.body.qid },
             'work_time' : { 'N': String(req.body.work_time) },
-          };
+          };*/
+
        if('wait_time' in req.body) answer.wait_time = { 'N': String(req.body.wait_time) };
        if('content' in req.body) answer.content = { 'S': req.body.content };
        console.log(answer);
 
-       dd = new params.env.aws.DynamoDB();
+       dd = new par.env.aws.DynamoDB();
        dd.putItem({
-          'TableName': params.env.answers,
+          'TableName': par.env.answers,
           'Item': answer
         }, function(err, data) {
              if( !err ) {
@@ -91,8 +181,32 @@ define(['jquery','underscore','fs','http','querystring','crypto','params',
                 // do not return full error object
                 return res.send(err.message);
 			      }     
-           return res.send(answer);  
+           // everything is fine. update second DB
+          console.log('update DB with', req.user.i,req.body.qid);
+          if(req.body.qid!=='test'){
+          var params = {
+	     Key: {
+	      userid: {
+		S: req.user.id
+	     }},
+	    TableName: par.env.sessions, //
+	    AttributeUpdates: {
+		last: {
+		     Action: 'PUT',
+		     Value: { S: req.body.qid  },
+		}
+	     }};
+	     dd.updateItem(params, function(err, data) {
+		 if (err) console.log(err, err.stack); // an error occurred
+		 else res.send(answer);           // successful response
+	     });
+           }else{
+             res.send(answer); 
+           }
+           //return res.send(answer);  
         });
+
+   
 
     };
 
@@ -111,7 +225,6 @@ define(['jquery','underscore','fs','http','querystring','crypto','params',
           AttributesToGet: [
             'sid', 'iid', 'userid'
           ],};
-        console.log('get params',params);
         dd.getItem(params, function(err, data) {
            if (err) console.log(err, err.stack); // an error occurred                                 
            console.log("data",data);
@@ -456,11 +569,11 @@ define(['jquery','underscore','fs','http','querystring','crypto','params',
      //console.log('Request questions',req);
      console.log('Request questions for session with user',req.user);
      // req.user is available thanks to passport
-     dd = new params.env.aws.DynamoDB();
+     dd = new par.env.aws.DynamoDB();
 
      function get_missing_questions(err,data){
        params = this;
-       var dd = new params.env.aws.DynamoDB();
+       var dd = new par.env.aws.DynamoDB();
 
        if(err) res.json({ err: 'Error checking session' + err });
        else{
@@ -475,7 +588,7 @@ define(['jquery','underscore','fs','http','querystring','crypto','params',
             'qid', 'status', 'title', 'time_response', 'time_wait', 'qtype',
           ], 
            ScanFilter: { 'qid': 
-             { ComparisonOperator: 'GE',
+             { ComparisonOperator: 'GT',
                AttributeValueList: [ { S: last_response } ],  
              } 
            },
@@ -496,6 +609,7 @@ define(['jquery','underscore','fs','http','querystring','crypto','params',
                 if('time_wait' in entry) item.time_wait = entry.time_wait.N;
                 questions.push(item);
              });
+             questions = questions.reverse();
              res.send(questions);
            }
          });
@@ -506,9 +620,9 @@ define(['jquery','underscore','fs','http','querystring','crypto','params',
             'userid': { 'S': req.user.id }
      };
      dd.getItem({
-            'TableName': params.env.sessions,
+            'TableName': par.env.sessions,
             'Key': item,
-     }, get_missing_questions.bind(params));
+     }, get_missing_questions.bind(par));
 
      
    };

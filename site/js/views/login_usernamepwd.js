@@ -4,7 +4,7 @@ define([
     'bootstrap',
     'backbone',
     'app',
-    'text!templates/login.html',
+    'text!templates/login-page.html',
     'parsley',
     'utils'],
   function($,_,bootstrap,Backbone,app,TmplLogin) {
@@ -34,8 +34,6 @@ define([
       onLoginAttempt: function(evt){
             if(evt) evt.preventDefault();
             console.log('attempt to login');
-            // check that code is not empty
-
             if(this.$("#login-form").parsley('validate')){
                 console.log('passed');
                 app.session.login({

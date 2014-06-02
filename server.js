@@ -74,7 +74,7 @@ requirejs([
       apiKey: process.env.API_KEY,
       apiSecret: process.env.API_SECRET
     };
-    
+
     app.request.config = config;  
     
     if(!config['TB.js']) {
@@ -100,10 +100,12 @@ requirejs([
 
     // opentok related routes
     app.get('/start-archive/:session', routes.startArchive);
+    app.get('/get-archive/:archive', routes.getArchive);
     app.get('/stop-archive/:archive', routes.stopArchive);
     app.get('/start-session', routes.startSession);
     app.post('/api/answers', routes.saveAnswer);
     app.get('/api/session/:id', routes.startInterview);
+    app.get('/api/archive', routes.getFullArchive);
 
     app.post('/api/submitAll', routes.submitUserDoc);
     app.post('/api/check_recaptcha', routes.checkRecaptcha);
@@ -151,8 +153,6 @@ requirejs([
 
     //Insert a new user
     app.post( '/api/users', function( request, response ,next) {
-       console.log("POST to /api/users");
-       console.log(request.body);
        //console.log(JSON.stringify(request.body.positions[0]));
 
        // not sure how to pass this object directly from the backbone model
@@ -239,7 +239,7 @@ requirejs([
 	   });
 	 }else console.log(err, err.stack); // an error occurred
       }else{
-       console.log("Table 'users' already exists");
+       console.log('Table ' + params.TableName + ' already exists');
       }  
     });
     }
@@ -257,6 +257,7 @@ requirejs([
 	  AttributeName: '_id', // required
 	  KeyType: 'HASH', // required
 	},
+
       ],
       ProvisionedThroughput: { // required
 	ReadCapacityUnits: 1, // required
@@ -268,14 +269,22 @@ requirejs([
     var AnswerParams = {
       AttributeDefinitions: [ // required
 	{
-	  AttributeName: '_id', // required
+	  AttributeName: 'userid', // required
+	  AttributeType: 'S', // required
+	},
+	{
+	  AttributeName: 'qid', // required
 	  AttributeType: 'S', // required
 	},
       ],
       KeySchema: [ // required
 	{
-	  AttributeName: '_id', // required
+	  AttributeName: 'userid', // required
 	  KeyType: 'HASH', // required
+	},
+	{
+	  AttributeName: 'qid', // required
+	  KeyType: 'RANGE', // required
 	},
       ],
       ProvisionedThroughput: { // required

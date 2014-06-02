@@ -4,7 +4,7 @@ define([
     'backbone',
     'app', // required for params
     'backbone-validation',
-    'models/user'],
+    'models/user_code'],//use models/user for username/pwd
   function($,_,Backbone,app,alidation,User) {
 
     var session = Backbone.Model.extend({

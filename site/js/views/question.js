@@ -33,23 +33,27 @@ define([
     }, */
 
     // render question and timer                                                                                    
-    setRecorderView: function(recorder){
+    /*setRecorderView: function(recorder){
       // attach publisher
       this.recorderView = recorder;
       //elem = this.$("#camera-preview").get(0);
       elem = $(this.el).find("#opentok_container")[0];
       console.log('attach recorder in question',elem);
       this.recorderView.$el.appendTo(elem); 
-    },
+    },*/
+
+
 
 
     render: function() {
-
+        console.log('this model',this.model);
         this.question_type = this.model.get("qtype");
         // apply basic layout
         this.$el.html(this.template_question(this.model.toJSON()));
         // set up question
         this.$("#MainContainer").html(this["template_"+this.question_type](this.model.toJSON()));
+        // create publisher if question is video
+     
 
        //this.$el.html(this.template_video());
         if(this.model.get('time_wait')){
@@ -60,8 +64,45 @@ define([
         return this;
     },
 
+    setRecorder: function(recorder){
+        if(this.question_type=="video"){
+         /*if(this.model.get('test')){ 
+         // test recording using opentok default crendentials
+           this.recorderView.recorder.requestSession();
+           
+
+         }*/
+           console.log("stop wait");
+           var elem =  this.$("#opentok_container").get(0);
+           if(!recorder){
+
+             //var volume = this.$("#meter");
+             console.log('set info panel recorder', infoPanel);
+             this.Recorder = new Recorder({ el: elem, model: this.model});
+             this.Recorder.createPublisher();
+
+           //this.Recorder = new Recorder({ el: cameraPreview, model: this.model});
+           }else{
+             this.Recorder = recorder;
+             console.log('append recorder');
+             this.Recorder.$el.appendTo(elem); 
+             var infoPanel = this.$("#InfoContainer");
+             this.Recorder.setInfoPanel(infoPanel);
+             // request session so we do not have to ask later...
+             this.Recorder.requestSessionPrePub();
+           }
+
+           //this.listenTo(this.Recorder,'recordStarted',this.renderChrono);
+           //this.Recorder.requestSession();
+           
+           //this.Recorder.startRecording();*/
+        }
+
+    },
+
     renderCountdown: function(){
         var time = this.model.get('time_wait');
+        console.log('render countdown');
         this.chronoView = new ChronoView({ seconds: time , type: 'countdown' , status: 'wait' });
         this.listenTo(this.chronoView, 'chrono_stop', this.stopWait);
         this.$("#ChronoContainer").html(this.chronoView.render().el);
@@ -69,6 +110,7 @@ define([
 
     renderChrono: function(){
         var time = this.model.get('time_response');
+        console.log('render chrono');
         this.chronoView = new ChronoView({ seconds: time , type: 'countdown' , status: 'active' });
         this.listenTo(this.chronoView, 'chrono_stop', this.stopActive);
         this.$("#ChronoContainer").html(this.chronoView.render().el);
@@ -81,20 +123,23 @@ define([
        console.log('stop wait');
         // if question is video type, then start recording
        if(this.question_type=="video"){
-         if(this.model.get('test')){ 
+         /*if(this.model.get('test')){ 
          // test recording using opentok default crendentials
            this.recorderView.recorder.requestSession();
-           this.listenTo(this.recorderView.recorder,'recordStarted',this.renderChrono);
+           
 
-         }
+         }*/
          /*  console.log("stop wait");
-           var cameraPreview =  this.$("#camera-preview").get(0);
+           var cameraPreview =  this.$("#opentok_container").get(0);
            var infoPanel = this.$("#InfoContainer");
            var volume = this.$("#meter");
            this.Recorder = new Recorder({ el: cameraPreview, model: this.model});
            this.Recorder.setInfoPanel(infoPanel);
-           //this.Recorder = new Recorder({ el: cameraPreview, model: this.model});
-           this.Recorder.requestSession();
+           //this.Recorder = new Recorder({ el: cameraPreview, model: this.model});*/
+           //this.Recorder.requestSession();
+           this.Recorder.requestRecording();
+           this.listenTo(this.Recorder,'recordStarted',this.renderChrono);
+           
            
            //this.Recorder.startRecording();*/
            
@@ -118,10 +163,11 @@ define([
         this.chronoView.close();
         if(this.question_type=="video"){
            // get 
-           var answer = this.recorderView.recorder.getArchiveId();
+           var answer = this.Recorder.getArchiveId();
            this.model.set("content",answer);
-           this.listenTo(this.recorderView.recorder,'recordStopped',this.saveModel);
-           this.recorderView.recorder.stopRecording();
+           this.listenTo(this.Recorder,'recordStopped',this.saveModel);
+           console.log('stop recording');
+           this.Recorder.stopRecording();
         }else if(this.question_type=="text"){
            var answer = $('#textAnswer').val();
            console.log(answer);

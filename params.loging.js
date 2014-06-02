@@ -7,10 +7,10 @@ function($,_,fs,http,querystring,crypto,Passport,PassportLocal) {
     //params.
 
     function findByUsername(username, fn) {
-	//var id = crypto.createHmac('sha1', params.env.hash_key).update(username).digest('hex').substring(0,8);
+	var id = crypto.createHmac('sha1', params.env.hash_key).update(username).digest('hex').substring(0,8);
 	dd = new params.env.aws.DynamoDB();
 	var item = {
-            '_id': { 'S': username }
+            '_id': { 'S': id }
 	};
 	dd.getItem({
 	    'TableName': params.env.accounts,
@@ -36,7 +36,7 @@ function($,_,fs,http,querystring,crypto,Passport,PassportLocal) {
 
     params.pass.deserializeUser(function(id, done) {
       findById(id, function (err, data) {
-        var user = { id: data.Item._id.S };
+        var user = { id: data.Item._id.S, username: data.Item.email.S };
         done(err, user);
       });
     });
@@ -45,22 +45,37 @@ function($,_,fs,http,querystring,crypto,Passport,PassportLocal) {
     params.pass.use(new LocalStrategy(
       function(username, password, done) {
         // asynchronous verification, for effect...    
-	process.nextTick(function () { 
-        // we will only check if username exists...
-	findById(username, function(err, data) {
+	process.nextTick(function () {
+	findByUsername(username, function(err, data) {
           if (err) { return done(err); }
 	  if(!err) {
 	     // now submit files
              console.log('data',data);
              if('Item' in data){
-                  //var user = { id: username };
-                  var user = { id: data.Item._id.S };
+		 var meta = data.Item.pwd.S.split(":");
+		 var salt = meta[1];
+		 var stored = meta[0];
+		 // encrypt+salt password
+                  console.log('check if pwd pwd match');
+		crypto.pbkdf2(password, salt, 10000, 64, function(err, derivedKey) {
+		  if (err) {
+		    return reject(err);
+		  }
+		  var encrypted = derivedKey.toString("base64");
+		  // check if passwords match
+		  if (stored !== encrypted) {
+		    //return res.json({error: 'Incorrect password'});
+                    return done(null, false, { message: 'Unknown user ' + username }); 
+		  }
+                  console.log('Authenticate user');
+                  var user = { id: data.Item._id.S, username: username };
                   done(null, user);
-		//});
+		  
+		});
 
              }else{
 		 //return res.json({error: 'User does not exist'});
-                 return done(null, false, { message: 'Unknown code ' + username }); 
+                 return done(null, false, { message: 'Unknown user ' + username }); 
              }
              
 

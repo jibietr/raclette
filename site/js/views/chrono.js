@@ -7,9 +7,9 @@ define([
   function($,_,bootstrap,Backbone,Tmpl_chrono) {
 
     var view = Backbone.View.extend({
-      //id: 'question',
+      id: 'chrono-view',
       tagName: 'div',
-      className: 'ChronoContainer',
+      //className: 'ChronoContainer',
       template: _.template(Tmpl_chrono),
       
     events: {
@@ -39,6 +39,7 @@ define([
         }.bind(this), (this.total-10)*1000);
        // we control style here
        //$(this.el).find("button").addClass('btn-primary');  
+       console.log('timers',this.timer_warn,this.timer_stop,this.timer_count);
        this.warning = false;
      },
 
@@ -57,7 +58,7 @@ define([
     },
 
     warn: function(active){
-       console.log("warning",active,this.el);
+       //console.log("warning",active,this.el);
        // add warning and change ..
        clearTimeout(this.timer_warn);
        
@@ -78,10 +79,10 @@ define([
     // this is controled from outside
     stop: function(){ 
       time = this.getTime();
-      console.log("stop from chrono");
-      clearTimeout(this.timer_warn);
-      clearInterval(this.timer_count);
-      clearInterval(this.timer_stop);       
+      console.log("Clear timers",this.timer_stop);
+      if(this.timer_warn) clearTimeout(this.timer_warn);
+      if(this.timer_count) clearInterval(this.timer_count);
+      if(this.timer_stop) clearInterval(this.timer_stop);       
       this.trigger("chrono_stop",time);
     },
 

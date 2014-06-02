@@ -1,15 +1,34 @@
 <div class="container-full">
   <div class="row">
     <div class="col-md-8 col-md-offset-2">
-      <div id="Announcement" class="col-md-12 well">
+      <div id="Announcement" class="well">
         <h2>...action!</h2>
-        <h4>A bit of practice.</h4>
-        <p>You have now the opportunity to see how the interview works and pracite a bit without we get started.</p>
-        <p>The video recorded here will not be stored in our system. You can record and playback this test question as many times as you like, but you won't be able to playback the videos during the real interview.</p>
-        <p>You will see a question and you will have some time to think about it. Once you are ready, you can click 'record' (ootherwise we will start recording the video automatically when the time is over). You can click 'stop' at any time.</p>
-        <button type="submit" class="btn btn-primary" id="try-question">Try question</button>
-        <button type="submit" class="btn btn-primary" id="go-interview">Go to interview</button>
-        <div id="test_question"></div>
+	<div class="row">
+	  <div class="col-md-12">
+            <p>You can now check your microphone volume settings and pracite a bit without we get started.</-p>
+            <p>You will see a question and you will have some time to think about it. Once you are ready, you can click 'record' (ootherwise we will start recording the video automatically when the time is over). You can click 'stop' at any time.</p>
+            <p>The video recorded here will not be stored in our system. You can record and playback this test question as many times as you like, but you won't be able to playback the videos during the real interview.</p>
+            <button type="submit" class="btn btn-primary" id="try-question">Try question</button>
+            <button type="submit" class="btn btn-primary hidden" id="try-again">Try again</button>
+            <br><br>
+            <div id="test_question"></div>
+          </div>
+	</div>
+        <div class="row">
+	  <div class="col-md-12">
+            <div id="InfoContainer" class="col-md-12 alert hidden">
+              <p class="text-danger"></p>
+            </div>
+	  </div>
+	   <div id="playback" class="col-md-6"></div>
+           <div id="info-continue" class="col-md-6 hidden">
+	     <h4>Can you hear yourself in the recording properly?</h4>
+	     <p>If yes, you can start with the interview. </p>
+	     <button type="submit" class="btn btn-primary" id="go-interview">Go to interview</button>
+             <br><br>
+	     <p>Otherwise, check your microphone settings and try recording again. If the problem persists contact us at idiapsc.jobs@gmail.com.</p>
+	   </div>
+   	</div>
       </div>
     </div>
   </div>

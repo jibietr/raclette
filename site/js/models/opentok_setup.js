@@ -62,6 +62,20 @@ define([
       });
     },
 
+    requestSessionPrepPub: function(){
+      console.log("start session");
+      $.ajax({
+        url: '/start-session',
+        type: 'GET',
+        success: function(data){ 
+          this.hostSessionPrePub(data);
+      }.bind(this),
+      error: function(data) {
+        alert('woops!'); //or whatever
+      }
+      });
+    },
+
     hostSession: function(data){
      
       // init session

@@ -1,4 +1,4 @@
-define([
+A1;2cdefine([
     "app",
 
     "text!templates/logged-in-page.html",
