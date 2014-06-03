@@ -22,6 +22,11 @@ define([
          console.log("publisher destroyed");
       });
     },
+
+    hasStarted: function(){
+      console.log('this publisher',this.publisher);
+      return this.publisher.accessAllowed;
+    },
     
     // ask for token and credentials...
     requestSession: function(){
@@ -64,29 +69,36 @@ define([
 
 
     hostSession: function(data){
-
+      TB.setLogLevel(TB.NONE);
+      this.setInfo("warning","Please, accept request to use camera and micro");
       this.session = TB.initSession(data.session);
-      this.publisher  = TB.initPublisher(document.querySelector("#publisher"));
-      this.sessionId = data.session;      
-
-      this.session.on('archiveStarted', function(event) {
-          console.log("ARCHIVE STOPPED");
-          //this.trigger('recordStarted');
-      }.bind(this));
-
-      this.session.on('archiveStopped', function(event) {
-	  //this.archiveId = null;
-	  console.log("ARCHIVE STOPPED");
-          //this.publisher.destroy();
-          this.session.disconnect();
-          this.trigger('recordStopped');
-      }.bind(this));
+      this.publisher = TB.initPublisher(data.apiKey, document.querySelector("#publisher"));
+      this.publisher.on("accessAllowed",this.requestRecording.bind(this));
+      this.sessionId = data.session;
 
       this.session.connect(data.apiKey,data.token, function(err, info) {
         if(err) {
           console.log(err.message || err);
         }
+        console.log("let's publish");
         this.session.publish(this.publisher);
+        console.log("published!");
+        //this.requestRecording();                                                                                              
+      }.bind(this));
+
+      this.session.on('archiveStarted', function(event) {
+          //this.archiveId = event.id;
+          console.log("ARCHIVE STARTED");
+          //this.clearInfo();
+          //this.model.trigger('recordStarted');
+      }.bind(this));
+
+      this.session.on('archiveStopped', function(event) {
+          //this.archiveId = null;                                                                                              
+          console.log("ARCHIVE STOPPED");
+          //this.publisher.destroy();
+          //this.session.disconnect();
+          //this.model.trigger('recordStopped');
       }.bind(this));
 
    },
@@ -105,7 +117,7 @@ define([
 
       session.on('archiveStarted', function(event) {
           //this.archiveId = event.id;
-          alert("ARCHIVE STARTED");
+          //alert("ARCHIVE STARTED");
           //this.clearInfo();
           //this.trigger('recordStarted');
       }.bind(this));
@@ -114,8 +126,8 @@ define([
 	  //this.archiveId = null;
 	  console.log("ARCHIVE STOPPED");
           //this.publisher.destroy();
-          session.disconnect();
-          this.trigger('recordStopped');
+          //session.disconnect();
+          //this.trigger('recordStopped');
       }.bind(this));
 
       session.connect(data.apiKey,data.token, function(err, info) {

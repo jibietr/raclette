@@ -71,6 +71,9 @@ define([
              console.log('set info panel recorder', infoPanel);
              this.Recorder = new Recorder({ el: elem, model: this.model});
              this.Recorder.createPublisher();
+             this.Recorder.$el.appendTo(elem); 
+             var infoPanel = this.$("#InfoContainer");
+             this.Recorder.setInfoPanel(infoPanel);
            }else{
              this.Recorder = recorder;
              //console.log('append recorder');
@@ -79,7 +82,7 @@ define([
              var infoPanel = this.$("#InfoContainer");
              this.Recorder.setInfoPanel(infoPanel);
              //init opentok session and publisher
-             this.Recorder.requestSessionPrePub();
+             //this.Recorder.requestSessionPrePub();
            }
         }
     },
@@ -120,9 +123,9 @@ define([
            this.Recorder = new Recorder({ el: cameraPreview, model: this.model});
            this.Recorder.setInfoPanel(infoPanel);
            //this.Recorder = new Recorder({ el: cameraPreview, model: this.model});*/
-           //this.Recorder.requestSession();
-           this.Recorder.requestRecording();
-           this.listenTo(this.Recorder,'recordStarted',this.renderChrono);
+           this.Recorder.requestSession();
+           //this.Recorder.requestRecording();
+          this.listenTo(this.Recorder,'recordStarted',this.renderChrono);
            
            
            //this.Recorder.startRecording();*/
