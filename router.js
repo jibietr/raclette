@@ -35,8 +35,9 @@ define(['jquery','underscore','fs','http','querystring','crypto','params',
       req.opentok.startArchive(req.params.session, { name: 'my archiving sample' },
       function(err, archive) {
       if(err) {
-	console.log('Error starting archive: ' + err.message);
-	return next(err);
+	//console.log('Error starting archive: ' + err.message,err);
+        res.statusCode = '500';
+        return res.send(err.message);
       }
       console.log('Archive started:',archive);
       res.send(archive);
@@ -61,23 +62,24 @@ define(['jquery','underscore','fs','http','querystring','crypto','params',
       var bucket = 'opentok-videos' + '/' + req.config.apiKey + '/' + req.params.archive;
       console.log('bucket',bucket,req.params);
       var params = { Bucket: bucket, Key: 'archive.mp4', };
-      s3.getSignedUrl('getObject', params, function (err, ur) {
-        console.log('The URL is', ur);
-        if(err) res.send({error:err});
-        else res.send({url:ur});
+      // first check if video exists...
+      s3.headObject(params, function(err, data) {
+       if (err){
+           console.log('ERR');
+           console.log(err, err.stack); // an error occurred
+           return res.send({error: err.code}); // send error
+       } 
+       else {
+         console.log('it seems it exists');
+         console.log(data);           // successful response
+         s3.getSignedUrl('getObject', params, function (err, ur) {
+          console.log('The URL is', ur);
+          if(err) res.send({error:err.code});
+          else res.send({url:ur});
+        });
+
+       }
       });
-/*      bucket = 'opentok-videos/44757122/41904e29-2999-4800-bb24-dee39a02bf9a';
-      var params = { Bucket: bucket,  ACL: 'public-read'   };
-      //note that the actual file may be missing at the moment of  making permsission
-
-      s3.putBucketAcl(params,function (err, data) {
-        console.log('put object acl ', err,data);
-        if(err) res.send({error:err});
-        else console.log(data);
-        //else res.send({url:ur});
-      });*/
-
-
     };
 
 
@@ -183,7 +185,7 @@ define(['jquery','underscore','fs','http','querystring','crypto','params',
 			      }     
            // everything is fine. update second DB
           console.log('update DB with', req.user.i,req.body.qid);
-          if(req.body.qid!=='test'){
+          if(req.body.qid!=='0'){
           var params = {
 	     Key: {
 	      userid: {
@@ -575,12 +577,23 @@ define(['jquery','underscore','fs','http','querystring','crypto','params',
        params = this;
        var dd = new par.env.aws.DynamoDB();
 
-       if(err) res.json({ err: 'Error checking session' + err });
+       if(err) res.json({ err: 'Error starting session' + err });
        else{
          console.log('Scan questions in Table ', params.env.questions);
          // get id last 
          var last_response = '0';
          if('last' in data.Item) last_response = data.Item.last.S;
+         if('expires' in data.Item){
+
+	     var expires = parseInt(data.Item.expires.S, 10);
+             var now = parseInt((new Date).getTime().toString(),10);
+             console.log('compare times',expires,now);
+	     if(now>expires){ 
+                console.log('session expired');
+                // res.json returns model with new fields
+                res.send('SESSION_EXPIRED');
+             }
+         }
 
          var scan_params = {
             TableName: params.env.questions, // require     

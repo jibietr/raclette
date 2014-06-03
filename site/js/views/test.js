@@ -25,7 +25,9 @@ define([
 
     skip: function(){
        this.trigger('test-done');
+       //this.progress.set({ status: 'interview'});
     },
+
 
 	
     // render question and timer                                                                                    
@@ -74,20 +76,18 @@ define([
       console.log('show video',this.test_question);
       // remove question view      
       this.questionView.remove();
-      // create new view
-
-      //this.$el.html(this.template());   
       this.archiveView = new ArchiveView();
-      console.log('playback element',$(this.el).find("#playback")[0]);  
-      //$(this.el).find("#playback").append(this.template_archive());
+      //.console.log('playback element',$(this.el).find("#playback")[0]);  
+      // render template
       $(this.el).find("#playback").html(this.template_archive());
-   
       this.info = this.$("#InfoContainer");
-      //this.archiveView.$el.appendTo(elem); 
-      //this.archiveView.render();  
       // model was udpated after save, so add .S
       var archiveId = this.test_question.get('content').S;
-      this.getArchive(archiveId);
+      this.setInfo('info',"Wait while we play back the video");    
+      this.tryCount =  0;
+      this.retryLimit = 3;
+      setTimeout(function(){ this.getArchive(archiveId) }.bind(this), 5000);
+
     },
 
     setInfo: function(type,message){
@@ -126,21 +126,26 @@ define([
 
 
     getArchive: function(archiveId){
-      this.setInfo('info',"Wait while we play back the video");    
       $.ajax({
-        url: '/get-archive/' + archiveId,
-        type: 'GET',
+       url: '/get-archive/' + archiveId,
+       type: 'GET',
        contentType: 'application/json',
-        success: function(data){
+       success: function(data){
           console.log('got archive',data);
+          if('error' in data){
+            if (data.error =='NotFound') {
+               this.tryCount++;
+               if(this.tryCount<this.retryLimit) setTimeout(function(){ this.getArchive() }.bind(this), 5000);
+               else this.setInfo('warning','Ooops, something went wrong!');
+            }
+          }else{
           //this.renderArchive(data.url);
-          this.url = data.url
-          setTimeout(function(){ this.playbackVideo(this.url) }.bind(this) , 10000);
-
-          //this.trigger('recordStopped');
+            this.url = data.url;
+            this.playbackVideo(this.url);
+         }
       }.bind(this),
-      error: function(data) {
-        alert('woops!'); //or whatever                                                         
+        error : function(error) {
+          console.log('error',error);
       }
       });
     },

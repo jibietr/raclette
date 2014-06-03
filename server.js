@@ -123,11 +123,32 @@ requirejs([
     app.post('/api/auth/signup', routes.Signup);
     //app.post('/api/auth/login', routes.Login);
     // is not obvious to me how to integrate this as a route
-    app.post('/api/auth/login', params.pass.authenticate('local', { session: true }),
+    /*app.post('/api/auth/login', params.pass.authenticate('local', { session: true }),
        function(req, res) {
           //res.redirect('/');
+           console.log('Login OK?');
           res.json({ err: 'Login Ok'});
+    });*/
+
+
+   app.post('/api/auth/login', function(req, res, next) {
+    params.pass.authenticate('local', { session: true }, function(err, user, info) {
+    console.log(err);
+    console.log(user);
+    if (err) { return res.json({ error: err });  }
+    if (!user) {
+      return res.json({ error: info });
+    }
+    req.logIn(user, function(err) {
+      if (err) { return next(err); }
+      //return res.redirect('/users/' + user.username);
+      console.log('return user',user);
+      return res.json(user);
     });
+     })(req, res, next);
+    });
+
+
 
     // Simple route middleware to ensure user is authenticated.
     //   Use this route middleware on any resource that needs to be protected.  If
@@ -217,6 +238,7 @@ requirejs([
       bucket: S3_BUCKET,
       users: TAB_USERS,
       accounts: process.env.PARAM2 + "-accounts",
+      codes: process.env.PARAM2 + "-codes",
       questions: TAB_QUESTIONS, 
       answers: TAB_ANSWERS,
       sessions: TAB_SESSIONS,

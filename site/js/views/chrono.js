@@ -39,13 +39,13 @@ define([
         }.bind(this), (this.total-10)*1000);
        // we control style here
        //$(this.el).find("button").addClass('btn-primary');  
-       console.log('timers',this.timer_warn,this.timer_stop,this.timer_count);
+       //console.log('timers',this.timer_warn,this.timer_stop,this.timer_count);
        this.warning = false;
      },
 
     // update counter and render new time
     incr: function(){
-       console.log("decr");
+       console.log("incr");
        this.seconds++;
        this.render();
        

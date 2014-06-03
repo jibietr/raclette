@@ -11,6 +11,9 @@ define([
      // if no defaults, then undefined...
      // we can add as defaults: 
      // userid, qtype, qid, content, created, time_wait, time_response, title
+      defaults: {
+            qid: ''
+        },
       
     });
 

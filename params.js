@@ -6,37 +6,27 @@ function($,_,fs,http,querystring,crypto,Passport,PassportLocal) {
     var params = {};
     //params.
 
-    function findByUsername(username, fn) {
-	//var id = crypto.createHmac('sha1', params.env.hash_key).update(username).digest('hex').substring(0,8);
+    function findByCode(code, fn) {
+        console.log('find code',code);
 	dd = new params.env.aws.DynamoDB();
 	var item = {
-            '_id': { 'S': username }
+            'code': { 'S': code }
 	};
 	dd.getItem({
-	    'TableName': params.env.accounts,
-	    'Key': item,
-	}, fn);
-    }
-
-    function findById(id, fn) {
-	dd = new params.env.aws.DynamoDB();
-	var item = {
-            '_id': { 'S': id }
-	};
-	dd.getItem({
-	    'TableName': params.env.accounts,
+	    'TableName': params.env.codes,
 	    'Key': item,
 	}, fn);
     }
 
     params.pass = Passport;
     params.pass.serializeUser(function(user, done) {
-      done(null, user.id);
+      done(null, user.code);
     });
 
-    params.pass.deserializeUser(function(id, done) {
-      findById(id, function (err, data) {
-        var user = { id: data.Item._id.S };
+    params.pass.deserializeUser(function(code, done) {
+      findByCode(code, function (err, data) {
+        //var user = { id: data.Item.userid.S };
+        var user = { id: data.Item.userid.S, code: data.Item.code.S };
         done(err, user);
       });
     });
@@ -47,79 +37,30 @@ function($,_,fs,http,querystring,crypto,Passport,PassportLocal) {
         // asynchronous verification, for effect...    
 	process.nextTick(function () { 
         // we will only check if username exists...
-	findById(username, function(err, data) {
-          if (err) { return done(err); }
+	findByCode(username, function(err, data) {
+          if (err) {
+               console.log('error');
+               return done(err); }
 	  if(!err) {
 	     // now submit files
              console.log('data',data);
              if('Item' in data){
                   //var user = { id: username };
-                  var user = { id: data.Item._id.S };
-                  done(null, user);
+                  var user = { id: data.Item.userid.S, code: data.Item.code.S };
+                  return done(null, user);
 		//});
-
              }else{
 		 //return res.json({error: 'User does not exist'});
-                 return done(null, false, { message: 'Unknown code ' + username }); 
+                 console.log('Unkown code');
+                 return done(null, false, { error: 'Unknown code' });
              }
-             
-
-	 }else{
-             return res.json({error: 'Error with DynamoDB' + err});
-             // check that passwords match
-
-	  } 
+	 }
         });
       });
       }
 
 
     ));
-
-/*
-   // @desc: logins in a user
-   Router.prototype.Signup = function(req, res){
-     
-       // check if email is a valid email
-       // id is 
-       //var user_hash = (new Date).getTime().toString() + Math.floor((Math.random()*1000)+1).toString();
-       //TODO: change username for email
-       var user = req.body;
-       var user_hash = crypto.createHmac('sha1', req.env_params.hash_key).update(user.username).digest('hex');
-       user_hash = user_hash.substring(0,8);
-
-	// salted-hash encripted pwd
-	var salt = crypto.randomBytes(64).toString('base64');;
-	crypto.pbkdf2(req.body.password, salt, 10000, 64, function(err, derivedKey) {
-	  if (err) {
-	    return reject(err);
-	  }
-	  var encrypted = derivedKey.toString("base64");
-	  var toBeStored = encrypted + ":" + salt;
-          var item = {
-		  '_id': { 'S': user_hash },
-	          'email': { 'S': user.username },
-		  'pwd': { 'S': toBeStored }
-		};
-	  var AWS = req.env_params.aws;
-	  dd = new AWS.DynamoDB();
-	  dd.putItem({
-		    'TableName': req.env_params.accounts,
-		    'Item': item,
-		  }, function(err, data) {
-		   if(!err) {
-		     // upload and db sucess
-		     console.log('create_user: upload and db success'); 
-		     // now submit files
-		     res.send(user);
-		   } else {
-		     console.log('create user: upload sucess, db error',err);
-		     return res.send(err.message);
-		    }       
-	  });
-	});
-     };*/
-
     // And now return the constructor function
     return params;
 });

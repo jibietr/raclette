@@ -4,9 +4,7 @@ define([
     'bootstrap',
     'backbone',
     'app',
-    'text!templates/login.html',
-    'parsley',
-    'utils'],
+    'text!templates/login.html'],
   function($,_,bootstrap,Backbone,app,TmplLogin) {
 
     var loginView = Backbone.View.extend({
@@ -17,8 +15,6 @@ define([
 
       events: { 
         'click #login-btn': 'onLoginAttempt',
-        'click #signup-btn' : 'onSignupAttempt',
-
       }, 
          
       render: function() {
@@ -32,58 +28,35 @@ define([
       },
 
       onLoginAttempt: function(evt){
-            if(evt) evt.preventDefault();
-            console.log('attempt to login');
-            // check that code is not empty
+        if(evt) evt.preventDefault();
+        console.log('attempt to login');
 
-            if(this.$("#login-form").parsley('validate')){
-                console.log('passed');
-                app.session.login({
-                    username: this.$("#login-username-input").val(),
-                    password: this.$("#login-password-input").val()
-                }, {
-                    success: function(mod, res){
-                        console.log(mod, res);
+        this.info = this.$("#InfoContainer");
 
-                    },
-                    error: function(mod, res){
-                        console.log("ERROR", mod, res);
+        var code = $('#code').val(); 
+        console.log("code",$('#code').val());
+        if(!code){ return this.setInfo('Please, introduce your code'); }
 
-                    }
-                });
-            } else {
-                // Invalid clientside validations thru parsley                                                                  
-                console.log("Did not pass clientside validation");
+        //interview = new Interview({ id: code });
 
-            }
+        //this.info = this.$("InfoContainer");
+
+        app.session.login({
+          username: code,
+          password: 'x',
+        }, {
+          success: function(mod, res){
+             console.log("SUCCESS", mod, res);
+             this.clearInfo();
+          }.bind(this),
+          error: function(mod, res){
+             console.log("ERROR", mod, res);
+             //console.log("error",error);
+             this.setInfo(mod.error.error);
+           }.bind(this)
+        });
+        
       },
-
-	onSignupAttempt: function(evt){
-            if(evt) evt.preventDefault();
-            if(this.$("#signup-form").parsley('validate')){
-                app.session.signup({
-                    username: this.$("#signup-username-input").val(),
-                    password: this.$("#signup-password-input").val(),
-                    name: this.$("#signup-name-input").val()
-                }, {
-                    success: function(mod, res){
-                        console.log(mod, res);
-
-                    },
-                    error: function(mod, res){
-                        console.log("ERROR", mod, res);
-
-                    }
-                });
-            } else {
-                // Invalid clientside validations thru parsley                                                                  
-                console.log("Did not pass clientside validation");
-
-            }
-        },
-
-
-
 
       setInfo: function(message){
         this.clearInfo(); // clear classes if any 
@@ -92,9 +65,11 @@ define([
       },
 
       clearInfo: function(){
+
         this.info.removeClass("bg-warning").removeClass("bg-danger").addClass("hidden");
         this.info.find("p").removeClass('text-danger').addClass('text-warning').removeClass('text-info');
       }
+
 
     });
     return loginView;

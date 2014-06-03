@@ -66,38 +66,22 @@ define([
 
     setRecorder: function(recorder){
         if(this.question_type=="video"){
-         /*if(this.model.get('test')){ 
-         // test recording using opentok default crendentials
-           this.recorderView.recorder.requestSession();
-           
-
-         }*/
-           console.log("stop wait");
            var elem =  this.$("#opentok_container").get(0);
            if(!recorder){
-
-             //var volume = this.$("#meter");
              console.log('set info panel recorder', infoPanel);
              this.Recorder = new Recorder({ el: elem, model: this.model});
              this.Recorder.createPublisher();
-
-           //this.Recorder = new Recorder({ el: cameraPreview, model: this.model});
            }else{
              this.Recorder = recorder;
-             console.log('append recorder');
+             //console.log('append recorder');
+             // we do not need this now, we are using document.queryselector
              this.Recorder.$el.appendTo(elem); 
              var infoPanel = this.$("#InfoContainer");
              this.Recorder.setInfoPanel(infoPanel);
-             // request session so we do not have to ask later...
+             //init opentok session and publisher
              this.Recorder.requestSessionPrePub();
            }
-
-           //this.listenTo(this.Recorder,'recordStarted',this.renderChrono);
-           //this.Recorder.requestSession();
-           
-           //this.Recorder.startRecording();*/
         }
-
     },
 
     renderCountdown: function(){
