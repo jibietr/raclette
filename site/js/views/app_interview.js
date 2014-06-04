@@ -52,9 +52,11 @@ define([
 	this.collection.fetch({reset: true, //initialize collection from db
 	  success: function(collection,response){ 
           console.log('INTERVIEW STILL ACTIVE',collection,response);
-          if(collection.length===0) this.progress.set({ status: 'finished'});
           this.total = collection.length;
-          this.progress.set({ status: 'setup'});
+          if(collection.length===0) this.progress.set({ status: 'finished'});
+          else this.progress.set({ status: 'setup'});
+
+
 
 	 }.bind(this), error: function(collection,response){
           // check error here interview expried?
