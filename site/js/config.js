@@ -53,6 +53,10 @@ requirejs.config({
         'jquery.iframe':{
            deps: ['jquery']
         },
+        'tbjs':{
+           exports: 'TBJS'
+        },
+
 
         }
 });

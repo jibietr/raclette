@@ -73,10 +73,11 @@ define([
 
     renderArchive: function(){
       //need to request access to a video using S3
-      console.log('show video',this.test_question);
+      console.log('SHOW VIDEO',this.test_question);
       // remove question view      
+      this.Recorder.$el.detach();
       this.questionView.remove();
-      this.archiveView = new ArchiveView();
+      //this.archiveView = new ArchiveView();
       //.console.log('playback element',$(this.el).find("#playback")[0]);  
       // render template
       $(this.el).find("#playback").html(this.template_archive());
@@ -116,7 +117,7 @@ define([
         $(this.el).find("#info-continue").removeClass('hidden');
         $(this.el).find('img').addClass('hidden');
         this.clearInfo();    
-        elem = $(this.el).find('#opentok_container').append('<video width="320" height="240" controls autoplay></video>');
+        elem = $(this.el).find('#playback').append('<video width="320" height="240" controls autoplay></video>');
         //url = "https://s3-eu-west-1.amazonaws.com/opentok-videos/44757122/b3c3463f-1040-4eb2-9e28-8575b4309d36/archive.mp4?AWSAccessKeyId=AKIAJYTQW3FHLXSOSKOA&Expires=1401619994&Signature=0cnmPEn6vOolT5qfVo4l73lD%2Fxk%3D";
         console.log('play this url',url);
         console.log('archive tag', $(this.el).find('video'));

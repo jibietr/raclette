@@ -595,18 +595,45 @@ define(['jquery','underscore','fs','http','querystring','crypto','params',
              }
          }
 
-         var scan_params = {
+        /* var scan_params = {
             TableName: params.env.questions, // require     
+            K 
             AttributesToGet: [
             'qid', 'status', 'title', 'time_response', 'time_wait', 'qtype',
           ], 
-           ScanFilter: { 'qid': 
+           QueryFilter: { 'qid': 
              { ComparisonOperator: 'GT',
                AttributeValueList: [ { S: last_response } ],  
              } 
            },
+         };*/
+
+
+
+               var query_params = {
+         TableName: params.env.questions, // require     
+            KeyConditions: { 'iid':
+             { ComparisonOperator: 'EQ',
+               AttributeValueList: [ { S: 'default_iid' } ],  
+             },
+               'qid':
+             { ComparisonOperator: 'GT',
+               AttributeValueList: [ { S: last_response } ],  
+             },
+             },
+             AttributesToGet: [
+		 'qid', 'status', 'title', 'time_response', 'time_wait', 'qtype',
+             ],
+            /*  QueryFilter:{  'qtype':
+             { ComparisonOperator: 'EQ',
+               AttributeValueList: [ { S: 'video'} ],  
+             },
+             },*/
+
          };
-	 dd.scan(scan_params, function(err, data) {
+
+
+	 dd.query(query_params, function(err, data) {
            if (err) console.log(err, err.stack); // an error occurred
            else{     
              console.log(data);           // successful response
@@ -622,7 +649,7 @@ define(['jquery','underscore','fs','http','querystring','crypto','params',
                 if('time_wait' in entry) item.time_wait = entry.time_wait.N;
                 questions.push(item);
              });
-             questions = questions.reverse();
+             //questions = questions.reverse();
              res.send(questions);
            }
          });

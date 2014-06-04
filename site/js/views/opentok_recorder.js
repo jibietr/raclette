@@ -1,16 +1,34 @@
-define([
-    'jquery',
+//define(['require','jquery',
+define(['jquery',
     'underscore',
     'bootstrap',
-    'backbone',
-    'tbjs'], // caution: do not declare TB obj as it is already available
+    'backbone','tbjs'], // caution: do not declare TB obj as it is already available
   function($,_,bootstrap,Backbone) {
+  //function(require,$,_,bootstrap,Backbone,tbjs) {
+  //function(require) {
+   
+    // this does not seem to work either
+    //var $ = require('jquery');
+    //var _ = require('underscore'); 
+    //var bootstrap = require('bootstrap');
+    //var Backbone = require('backbone');
+    //var tbjs = require('tbjs');
+
+    // I am using script in index to load tbjs
 
     var recorder = Backbone.View.extend({
 
+        defaults: {
+            archiveId: null,
+            sessionId: null
+        },
+
     // in case you want to create publisher before session
     createPublisher: function(){
-      elem = document.querySelector("#publisher");
+      //elem = document.querySelector("#publisher");
+
+      // elem = this.$('#publisher');
+      elem = $(this.el).find('#publisher')[0];      
       this.publisher = TB.initPublisher(elem);
       console.log('this view',this.view);
       this.publisher.on("accessAllowed",function(){
@@ -19,7 +37,7 @@ define([
          console.log('this publisher stream?');
       }.bind(this));
       this.publisher.on("destroyed",function(){
-         console.log("publisher destroyed");
+         console.log("PUBLISHER DESTROYED");
       });
     },
 
@@ -30,7 +48,7 @@ define([
     
     // ask for token and credentials...
     requestSession: function(){
-      this.setInfo("warning","Wait while we start recording");
+      //this.setInfo("warning","Wait while we start recording");
       console.log("start session");
       $.ajax({
         url: '/start-session',
@@ -49,7 +67,7 @@ define([
 
 
     requestSessionPrePub: function(){
-      this.setInfo("warning","Wait while we start recording");
+      //this.setInfo("warning","Wait while we start recording");
       console.log("start session pre pub");
       $.ajax({
         url: '/start-session',
@@ -73,7 +91,7 @@ define([
       this.setInfo("warning","Please, accept request to use camera and micro");
       this.session = TB.initSession(data.session);
       this.publisher = TB.initPublisher(data.apiKey, document.querySelector("#publisher"));
-      this.publisher.on("accessAllowed",this.requestRecording.bind(this));
+      //this.publisher.on("accessAllowed",this.requestRecording.bind(this));
       this.sessionId = data.session;
 
       this.session.connect(data.apiKey,data.token, function(err, info) {
@@ -97,11 +115,12 @@ define([
           //this.archiveId = null;                                                                                              
           console.log("ARCHIVE STOPPED");
           //this.publisher.destroy();
-          //this.session.disconnect();
+
           //this.model.trigger('recordStopped');
       }.bind(this));
 
    },
+
 
 
 
@@ -111,37 +130,35 @@ define([
       
       // init session
       console.log('host session pre pub');
-
+      TB.setLogLevel(TB.NONE);
       this.session = TB.initSession(data.session);
       this.sessionId = data.session;      
-
-      session.on('archiveStarted', function(event) {
+ /*
+      this.session.on('archiveStarted', function(event) {
           //this.archiveId = event.id;
-          //alert("ARCHIVE STARTED");
+          alert("ARCHIVE STARTED");
           //this.clearInfo();
           //this.trigger('recordStarted');
       }.bind(this));
 
-      session.on('archiveStopped', function(event) {
+      this.session.on('archiveStopped', function(event) {
 	  //this.archiveId = null;
-	  console.log("ARCHIVE STOPPED");
+          alert("ARCHIVE STARTED");
           //this.publisher.destroy();
           //session.disconnect();
           //this.trigger('recordStopped');
-      }.bind(this));
+      }.bind(this));*/
 
-      session.connect(data.apiKey,data.token, function(err, info) {
+      this.session.connect(data.apiKey,data.token, function(err, info) {
         if(err) {
           console.log(err.message || err);
         }
         //console.log("let's publish pre pub",this.publisher);
-        session.publish(this.publisher);
+        this.session.publish(this.publisher);
         //console.log("published!",this.publisher.stream);
         //this.requestRecording();
       }.bind(this));
 
-      
-   
       console.log('done setting up session handlers',this.session);
     },
 
@@ -150,7 +167,10 @@ define([
     },
     
     requestRecording: function(){
-
+      if(this.sessionId==null){
+         return this.setInfo("warning","Wait while we intialize the recording");
+      }
+      this.setInfo("warning","Wait while we start recording");
       $.ajax({
         url: '/start-archive/' + this.sessionId,
         type: 'GET',
@@ -163,6 +183,7 @@ define([
         }.bind(this),
       error: function(data) {
         //alert('woops!'); //or whatever
+        // this.setInfo("warning","Wait while we start recording");
         console.log('ERROR start recording',data);
         this.setInfo("danger","Please, try clicking start again");
       }.bind(this)
@@ -179,7 +200,8 @@ define([
         contentType: 'application/json',
         success: function(data){ 
           console.log('success request stop',data);
-           this.clearInfo();
+          this.clearInfo();
+          //this.session.disconnect();
           this.trigger('recordStopped');
       }.bind(this),
       error: function(data) {

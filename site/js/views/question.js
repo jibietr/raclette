@@ -82,7 +82,7 @@ define([
              var infoPanel = this.$("#InfoContainer");
              this.Recorder.setInfoPanel(infoPanel);
              //init opentok session and publisher
-             //this.Recorder.requestSessionPrePub();
+             this.Recorder.requestSessionPrePub();
            }
         }
     },
@@ -123,8 +123,8 @@ define([
            this.Recorder = new Recorder({ el: cameraPreview, model: this.model});
            this.Recorder.setInfoPanel(infoPanel);
            //this.Recorder = new Recorder({ el: cameraPreview, model: this.model});*/
-           this.Recorder.requestSession();
-           //this.Recorder.requestRecording();
+          //this.Recorder.requestSession();
+          this.Recorder.requestRecording();
           this.listenTo(this.Recorder,'recordStarted',this.renderChrono);
            
            

@@ -138,8 +138,8 @@ define([
         this.$el.html(this.template_setup());
         // this may cause problems. not sure if has to be separated in two calls
         elem = $(this.el).find("#opentok_container")[0];
-        //this.Recorder = new Recorder({ el: elem, model: this.model});
-        //this.Recorder.createPublisher();
+        this.Recorder = new Recorder({ el: elem, model: this.model});
+        this.Recorder.createPublisher();
  	return this;
       },
 
@@ -155,7 +155,7 @@ define([
         //this.testView.setProgress(this.progress);
         console.log('test view',this.testView);
 	this.$el.html(this.testView.render().el);
-        //this.testView.setRecorder(this.Recorder);
+        this.testView.setRecorder(this.Recorder);
         this.listenTo(this.testView,'test-done',function(){
           this.testView.remove();
           this.progress.set({ status: 'wait' });
