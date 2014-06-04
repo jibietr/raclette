@@ -159,8 +159,8 @@ define([
         this.$el.html(this.template_setup());
         // this may cause problems. not sure if has to be separated in two calls
         elem = $(this.el).find("#opentok_container")[0];
-        //this.Recorder = new Recorder({ el: elem, model: this.model});
-        //this.Recorder.createPublisher();
+        this.Recorder = new Recorder({ el: elem, model: this.model});
+        this.Recorder.createPublisher();
  	return this;
       },
 
