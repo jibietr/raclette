@@ -18,9 +18,10 @@ define([
     'text!templates/wrap.html',
     'text!templates/expired.html',
     'text!templates/textbar.html',
+    'text!templates/interintro.html',
     'views/opentok',
     'models/progress'],
-  function($,_,bootstrap,Backbone,app,Questionnaire,Archive,Panel,Session,TestView,QuestionView,PanelView,ArchiveView,Recorder,TmplSetup,TmplTest,TmplWrap,TmplExpired,TmplBar,OpentokView,Progress) {
+  function($,_,bootstrap,Backbone,app,Questionnaire,Archive,Panel,Session,TestView,QuestionView,PanelView,ArchiveView,Recorder,TmplSetup,TmplTest,TmplWrap,TmplExpired,TmplBar,TmplIntro,OpentokView,Progress) {
 
     var questionnaireView = Backbone.View.extend({
 
@@ -31,6 +32,7 @@ define([
       template_wrap: _.template(TmplWrap),
       template_expired: _.template(TmplExpired),
       template_bar: _.template(TmplBar),
+      template_intro: _.template(TmplIntro),
 
       initialize: function() {
         // this is what we do to set up the session
@@ -38,10 +40,10 @@ define([
         // will show last page...
         //$( "<p>Test</p>" ).insertBefore(this.$el);
         //this.$el.before(this.template_bar());
-        this.renderBar();
-
-        this.progress = new Progress();
-        this.progress.on("change:status", this.onStatusChange, this);
+        //this.renderBar();
+        app.session.on("change:status", this.render.bind(this)); 
+        //this.progress = new Progress();
+        //app.session.on("change:status", this.onStatusChange, this);
  
         this.panel = new Panel();
         this.panelView = new PanelView({ 
@@ -52,35 +54,24 @@ define([
 	this.collection.fetch({reset: true, //initialize collection from db
 	  success: function(collection,response){ 
           console.log('INTERVIEW STILL ACTIVE',collection,response);
-          this.total = collection.length;
-          if(collection.length===0) this.progress.set({ status: 'finished'});
-          else this.progress.set({ status: 'setup'});
+          //this.total = collection.length;
+          if(collection.length===0) app.session.set({ status: 'finished'});
+          else app.session.set({ status: 'intro'});
+          //app.session.set({ status: 'intro'});
 
 
 
-	 }.bind(this), error: function(collection,response){
+	 }, error: function(collection,response){
           // check error here interview expried?
           if(response.responseText=="SESSION_EXPIRED"){
-              this.progress.set({ status: 'expired'});
+              app.session.set({ status: 'expired'});
           }
 	}.bind(this)});        
 
       },
 
-      onStatusChange: function(){
-        var status =  this.progress.attributes.status;
-        if(status==='finished') this.renderPanel();
-        if(status==='setup') this.renderSetup();
-        if(status==='test') this.renderTest();
-        if(status==='wait') this.renderPanel();
-        if(status==='expired') this.renderExpired();
-        if(status==='interview') this.renderQuestion();
-        
-
-      },
-
       events:{
-	 //'click #submit-question':'saveQuestion',
+	 'click #intro-continue':'onIntroContinue',
 	 'click #start-interview': 'onStartInterview',
 	 'click #continue-interview': 'onContinue',
          'click #setup-done': 'onSetupDone' ,
@@ -89,13 +80,18 @@ define([
 
      onSetupDone: function(){
        // do we have video??
-       //console.log('did you start video?',this.Recorder.hasStarted());
+       //console.log('did you start video?',this.Recorder.hasStarted());render
        //if(this.Recorder.hasStarted())  this.progress.set({ status: 'test'});
-       this.progress.set({ status: 'test'});
+       app.session.set({ status: 'test'});
      },
 
       onStartInterview: function(){
-        this.progress.set({ status: 'interview'});
+        app.session.set({ status: 'interview'});
+      },
+
+      onIntroContinue: function(evt){
+        evt.preventDefault();
+        app.session.set({ status: 'setup'});
       },
 
       renderInterview: function(){
@@ -104,11 +100,20 @@ define([
       },
 
       onContinue: function(){
-        this.progress.set({ status: 'interview'});
+        app.session.set({ status: 'interview'});
       },
  
 
       render: function(){
+        var status =  app.session.attributes.status;
+        console.log('status change',status);
+        if(status==='finished') return this.renderPanel();
+        if(status==='setup') return this.renderSetup();
+        if(status==='test') return this.renderTest();
+        if(status==='wait') return this.renderPanel();
+        if(status==='expired') return this.renderExpired();
+        if(status==='interview') return this.renderQuestion();
+        if(status==='intro') return this.renderIntro();
 	return this;
       },
 
@@ -120,9 +125,11 @@ define([
      },
 
      renderBar: function(){
+       console.log('render bar!!');
        this.$el.before(this.template_bar());
        $('#nav_welcome').addClass('active');
-
+       this.$el.html();
+       return this;
      },
    
      setBar: function(elem){
@@ -134,21 +141,33 @@ define([
        $('#nav_'+elem).addClass('active');
      },
 
+      renderIntro: function(){
+ 
+        //this.renderBar();
+        //this.setBar('welcome');
+        console.log('render welcome',this.collection.length);
+        
+        this.$el.html(this.template_intro({num_questions: this.collection.length }));
+        // this may cause problems. not sure if has to be separated in two calls
+ 	return this;
+      },
+
       renderSetup: function(){
-        this.renderBar('setup');
+        window.scrollTo(0,0);
+        //this.setBar('setup');
         console.log('render setup');
         this.$el.html(this.template_setup());
         // this may cause problems. not sure if has to be separated in two calls
         elem = $(this.el).find("#opentok_container")[0];
-        this.Recorder = new Recorder({ el: elem, model: this.model});
-        this.Recorder.createPublisher();
+        //this.Recorder = new Recorder({ el: elem, model: this.model});
+        //this.Recorder.createPublisher();
  	return this;
       },
 
 
       renderTest: function(){
         // what do we stop here?
-        this.setBar('test');
+        //this.setBar('test');
 
 
         //this.Recorder.$el.detach();
@@ -160,7 +179,7 @@ define([
         this.testView.setRecorder(this.Recorder);
         this.listenTo(this.testView,'test-done',function(){
           this.testView.remove();
-          this.progress.set({ status: 'wait' });
+          app.session.set({ status: 'wait' });
         }.bind(this));
         return this;
 
@@ -168,7 +187,6 @@ define([
 
 
      renderPanel: function(){ 
-           this.setBar('interview');
         // it may not exist at the very beginning
         if(this.Recorder) this.Recorder.$el.detach();
         if(this.collection.length===0){ // show last page...
@@ -183,10 +201,11 @@ define([
         });*/
         console.log('does panelview eexist?',this.panelView);
         this.$el.html(this.panelView.render().el);
+        return this;
      },
  
      renderQuestion: function() {
-          this.setBar('interview');
+          //this.setBar('interview');
           // copy user id param from session
           //this.question.set('userid',this.session.get("userid"));
           // detach panel view
@@ -203,7 +222,7 @@ define([
           this.listenTo(this.question,'question-done',function(){
              this.collection.remove(this.question);
 	      this.questionView.remove();
-              this.progress.set({ status: 'wait' });
+              app.session.set({ status: 'wait' });
           }.bind(this));
           // set up recorder...
           this.questionView.setRecorder(this.Recorder);

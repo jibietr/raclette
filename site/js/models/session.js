@@ -14,7 +14,8 @@ define([
         // These will be overriden after the initial checkAuth
         defaults: {
             logged_in: false,
-            user_id: ''
+            user_id: '',
+            status: ''
         },
 
         initialize: function(){

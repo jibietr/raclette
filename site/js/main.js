@@ -31,6 +31,9 @@ requirejs([
             //if(hasPushstate) Backbone.history.start({ pushState: true, root: '/' } );
             //else Backbone.history.start();
             Backbone.history.start();
+            /*Backbone.history.bind("all", function (route, router) {
+               window.scrollTo(0,0);
+            });*/
         }
     });
 
