@@ -119,7 +119,7 @@ define([
 
      },
 
-     renderBar: function(elem){
+     renderBar: function(){
        this.$el.before(this.template_bar());
        $('#nav_welcome').addClass('active');
 
