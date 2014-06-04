@@ -1,5 +1,7 @@
-define(['jquery','underscore','fs','http','querystring','crypto','passport','passport-local'],
-function($,_,fs,http,querystring,crypto,Passport,PassportLocal) {
+//define(['jquery','underscore','fs','http','querystring','crypto','passport','passport-local'],
+//function($,_,fs,http,querystring,crypto,Passport,PassportLocal) {
+define(['jquery','underscore','fs','querystring','crypto','passport','passport-local'],
+function($,_,fs,querystring,crypto,Passport,PassportLocal) {
     // Start with the constructor
     // empty constructor    function Router(me) {
 
