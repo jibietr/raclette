@@ -2,6 +2,8 @@
   <div class="row">
     <div class="col-md-6 col-md-offset-2">
       <div id="Announcement" class="well">
+
+
           <h3>Welcome!</h3>
           <p>The following interview prepared by the Idiap Social Computing Group
           consists of <%= num_questions %> questions.</p>
@@ -22,9 +24,32 @@
 	    <li><p>A well-lit room (make sure no light is directly in view of the webcam)</p></li>
 	  </ul>
           <br>
+
+
+	 <h4>What happens with the data recorded here? (Terms of Service)</h4>
+
+	  <p>The data recorded here belongs to you, and therefore, we
+	    will provide you with a copy of it within the next 30 days.
+	    By accepting these terms of service, you license to us
+	    a copy of the data that we can store for up 2 years. After
+	    this period the data will be deleted.
+	    
+	    Our copy of the data will be viewed by authorized people
+	    for the purposes of recruitment and research and will be handled
+	    as confidential. We won't share, distribute, or sell your data to any third
+	    parties.
+
+	    You will be notified if any of these TOS needs to change
+	    for any legal reasons.</p>
+
 	  <h4>How do I proceed?</h4>
           <p>First, you will go through the process of setting up the webcam
           and microphone. Then, you will have some time to practice for the interview before you start.</p>
+
+
+	  <div class="form-group">
+            <input type="checkbox" id="checkbox"> I agree with the terms of service.<span class="help-block hidden"></span>
+          </div>
 
           <button type="submit" class="btn btn-primary" id="intro-continue">Continue</button>
       </div>

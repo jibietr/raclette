@@ -19,9 +19,10 @@ define([
     'text!templates/expired.html',
     'text!templates/textbar.html',
     'text!templates/interintro.html',
+    'text!templates/interexamples.html',
     'views/opentok',
     'models/progress'],
-  function($,_,bootstrap,Backbone,app,Questionnaire,Archive,Panel,Session,TestView,QuestionView,PanelView,ArchiveView,Recorder,TmplSetup,TmplTest,TmplWrap,TmplExpired,TmplBar,TmplIntro,OpentokView,Progress) {
+  function($,_,bootstrap,Backbone,app,Questionnaire,Archive,Panel,Session,TestView,QuestionView,PanelView,ArchiveView,Recorder,TmplSetup,TmplTest,TmplWrap,TmplExpired,TmplBar,TmplIntro,TmplExamples,OpentokView,Progress) {
 
     var questionnaireView = Backbone.View.extend({
 
@@ -33,6 +34,7 @@ define([
       template_expired: _.template(TmplExpired),
       template_bar: _.template(TmplBar),
       template_intro: _.template(TmplIntro),
+      template_examples: _.template(TmplExamples),
 
       initialize: function() {
         // this is what we do to set up the session
@@ -56,7 +58,7 @@ define([
           console.log('INTERVIEW STILL ACTIVE',collection,response);
           //this.total = collection.length;
           if(collection.length===0) app.session.set({ status: 'finished'});
-          else app.session.set({ status: 'intro'});
+          else app.session.set({ status: 'intro'});//intro
           //app.session.set({ status: 'intro'});
 
 
@@ -72,6 +74,7 @@ define([
 
       events:{
 	 'click #intro-continue':'onIntroContinue',
+	 'click #examples-continue':'onExamplesContinue',
 	 'click #start-interview': 'onStartInterview',
 	 'click #continue-interview': 'onContinue',
          'click #setup-done': 'onSetupDone' ,
@@ -80,7 +83,7 @@ define([
 
      onSetupDone: function(){
        // do we have video??
-       //console.log('did you start video?',this.Recorder.hasStarted());render
+       //console.log('did you start video?',this.Recorder.hasStarted());
        //if(this.Recorder.hasStarted())  this.progress.set({ status: 'test'});
        app.session.set({ status: 'test'});
      },
@@ -89,10 +92,32 @@ define([
         app.session.set({ status: 'interview'});
       },
 
-      onIntroContinue: function(evt){
-        evt.preventDefault();
+      onExamplesContinue: function(){
         app.session.set({ status: 'setup'});
       },
+
+      onIntroContinue: function(evt){
+
+        // check TOS here
+        evt.preventDefault();
+        if($('#checkbox').is(":checked")){
+          $group = this.$el.find('.form-group');
+          $group.removeClass('has-error');
+          $group.find('.help-block').addClass('hidden');
+
+          app.session.set({ status: 'examples'});
+        }else{
+          var error = 'To continue, you must agree on the TOS';
+          $group = this.$el.find('.form-group');
+          $group.addClass('has-error');
+          $group.find('.help-block').html(error).removeClass('hidden');
+        }
+
+        
+      },
+
+ 
+
 
       renderInterview: function(){
 	  this.question = this.collection.at(0);
@@ -114,12 +139,19 @@ define([
         if(status==='expired') return this.renderExpired();
         if(status==='interview') return this.renderQuestion();
         if(status==='intro') return this.renderIntro();
+        if(status==='examples') return this.renderExamples();
 	return this;
       },
 
 
      renderExpired: function(){
         this.$el.html(this.template_expired());
+       return this;
+
+     },
+
+     renderExamples: function(){
+        this.$el.html(this.template_examples());
        return this;
 
      },

@@ -7,13 +7,15 @@ define([
     'views/chrono',
     'views/opentok_recorder',
     'aws-sdk',
+    'jquery.serializeObject',
     'text!templates/question.html',
     'text!templates/video.html',
+    'text!templates/tipi.html',
     'text!templates/start.html',
     'text!templates/wait.html',
     'text!templates/end.html',
     'text!templates/text.html'],
-  function($,_,bootstrap,Backbone,ChronoView,Recorder,aws_sdk,Tmpl_question,Tmpl_video,Tmpl_start,Tmpl_wait,Tmpl_end,Tmpl_text) {
+  function($,_,bootstrap,Backbone,ChronoView,Recorder,aws_sdk,serialize,Tmpl_question,Tmpl_video,Tmpl_tipi,Tmpl_start,Tmpl_wait,Tmpl_end,Tmpl_text) {
 
     var questionView = Backbone.View.extend({
       //id: 'question',
@@ -21,6 +23,7 @@ define([
       className: 'QuestionContainer',
       template_question: _.template(Tmpl_question),
       template_video: _.template(Tmpl_video),
+      template_tipi: _.template(Tmpl_tipi),
       template_start: _.template(Tmpl_start),
       template_wait: _.template(Tmpl_wait),
       template_end: _.template(Tmpl_end),
@@ -55,14 +58,37 @@ define([
         // create publisher if question is video
      
 
-       //this.$el.html(this.template_video());
-        if(this.model.get('time_wait')){
-          this.renderCountdown();
-        }else{
+
+        if(this.model.get('time_wait')){//no time wait means other 
+         this.renderCountdown();
+        }else{//tipi 
+          this.info = this.$("#InfoContainer");
           this.renderChrono();
         }
         return this;
     },
+
+
+    setInfo: function(type,message){
+      this.clearInfo(); // clear classes if any
+      if(type=='warning'){  
+        this.info.find("p").addClass('text-warning').text(message);
+        this.info.addClass('bg-warning').removeClass('hidden');
+      }else if(type=='error'){
+        this.info.find("p").addClass('text-danger').text(message);
+        this.info.addClass('bg-danger').removeClass('hidden');
+      }else if(type=='info'){
+        this.info.find("p").addClass('text-info').text(message);
+        this.info.addClass('bg-info').removeClass('hidden');
+
+      }
+    },
+
+    clearInfo: function(){
+       this.info.removeClass("bg-warning").removeClass("bg-danger").addClass("hidden");
+       this.info.find("p").removeClass('text-danger').addClass('text-warning').removeClass('text-info');
+    },
+
 
     setRecorder: function(recorder){
         if(this.question_type=="video"){
@@ -110,29 +136,9 @@ define([
        console.log('stop wait');
         // if question is video type, then start recording
        if(this.question_type=="video"){
-         /*if(this.model.get('test')){ 
-         // test recording using opentok default crendentials
-           this.recorderView.recorder.requestSession();
-           
-
-         }*/
-         /*  console.log("stop wait");
-           var cameraPreview =  this.$("#opentok_container").get(0);
-           var infoPanel = this.$("#InfoContainer");
-           var volume = this.$("#meter");
-           this.Recorder = new Recorder({ el: cameraPreview, model: this.model});
-           this.Recorder.setInfoPanel(infoPanel);
-           //this.Recorder = new Recorder({ el: cameraPreview, model: this.model});*/
-          //this.Recorder.requestSession();
           this.Recorder.requestRecording();
           this.listenTo(this.Recorder,'recordStarted',this.renderChrono);
            
-           
-           //this.Recorder.startRecording();*/
-           
-        }else{
-
-           this.startActive();
         }
 
     },
@@ -160,6 +166,26 @@ define([
            console.log(answer);
            this.model.set("content",answer);
            this.saveModel();
+        }else if(this.question_type=="tipi"){
+           //var answer = $('#textAnswer').val();
+           var formData = $('#tipi').serializeObject();
+           if(Object.keys(formData).length<10){
+             this.setInfo('error','Please answer the questionnaire completely. Then press stop again.');   
+             window.scrollTo(0,0);
+           }else{
+	     this.clearInfo();
+             // create content
+            var answer =  "";
+            for (var key in formData) {
+              answer+= key + ":"+ formData[key]+",";
+            }
+            answer = answer.substring(0, answer.length - 1);
+            //console.log('answer',answer);  
+            this.model.set("content",answer);
+            this.saveModel();
+           }
+           //console.log(formData,Object.keys(formData).length);
+           
         }
   
     },

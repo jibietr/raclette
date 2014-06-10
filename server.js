@@ -90,7 +90,7 @@ requirejs([
       process.exit();
     }
 
-    var opentok = new OpenTok.OpenTokSDK(config.apiKey, config.apiSecret);
+    var opentok = new OpenTok(config.apiKey, config.apiSecret);
     if(config.anvil) {
       opentok.api_url = config.anvil;
     }
