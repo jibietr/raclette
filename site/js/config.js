@@ -18,7 +18,7 @@ requirejs.config({
         'datepicker' : 'lib/bootstrap-datepicker',
         'backbone-validation': 'lib/backbone-validation',
         'aws-sdk': 'lib/aws-sdk-2.0.0-rc13.min',
-        'tbjs': 'lib/TB.min',
+        'tbjs': 'lib/opentok.min',
         'recaptcha': 'lib/recaptcha_ajax',
         'parsley': 'lib/parsley',
         'utils': 'lib/utils', 
@@ -53,9 +53,7 @@ requirejs.config({
         'jquery.iframe':{
            deps: ['jquery']
         },
-        'tbjs':{
-           exports: 'TBJS'
-        },
+
 
 
         }

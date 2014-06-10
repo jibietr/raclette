@@ -20,7 +20,8 @@ define(['jquery',
 
         defaults: {
             archiveId: null,
-            sessionId: null
+            sessionId: null,
+            accessAllowed: false
         },
 
     // in case you want to create publisher before session
@@ -29,12 +30,13 @@ define(['jquery',
 
       // elem = this.$('#publisher');
       elem = $(this.el).find('#publisher')[0];      
-      this.publisher = TB.initPublisher(elem);
+      this.publisher = OT.initPublisher(elem);
       console.log('this view',this.view);
       this.publisher.on("accessAllowed",function(){
-         //this.set({ status: 'accepted'});
-         console.log('access allowed');
-         console.log('this publisher stream?');
+         this.accessAllowed = true;
+         //alert('accessalowed');
+         //console.log('access allowed');
+         //console.log('this publisher stream?');
       }.bind(this));
       this.publisher.on("destroyed",function(){
          console.log("PUBLISHER DESTROYED");
@@ -42,8 +44,8 @@ define(['jquery',
     },
 
     hasStarted: function(){
-      console.log('this publisher',this.publisher);
-      return this.publisher.accessAllowed;
+      //console.log('this publisher',this.publisher);
+      return this.accessAllowed;
     },
     
     // ask for token and credentials...
@@ -87,10 +89,10 @@ define(['jquery',
 
 
     hostSession: function(data){
-      TB.setLogLevel(TB.NONE);
+      OT.setLogLevel(OT.NONE);
       this.setInfo("warning","Please, accept request to use camera and micro");
-      this.session = TB.initSession(data.session);
-      this.publisher = TB.initPublisher(data.apiKey, document.querySelector("#publisher"));
+      this.session = OT.initSession(data.session);
+      this.publisher = OT.initPublisher(data.apiKey, document.querySelector("#publisher"));
       //this.publisher.on("accessAllowed",this.requestRecording.bind(this));
       this.sessionId = data.session;
 
@@ -130,34 +132,29 @@ define(['jquery',
       
       // init session
       console.log('host session pre pub');
-      TB.setLogLevel(TB.NONE);
-      this.session = TB.initSession(data.session);
+      OT.setLogLevel(OT.NONE);
+      this.session = OT.initSession(data.apiKey,data.session);
       this.sessionId = data.session;      
- /*
+      this.tokenId = data.token;
+ 
       this.session.on('archiveStarted', function(event) {
-          //this.archiveId = event.id;
-          alert("ARCHIVE STARTED");
-          //this.clearInfo();
-          //this.trigger('recordStarted');
+           this.archiveId = event.id;
+           //console.log('success request start',data);
+           this.clearInfo();
+           this.trigger('recordStarted');
       }.bind(this));
 
       this.session.on('archiveStopped', function(event) {
-	  //this.archiveId = null;
-          alert("ARCHIVE STARTED");
-          //this.publisher.destroy();
-          //session.disconnect();
-          //this.trigger('recordStopped');
-      }.bind(this));*/
-
-      this.session.connect(data.apiKey,data.token, function(err, info) {
-        if(err) {
-          console.log(err.message || err);
-        }
-        //console.log("let's publish pre pub",this.publisher);
-        this.session.publish(this.publisher);
-        //console.log("published!",this.publisher.stream);
-        //this.requestRecording();
+          console.log('success request stop',event);
+          this.clearInfo();
+          this.archiveId = null;
+          this.sessionId = null;
+          //this.session.unpublish(this.publisher);
+          //this.session.disconnect();
+          this.trigger('recordStopped');
       }.bind(this));
+
+      console.log('trying to connect',data.apiKey,data.token);
 
       console.log('done setting up session handlers',this.session);
     },
@@ -165,21 +162,30 @@ define(['jquery',
     getArchiveId: function(){
       return(this.archiveId);
     },
+
     
     requestRecording: function(){
-      if(this.sessionId==null){
-         return this.setInfo("warning","Wait while we intialize the recording");
-      }
+
       this.setInfo("warning","Wait while we start recording");
+      this.session.connect(this.tokenId, function(err, info) {
+        if(err) {
+          console.log(err.message || err);
+        }
+        //console.log("let's publish pre pub",this.publisher);
+        this.session.publish(this.publisher);
+        //console.log("published!",this.publisher.stream);
+        //this.requestRecording();
+
+
       $.ajax({
         url: '/start-archive/' + this.sessionId,
         type: 'GET',
         contentType: 'application/json',
         success: function(data){ 
-           this.archiveId = data.id;
+    /*       this.archiveId = data.id;
            console.log('success request start',data);
            this.clearInfo();
-           this.trigger('recordStarted');
+           this.trigger('recordStarted');*/
         }.bind(this),
       error: function(data) {
         //alert('woops!'); //or whatever
@@ -188,6 +194,12 @@ define(['jquery',
         this.setInfo("danger","Please, try clicking start again");
       }.bind(this)
       });
+
+
+
+      }.bind(this));
+
+
 
     },
 
@@ -199,10 +211,7 @@ define(['jquery',
         type: 'GET',
         contentType: 'application/json',
         success: function(data){ 
-          console.log('success request stop',data);
-          this.clearInfo();
-          //this.session.disconnect();
-          this.trigger('recordStopped');
+
       }.bind(this),
       error: function(data) {
         //alert('woops!'); //or whatever

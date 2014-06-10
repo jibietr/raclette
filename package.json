@@ -1,25 +1,23 @@
 {
-    "name": "raclette",
-    "version": "0.0.1",
-    "description": "the idiap-scg recruitment system",
-    "scripts": {
-      "start": "node server"
-    },
-    "dependencies": {
-      "express": "~3.1.0",
-      "requirejs": "~2.1.11",
-      "jquery": "1.8.3",
-      "underscore": "1.4.4",
-      "backbone": "1.0.0", 
-      "aws-sdk": "~2.0.0",
-      "path": "0.4.9",
-      "request": "~2.33.0", 
-      "crypto": "0.0.3",
-      "querystring": "0.2.0",
-      "passport": "0.2.0",
-      "passport-local": "1.0.0",
-      "opentok": "2.0.0-beta"
-
-    }
+  "name": "raclette",
+  "version": "0.0.1",
+  "description": "the idiap-scg recruitment system",
+  "scripts": {
+    "start": "node server"
+  },
+  "dependencies": {
+    "aws-sdk": "~2.0.0",
+    "backbone": "1.0.0",
+    "crypto": "0.0.3",
+    "express": "~3.1.0",
+    "jquery": "1.8.3",
+    "opentok": "^2.2.2",
+    "passport": "0.2.0",
+    "passport-local": "1.0.0",
+    "path": "0.4.9",
+    "querystring": "0.2.0",
+    "request": "2.33.0",
+    "requirejs": "~2.1.11",
+    "underscore": "1.4.4"
+  }
 }
-
