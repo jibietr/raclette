@@ -38,8 +38,13 @@ define(['jquery',
          //console.log('access allowed');
          //console.log('this publisher stream?');
       }.bind(this));
-      this.publisher.on("destroyed",function(){
-         console.log("PUBLISHER DESTROYED");
+      this.publisher.on("destroyed",function(event){
+         console.log("DESTROYED!!!"); 
+      });
+      this.publisher.on("streamDestroyed",function(event){
+         console.log("AVOID DESTROYING??"); 
+	 event.preventDefault();
+
       });
     },
 
@@ -89,8 +94,8 @@ define(['jquery',
 
 
     hostSession: function(data){
-      OT.setLogLevel(OT.NONE);
-      this.setInfo("warning","Please, accept request to use camera and micro");
+      //Ot.Setloglevel(-OT.NONE);
+      This.Setinfo("warning","Please, accept request to use camera and micro");
       this.session = OT.initSession(data.session);
       this.publisher = OT.initPublisher(data.apiKey, document.querySelector("#publisher"));
       //this.publisher.on("accessAllowed",this.requestRecording.bind(this));
@@ -121,6 +126,8 @@ define(['jquery',
           //this.model.trigger('recordStopped');
       }.bind(this));
 
+      
+
    },
 
 
@@ -131,27 +138,33 @@ define(['jquery',
       // check stream here
       
       // init session
-      console.log('host session pre pub');
-      OT.setLogLevel(OT.NONE);
+      //console.log('host session pre pub');
+      //OT.setLogLevel(OT.NONE);
       this.session = OT.initSession(data.apiKey,data.session);
       this.sessionId = data.session;      
       this.tokenId = data.token;
  
       this.session.on('archiveStarted', function(event) {
            this.archiveId = event.id;
-           //console.log('success request start',data);
+           console.log('ARCHIVE STARTED');
            this.clearInfo();
            this.trigger('recordStarted');
       }.bind(this));
 
       this.session.on('archiveStopped', function(event) {
-          console.log('success request stop',event);
+          console.log('ARCHVIE STOPPED');
           this.clearInfo();
           this.archiveId = null;
           this.sessionId = null;
-          //this.session.unpublish(this.publisher);
-          //this.session.disconnect();
+          console.log('try to unpublish');
+          this.session.unpublish(this.publisher);
+          this.session.disconnect();
           this.trigger('recordStopped');
+      }.bind(this));
+
+     this.session.on('streamDestroyed', function(event) {
+          console.log('prevent destroyed?');
+          event.preventDefault()
       }.bind(this));
 
       console.log('trying to connect',data.apiKey,data.token);

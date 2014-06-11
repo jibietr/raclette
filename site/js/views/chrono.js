@@ -78,13 +78,15 @@ define([
     
     // this is controled from outside
     stop: function(){ 
-      time = this.getTime();
+      this.time = this.getTime();
       console.log("Clear timers",this.timer_stop);
       if(this.timer_warn) clearTimeout(this.timer_warn);
       if(this.timer_count) clearInterval(this.timer_count);
       if(this.timer_stop) clearInterval(this.timer_stop);       
-      this.trigger("chrono_stop",time);
+       this.trigger("chrono_stop",this.time);
     },
+
+
 
     getTime: function(){
        var seconds = ((this.type =='countdown') ? this.total-this.seconds : this.seconds); 

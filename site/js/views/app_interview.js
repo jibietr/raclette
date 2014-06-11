@@ -13,7 +13,8 @@ define([
     'views/panel',
     'views/archive',
     'views/opentok_recorder',
-    'text!templates/setup.html',    
+    'text!templates/setup-1.html',    
+   'text!templates/setup-2.html',    
     'text!templates/test.html',
     'text!templates/wrap.html',
     'text!templates/expired.html',
@@ -22,13 +23,14 @@ define([
     'text!templates/interexamples.html',
     'views/opentok',
     'models/progress'],
-  function($,_,bootstrap,Backbone,app,Questionnaire,Archive,Panel,Session,TestView,QuestionView,PanelView,ArchiveView,Recorder,TmplSetup,TmplTest,TmplWrap,TmplExpired,TmplBar,TmplIntro,TmplExamples,OpentokView,Progress) {
+  function($,_,bootstrap,Backbone,app,Questionnaire,Archive,Panel,Session,TestView,QuestionView,PanelView,ArchiveView,Recorder,TmplSetup,TmplSetup2,TmplTest,TmplWrap,TmplExpired,TmplBar,TmplIntro,TmplExamples,OpentokView,Progress) {
 
     var questionnaireView = Backbone.View.extend({
 
       tagName: "div",
       id: 'app-view',
       template_setup: _.template(TmplSetup),
+      template_setup2: _.template(TmplSetup2),
       template_test: _.template(TmplTest),
       template_wrap: _.template(TmplWrap),
       template_expired: _.template(TmplExpired),
@@ -78,6 +80,7 @@ define([
 	 'click #start-interview': 'onStartInterview',
 	 'click #continue-interview': 'onContinue',
          'click #setup-done': 'onSetupDone' ,
+         'click #setup-continue': 'renderSetup2' ,
      },
      
 
@@ -145,12 +148,14 @@ define([
 
 
      renderExpired: function(){
+        window.scrollTo(0,0);
         this.$el.html(this.template_expired());
        return this;
 
      },
 
      renderExamples: function(){
+        window.scrollTo(0,0);
         this.$el.html(this.template_examples());
        return this;
 
@@ -174,12 +179,12 @@ define([
      },
 
       renderIntro: function(){
- 
+         window.scrollTo(0,0);
         //this.renderBar();
         //this.setBar('welcome');
         console.log('render welcome',this.collection.length);
-        
-        this.$el.html(this.template_intro({num_questions: this.collection.length }));
+        var time_duration = this.collection.length*5;
+        this.$el.html(this.template_intro({num_questions: this.collection.length, duration: time_duration }));
         // this may cause problems. not sure if has to be separated in two calls
  	return this;
       },
@@ -189,6 +194,15 @@ define([
         //this.setBar('setup');
         console.log('render setup');
         this.$el.html(this.template_setup());
+        // this may cause problems. not sure if has to be separated in two calls
+ 	return this;
+      },
+
+      renderSetup2: function(){
+        window.scrollTo(0,0);
+        //this.setBar('setup');
+        console.log('render setup');
+        this.$el.html(this.template_setup2());
         // this may cause problems. not sure if has to be separated in two calls
         elem = $(this.el).find("#opentok_container")[0];
         this.Recorder = new Recorder({ el: elem, model: this.model});
@@ -200,7 +214,7 @@ define([
       renderTest: function(){
         // what do we stop here?
         //this.setBar('test');
-
+        window.scrollTo(0,0);
 
         //this.Recorder.$el.detach();
         console.log('render test');
@@ -218,7 +232,8 @@ define([
       },
 
 
-     renderPanel: function(){ 
+     renderPanel: function(){
+        window.scrollTo(0,0); 
         // it may not exist at the very beginning
         if(this.Recorder) this.Recorder.$el.detach();
         if(this.collection.length===0){ // show last page...
@@ -237,6 +252,7 @@ define([
      },
  
      renderQuestion: function() {
+        window.scrollTo(0,0);
           //this.setBar('interview');
           // copy user id param from session
           //this.question.set('userid',this.session.get("userid"));
