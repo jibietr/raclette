@@ -35,6 +35,7 @@ define([
        'click #stop-active': 'stopActive'
     }, */
 
+
     // render question and timer                                                                                    
     /*setRecorderView: function(recorder){
       // attach publisher
@@ -56,14 +57,11 @@ define([
         // set up question
         this.$("#MainContainer").html(this["template_"+this.question_type](this.model.toJSON()));
         // create publisher if question is video
-     
-
-
         if(this.model.get('time_wait')){//no time wait means other 
-         this.renderCountdown();
+         this.renderWaitTime();
         }else{//tipi 
           this.info = this.$("#InfoContainer");
-          this.renderChrono();
+          this.renderActiveTime();
         }
         return this;
     },
@@ -113,64 +111,61 @@ define([
         }
     },
 
-    renderCountdown: function(){
+    renderWaitTime: function(){
         var time = this.model.get('time_wait');
         console.log('render countdown');
         this.chronoView = new ChronoView({ seconds: time , type: 'countdown' , status: 'wait' });
-        this.listenTo(this.chronoView, 'chrono_stop', this.stopWait);
+        this.listenTo(this.chronoView, 'chrono_stop', this.startRecording);
         this.$("#ChronoContainer").html(this.chronoView.render().el);
      },
 
-    renderChrono: function(){
+    renderActiveTime: function(){
         var time = this.model.get('time_response');
         console.log('render chrono');
+        if(this.question_type=="video"){
         this.chronoView = new ChronoView({ seconds: time , type: 'countdown' , status: 'active' });
+        }else{
+        this.chronoView = new ChronoView({ seconds: time , type: 'countdown' , status: 'count' });
+        }
         this.listenTo(this.chronoView, 'chrono_stop', this.stopActive);
         this.$("#ChronoContainer").html(this.chronoView.render().el);
      },
 
-    stopWait: function(time){
-        // stop countdown
-        // TODO: save question
-       this.model.set("wait_time",time);  
-       console.log('stop wait');
-        // if question is video type, then start recording
-       if(this.question_type=="video"){
-          this.Recorder.requestRecording();
-          this.listenTo(this.Recorder,'recordStarted',this.renderChrono);
-           
-        }
+    startRecording: function(time){
+      // if function was triggered by click, there is no time
+      this.model.set("wait_time",time);
+      this.Recorder.requestRecording();
+      this.listenTo(this.Recorder,'recordStarted',this.renderActiveTime);
+    },
+
+    stopActive: function(time){
+      // if function was triggered by click, there is no time
+      // set time to question
+      this.model.set("work_time",time);
+      if(this.question_type=="video") this.stopVideo();
+      else if(this.question_type=="tipi") this.submitQuestion();
 
     },
 
+    stopVideo: function(){
 
-    startActive: function(){
-      this.chronoView.remove();
-      this.renderChrono();
+      var answer = this.Recorder.getArchiveId();
+      this.model.set("content",answer);
+      this.listenTo(this.Recorder,'recordStopped',this.saveModel);
+      console.log('stop recording');
+      this.Recorder.stopRecording();
     },
 
-    stopActive: function(){
 
-        console.log("stop active");
-        this.model.set("work_time",this.chronoView.getTime());
-        this.chronoView.close();
-        if(this.question_type=="video"){
-           // get 
-           var answer = this.Recorder.getArchiveId();
-           this.model.set("content",answer);
-           this.listenTo(this.Recorder,'recordStopped',this.saveModel);
-           console.log('stop recording');
-           this.Recorder.stopRecording();
-        }else if(this.question_type=="text"){
-           var answer = $('#textAnswer').val();
-           console.log(answer);
-           this.model.set("content",answer);
-           this.saveModel();
-        }else if(this.question_type=="tipi"){
+    submitQuestion: function(){
+       //    var answer = $('#textAnswer').val();
+       //    console.log(answer);
+       //    this.model.set("content",answer);
+       //    this.saveModel();
            //var answer = $('#textAnswer').val();
            var formData = $('#tipi').serializeObject();
            if(Object.keys(formData).length<10){
-             this.setInfo('error','Please answer the questionnaire completely. Then press stop again.');   
+             this.setInfo('error','Please answer the questionnaire completely. Then press submit.');   
              window.scrollTo(0,0);
            }else{
 	     this.clearInfo();
@@ -184,9 +179,8 @@ define([
             this.model.set("content",answer);
             this.saveModel();
            }
-           //console.log(formData,Object.keys(formData).length);
            
-        }
+        
   
     },
 

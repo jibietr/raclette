@@ -174,7 +174,7 @@ define([
      },
 
       renderIntro: function(){
- 
+         window.scrollTo(0,0);
         //this.renderBar();
         //this.setBar('welcome');
         console.log('render welcome',this.collection.length);
@@ -200,7 +200,7 @@ define([
       renderTest: function(){
         // what do we stop here?
         //this.setBar('test');
-
+        window.scrollTo(0,0);
 
         //this.Recorder.$el.detach();
         console.log('render test');
@@ -218,7 +218,8 @@ define([
       },
 
 
-     renderPanel: function(){ 
+     renderPanel: function(){
+        window.scrollTo(0,0); 
         // it may not exist at the very beginning
         if(this.Recorder) this.Recorder.$el.detach();
         if(this.collection.length===0){ // show last page...
@@ -237,6 +238,7 @@ define([
      },
  
      renderQuestion: function() {
+        window.scrollTo(0,0);
           //this.setBar('interview');
           // copy user id param from session
           //this.question.set('userid',this.session.get("userid"));

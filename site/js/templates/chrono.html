@@ -31,6 +31,22 @@
   <% } %>
   </div>
   <% } %>
+  <% if (status == "count") { %>
+  <p>Time remaining</p>
+  <div id="counter" class="counter-4">
+    <div id="minutes" class="unit"><%= min %></div>
+    <div class="divider">:</div>
+    <div id="seconds" class="unit"><%= sec %></div>
+  </div>
+  <br>
+  <div class="row">
+  <% if (warning) { %>
+    <button type="submit" class="btn btn-warning" id="stop-chrono">Submit</button>
+  <% } else { %>
+    <button type="submit" class="btn btn-danger" id="stop-chrono">Submit</button>
+  <% } %>
+  </div>
+  <% } %>
 </div>
 
    
