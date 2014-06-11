@@ -91,14 +91,14 @@ define([
     setRecorder: function(recorder){
         if(this.question_type=="video"){
            var elem =  this.$("#opentok_container").get(0);
-           if(!recorder){
+         /*  if(!recorder){
              console.log('set info panel recorder', infoPanel);
              this.Recorder = new Recorder({ el: elem, model: this.model});
              this.Recorder.createPublisher();
              this.Recorder.$el.appendTo(elem); 
              var infoPanel = this.$("#InfoContainer");
              this.Recorder.setInfoPanel(infoPanel);
-           }else{
+           }else{*/
              this.Recorder = recorder;
              //console.log('append recorder');
              // we do not need this now, we are using document.queryselector
@@ -107,7 +107,7 @@ define([
              this.Recorder.setInfoPanel(infoPanel);
              //init opentok session and publisher
              this.Recorder.requestSessionPrePub();
-           }
+           //}
         }
     },
 

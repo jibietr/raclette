@@ -139,7 +139,7 @@ define(['jquery',
       
       // init session
       //console.log('host session pre pub');
-      //OT.setLogLevel(OT.NONE);
+      OT.setLogLevel(OT.NONE);
       this.session = OT.initSession(data.apiKey,data.session);
       this.sessionId = data.session;      
       this.tokenId = data.token;
