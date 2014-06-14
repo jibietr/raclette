@@ -336,9 +336,10 @@ requirejs([
       TableName: app.request.env_params.accounts, // required
     };
    
-    InitDB(UserParams);
+    //InitDB(UserParams);
+    InitDB(AnswerParams);
     setTimeout(InitDB(AnswerParams),1000);
-    setTimeout(InitDB(AccountsParams),1000);
+    //setTimeout(InitDB(AccountsParams),1000);
 
 
     //Insert a new user
