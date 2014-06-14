@@ -4,8 +4,8 @@ define([
     'bootstrap',
     'backbone',
     'app',
-    'text!templates/login.html'],
-  function($,_,bootstrap,Backbone,app,TmplLogin) {
+    'views/app_interview',                                                                                                               'text!templates/login.html'],
+  function($,_,bootstrap,Backbone,app,AppInt,TmplLogin) {
 
     var loginView = Backbone.View.extend({
 
@@ -16,14 +16,26 @@ define([
       events: { 
         'click #login-btn': 'onLoginAttempt',
       }, 
+
+
+      initialize: function () {
+                // Listen for session logged_in state changes and re-render
+            app.session.on("change:logged_in", this.render.bind(this));
+        },
+
          
       render: function() {
         //this.$el.html(this.template_login);
         console.log('render user',app.session.user);
+        if(app.session.get('logged_in')){
+            var appInt = new AppInt({});
+            this.$el.html(appInt.render().$el);
+        }else{
         this.$el.html(this.template_login({
                 user: app.session.user.toJSON()
             }));
-            return this;
+         }
+
         return this;
       },
 

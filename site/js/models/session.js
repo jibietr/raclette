@@ -51,6 +51,7 @@ define([
                     if(!res.error && res.user){
                         self.updateSessionUser( res.user );
                         self.set({ logged_in : true });
+                        console.log("Success auth:",res.error);
                         if('success' in callback) callback.success(mod, res);    
                     } else {
                         self.set({ logged_in : false });

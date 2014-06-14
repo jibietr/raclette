@@ -22,7 +22,7 @@ define([
 	},
 
         initialize: function(){
-           app.session.on("change:logged_in", this.index.bind(this));   
+         //           app.session.on("change:logged_in", this.index.bind(this));   
         //   app.session.on("change:status", this.show.bind(this));   
         },
 
@@ -32,17 +32,17 @@ define([
         },
 
         index: function(other){
-          console.log('Default page. You attempted to reach:' + other);
+          console.log('Default page. You attempted to reach:',other);
           // Fix for non-pushState routing (IE9 and below)
           var hasPushState = !!(window.history && history.pushState);
           if(!hasPushState) this.navigate(window.location.pathname.substring(1), {trigger: true, replace: true});
           else {
                 //this.show(new AppView({ model: this.session }));
-                if(app.session.get('logged_in')){
+               /* if(app.session.get('logged_in')){
                    console.log("Logged In. Update view");
                    this.show( new AppInt({}) );
-                }
-                else this.show( new LoginView({}) );
+                }*/
+                this.show( new LoginView({}) );
           }               
           //this.loadView(new AppForm());           
 	  
