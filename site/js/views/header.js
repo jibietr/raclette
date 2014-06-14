@@ -29,7 +29,7 @@ function($,_,bootstrap,Backbone,app,Tmpl) {
 
       
         onLoginStatusChange: function(evt){
-            console.log('HEADER LOGIN');
+            //console.log('HEADER LOGIN');
             this.render();
             //if(app.session.get("logged_in")) app.showAlert("Success!", "Logged in as "+app.session.user.get("username"), "alert-success");
             //else app.showAlert("See ya!", "Logged out successfully", "alert-success");
@@ -47,7 +47,7 @@ function($,_,bootstrap,Backbone,app,Tmpl) {
 
 
         render: function () {
-            console.log("RENDER::", app.session.user.toJSON(), app.session.toJSON());
+           // console.log("RENDER::", app.session.user.toJSON(), app.session.toJSON());
             this.$el.html(this.template());
             $('#nav_welcome').removeClass('active');
             $('#nav_setup').removeClass('active');
