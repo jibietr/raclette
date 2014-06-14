@@ -56,7 +56,7 @@ define([
        
 
        this.test_question = new Question();
-       this.test_question.set({ test: true, title: 'Could you introduce yourself, please?', time_response: '40', time_wait: '60', qtype: 'video', qid: '0' });
+       this.test_question.set({ test: true, title: 'Could you introduce yourself, please?', time_response: '240', time_wait: '60', qtype: 'video', qid: '0' });
        //this.opentokView.render();
        this.questionView = new QuestionView({
          model: this.test_question
