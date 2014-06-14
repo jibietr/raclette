@@ -63,8 +63,6 @@ define([
           else app.session.set({ status: 'intro'});//intro
           //app.session.set({ status: 'intro'});
 
-
-
 	 }, error: function(collection,response){
           // check error here interview expried?
           if(response.responseText=="SESSION_EXPIRED"){
