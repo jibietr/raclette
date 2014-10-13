@@ -61,7 +61,10 @@ OpentokView,Progress){
 		success: function(collection,response){ // interview still active
 		    //console.log('INTERVIEW STILL ACTIVE',collection,response);
 		    //this.total = collection.length;
-		    if(collection.length===0) app.session.set({ status: 'finished'}); // no more questions
+		    if(collection.length===0){
+			app.session.set({ status: 'finished'}); // no more questions
+			app.session.set({ status: 'archive'}); // no more questions
+		    }
 		    else app.session.set({ status: 'intro'}); // missing questions, go to intro
 		},
 		error: function(collection,response){
@@ -124,6 +127,7 @@ OpentokView,Progress){
             if(status==='finished') return this.renderPanel();
             if(status==='setup') return this.renderSetup();
             if(status==='test') return this.renderTest();
+	    if(status==='archive') return this.renderArchive();
             if(status==='wait') return this.renderPanel();
             if(status==='expired') return this.renderExpired();
             if(status==='interview') return this.renderQuestion();
@@ -167,6 +171,13 @@ OpentokView,Progress){
         this.$el.html(this.template_setup());
         // this may cause problems. not sure if has to be separated in two calls
  	return this;
+      },
+
+     renderArchive: function(){
+        console.log('render archive');
+         archive = new ArchiveView();
+         this.$el.html(archive.render().el);
+         return this;
       },
 
       renderSetup2: function(){
