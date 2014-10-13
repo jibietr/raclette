@@ -1,89 +1,88 @@
-define(['jquery','underscore','fs','http','querystring','crypto','params',
-   //'opentok'],function($,_,fs,OpenTok,) {
-   ],function($,_,fs,http,querystring,crypto,par) {
-    // Start with the constructor
-    // empty constructor    function Router(me) {
+// define all functions served in the backend
+define(['jquery','underscore','fs','http','querystring','crypto','params'],
+function($,_,fs,http,querystring,crypto,par) {
 
-    var Router = function() {};
+    var Router = function() {}; //empty constructor
 
+    // Generate an opentok session 
+    // https://tokbox.com/opentok/tutorials/create-token/node/index.html
     Router.prototype.startSession = function(req, res) {
-      console.log("request start session");
 
-      req.opentok.createSession({}, function(error, session){
-	if(error) {
-	  util.log("Error obtaining session ID: " + error.message);
-	  process.exit();
-	}
-	//req.opentokSession = session;
+      console.log("startSession:: request start session");
 
-        console.log("session:",session.sessionId);
-        //console.log("role:",OpenTok.RoleConstants.MODERATOR);
-        // need to get token
-        var tokenId = req.opentok.generateToken(session.sessionId);
-
-        console.log("tokenId:",tokenId);
-
-        res.send({
-	    apiKey: req.config.apiKey,
-	    session: session.sessionId,
-	    token: tokenId
-        });
+      par.opentok.createSession({}, function(error, session){
+	  if(error) {
+	      console.log("startSession:: Error obtaining session ID: ", error.message);
+	  }else{
+              console.log("startSession:: Session created with ID: ", session.sessionId);
+              // generate a token
+              var tokenId = par.opentok.generateToken(session.sessionId);
+              console.log("startSession:: Got token ",tokenId);
+	      // return session
+              res.send({
+		  apiKey: par.config.apiKey,
+		  session: session.sessionId,
+		  token: tokenId
+              });
+	  }
       });
     };
 
+    // Start opentok archive
     Router.prototype.startArchive = function(req, res, next) {
-      console.log('start archive',req.params.session);
-      req.opentok.startArchive(req.params.session, { name: 'my archiving sample' },
-      function(err, archive) {
-      if(err) {
-	console.log('Error starting archive: ' + err.message,err);
-        res.statusCode = '500';
-        return res.send(err.message);
-      }
-      console.log('Archive started:',archive);
-      res.send(archive);
-      });
+	console.log("startArchive:: start recording with session ID: ", req.params.session);
+	par.opentok.startArchive(req.params.session, { name: 'archive_sample' }, 
+          function(err, archive) {
+	    if(err) {
+		console.log("startArchive:: Error starting archive: " + err.message, err);
+		res.statusCode = "500";
+		return res.send(err.message);
+	    }
+	    console.log("startArchive:: Archive started:",archive);
+	    res.send(archive);
+	});
     };
 
+    // Stop opentok archive
     Router.prototype.stopArchive = function(req, res, next) {
-       req.opentok.stopArchive(req.params.archive, function(err, archive) {
-       if(err) {
-         console.log('Error stopping archive: ' + err.message);
-         return next(err);
-        }
-        res.send(archive);
-     }); 
+	par.opentok.stopArchive(req.params.archive, 
+          function(err, archive) {
+	    if(err) {
+		console.log('Error stopping archive: ' + err.message);
+		return next(err);
+            }
+            res.send(archive);
+	}); 
     };
 
+    // Get archived video
     Router.prototype.getArchive = function(req, res, next) {
-      // req.params.archive
-      // I cannot pass a sign url to a video player so will make video public
-      // and then delete it
-      s3 = new par.env.aws.S3();
-      var bucket = 'opentok-videos' + '/' + req.config.apiKey + '/' + req.params.archive;
-      console.log('bucket',bucket,req.params);
-      var params = { Bucket: bucket, Key: 'archive.mp4', };
-      // first check if video exists...
-      s3.headObject(params, function(err, data) {
-       if (err){
-           console.log('ERR');
-           console.log(err, err.stack); // an error occurred
-           return res.send({error: err.code}); // send error
-       } 
-       else {
-         console.log('it seems it exists');
-         console.log(data);           // successful response
-         s3.getSignedUrl('getObject', params, function (err, ur) {
-          console.log('The URL is', ur);
-          if(err) res.send({error:err.code});
-          else res.send({url:ur});
-        });
-
-       }
-      });
+	// req.params.archive
+	// I cannot pass a sign url to a video player so will make video public
+	// and then delete it --> is this what we are doing?
+	s3 = new par.env.aws.S3();
+	var bucket = 'opentok-videos' + '/' + par.config.apiKey + '/' + req.params.archive;
+	console.log('bucket',bucket,req.params);
+	var params = { Bucket: bucket, Key: 'archive.mp4', };
+	// first check if video exists...
+	s3.headObject(params, function(err, data) {
+	    if (err){
+		console.log('ERR');
+		console.log(err, err.stack); // an error occurred
+		return res.send({error: err.code}); // send error
+	    } else {
+		console.log('it seems it exists');
+		console.log(data);           // successful response
+		s3.getSignedUrl('getObject', obj, function (err, ur) {
+		    console.log('The URL is', ur);
+		    if(err) res.send({error:err.code});
+		    else res.send({url:ur});
+		});
+	    }
+	});
     };
 
-
+    // Get list of videos for a given user
     Router.prototype.getFullArchive = function(req, res, next) {
       // req.params.archive
       // I cannot pass a sign url to a video player so will make video public
@@ -138,7 +137,7 @@ define(['jquery','underscore','fs','http','querystring','crypto','params',
 
 
 
-
+    // Save a response to DB
     Router.prototype.saveAnswer = function(req, res){ 
 
       console.log("POST to /api/apianswers");
@@ -213,6 +212,7 @@ define(['jquery','underscore','fs','http','querystring','crypto','params',
 
     };
 
+    // Get questions left form interview
     Router.prototype.startInterview = function(req, res){ 
         
         console.log("start interview",req.params);
@@ -247,6 +247,7 @@ define(['jquery','underscore','fs','http','querystring','crypto','params',
         });
     };  
 
+    /*
     Router.prototype.submitAll = function(req, res){
  
        // create unique Hash as id
@@ -312,8 +313,10 @@ define(['jquery','underscore','fs','http','querystring','crypto','params',
         });
 
 
-    };
+    };*/
 
+
+    /*
     Router.prototype.submitUserDoc = function(req, res){
  
        // create unique Hash as id
@@ -380,8 +383,9 @@ define(['jquery','underscore','fs','http','querystring','crypto','params',
        
 
 
-    };
+    };*/
 
+    /*
     function s3_upload_file(env_params,file,fname,handler){
 
        console.log("s3 upload file" + file.name);
@@ -400,10 +404,10 @@ define(['jquery','underscore','fs','http','querystring','crypto','params',
 		        };
 	         s3.putObject(params, handler);
 	     });
-    }
+    }*/
 
 
-
+    /*
     function uploadFiles(req, hash,callbackSuccess, callbackError){
 
         // extract name and mime from object to upload
@@ -436,8 +440,9 @@ define(['jquery','underscore','fs','http','querystring','crypto','params',
           s3_upload_file(req.env_params,req.files[key],fname,handler);
         }
 
-    }
+    }*/
 
+    /*
     Router.prototype.checkRecaptcha = function(req, res){
 
        //http://stackoverflow.com/questions/7450465/i-keep-receiving-invalid-site-private-key-on-my-recaptcha-validation-request
@@ -493,7 +498,8 @@ define(['jquery','underscore','fs','http','querystring','crypto','params',
     request.write(data_qs, 'utf8');
     request.end();
 
-    };
+    };*/
+
 
    // @desc: check a user's auth status based on a cookie 
    Router.prototype.Auth = function(req, res){
@@ -504,8 +510,6 @@ define(['jquery','underscore','fs','http','querystring','crypto','params',
       var user = { username: 'jansinsa@hotmail.com', id: '1', password: 'default_pwd' };
       if(req.signedCookies.user_id===user.id) res.json({ user: _.omit(user, ['password', 'auth_token']) });
       else res.json({ error: "Client has no valid login cookies."  });
-
-
    };
 
 
@@ -566,7 +570,7 @@ define(['jquery','underscore','fs','http','querystring','crypto','params',
   
    };*/
 
-
+    // get missing questions
    Router.prototype.GetQuestions = function(req, res){
      // get status of interview, check status, and then retrieve questions
      //console.log('Request questions',req);
@@ -580,7 +584,7 @@ define(['jquery','underscore','fs','http','querystring','crypto','params',
 
        if(err) res.json({ err: 'Error starting session' + err });
        else{
-         console.log('Scan questions in Table ', params.env.questions);
+         console.log('Scan questions in Table ', par.env.questions);
          // get id last 
          var last_response = '0';
          if('last' in data.Item) last_response = data.Item.last.S;
@@ -588,7 +592,7 @@ define(['jquery','underscore','fs','http','querystring','crypto','params',
 
 	     var expires = parseInt(data.Item.expires.S, 10);
              var now = parseInt((new Date).getTime().toString(),10);
-             console.log('compare times',expires,now);
+             //console.log('compare times',expires,now);
 	     if(now>expires){ 
                 console.log('session expired');
                 // res.json returns model with new fields
@@ -612,7 +616,7 @@ define(['jquery','underscore','fs','http','querystring','crypto','params',
 
 
                var query_params = {
-         TableName: params.env.questions, // require     
+         TableName: par.env.questions, // require     
             KeyConditions: { 'iid':
              { ComparisonOperator: 'EQ',
                AttributeValueList: [ { S: 'default_iid' } ],  
@@ -637,7 +641,8 @@ define(['jquery','underscore','fs','http','querystring','crypto','params',
 	 dd.query(query_params, function(err, data) {
            if (err) console.log(err, err.stack); // an error occurred
            else{     
-             console.log(data);           // successful response
+             //console.log(data);           // successful response
+             console.log("success retrieving questions");
              questions = [];
              data.Items.forEach(function(entry) {
                 console.log(entry);
@@ -677,7 +682,7 @@ define(['jquery','underscore','fs','http','querystring','crypto','params',
        //var user_hash = (new Date).getTime().toString() + Math.floor((Math.random()*1000)+1).toString();
        //TODO: change username for email
        var user = req.body;
-       var user_hash = crypto.createHmac('sha1', req.env_params.hash_key).update(user.username).digest('hex');
+       var user_hash = crypto.createHmac('sha1', par.env.hash_key).update(user.username).digest('hex');
        user_hash = user_hash.substring(0,8);
 
 	// salted-hash encripted pwd
@@ -693,10 +698,10 @@ define(['jquery','underscore','fs','http','querystring','crypto','params',
 	          'email': { 'S': user.username },
 		  'pwd': { 'S': toBeStored }
 		};
-	  var AWS = req.env_params.aws;
+	  var AWS = par.env.aws;
 	  dd = new AWS.DynamoDB();
 	  dd.putItem({
-		    'TableName': req.env_params.accounts,
+		    'TableName': par.env.accounts,
 		    'Item': item,
 		  }, function(err, data) {
 		   if(!err) {

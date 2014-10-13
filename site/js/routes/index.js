@@ -1,78 +1,75 @@
+// routing
 define([
-  'jquery',
-  'underscore',
-  'bootstrap',
-  'backbone',
-  'app',
-  'views/faq', 
-  'views/app_interview', // AppInt
-  //'views/app_form'
-  'models/session',  
-  'models/user',
-  'views/login',
-  'views/header'],
-  function($,_,bootstrap,Backbone,app,FAQ,AppInt,Session,User,LoginView,HeaderView) {
-
-
+    'jquery',
+    'underscore',
+    'bootstrap',
+    'backbone',
+    'app',
+    'views/faq', 
+    'views/app_interview',
+    'views/login',
+    'views/header'
+],
+function($,_,bootstrap,Backbone,app,faqView,AppView,LoginView,HeaderView) {
+    
     var router = Backbone.Router.extend({
-	/* define the route and function maps for this router */
+	 /* define the route and function maps for this router */
 	routes: {
             "faq" : "showFAQ",
-	    "*other": "index"
+	    "*other": "showLogin"
 	},
 
         initialize: function(){
-         //           app.session.on("change:logged_in", this.index.bind(this));   
-        //   app.session.on("change:status", this.show.bind(this));   
+            // listen to changes in log status
+            app.session.on("change:logged_in", this.showLogin.bind(this));
         },
-
+	
         showFAQ: function(){
-          console.log('Show FAQ');
-          this.show(new FAQ());
+            //console.log('Show FAQ');
+            this.show(new faqView());
         },
 
-        index: function(other){
+	isAuth: function(){
+	    if(!app.session.get('logged_in')){
+		console.log("not logged in"); // show login
+		this.show(new LoginView({}));
+		return false;
+	    }
+	    return true;
+	},
+
+        showLogin: function(other){
           console.log('Default page. You attempted to reach:',other);
           // Fix for non-pushState routing (IE9 and below)
           var hasPushState = !!(window.history && history.pushState);
           if(!hasPushState) this.navigate(window.location.pathname.substring(1), {trigger: true, replace: true});
           else {
-                //this.show(new AppView({ model: this.session }));
-               /* if(app.session.get('logged_in')){
-                   console.log("Logged In. Update view");
-                   this.show( new AppInt({}) );
-                }*/
-                this.show( new LoginView({}) );
+              //this.show(new AppView({ model: this.session }));
+              if(this.isAuth()){
+                  console.log("Logged In. Update view");
+		  // Every page view in the router should need a header.
+		  // Instead of creating a base parent view, just assign the view to this
+		  // so we can create it if it doesn't yet exist
+		  if(!this.headerView){
+                      this.headerView = new HeaderView({});
+                      this.headerView.setElement( $("#header") );
+		  }
+		  this.show( new AppView({}) );
+              }
           }               
-          //this.loadView(new AppForm());           
-	  
 	},
-        // clean after yourself        
-        // http://mikeygee.com/blog/backbone.html
-       show: function(view,options) {
 
-            // Every page view in the router should need a header.
-            // Instead of creating a base parent view, just assign the view to this
-            // so we can create it if it doesn't yet exist
-           if(!this.headerView){
-                this.headerView = new HeaderView({});
-                this.headerView.setElement( $("#header") );
-                //this.headerView.setElement( $("#header") ).render();
-             }
-          console.log('RENDER VIEW',app.session.attributes.status,this.view,view,options);
-          //if(view){
-          if(this.view) this.view.remove();
-          this.view = view;
-          //}
- 
-          $("#application").html(this.view.render().$el);
-          
+	show: function(view,options) {
+            // clean after yourself        
+            // http://mikeygee.com/blog/backbone.htmlw
+            if(this.view) this.view.remove();
+	    this.view = view; //main view
+	    $("#application").html(this.view.render().$el);
         }
     });
 
-
-  return router;
-
+    return router;
+    
 });
 
 

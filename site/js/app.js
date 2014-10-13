@@ -15,7 +15,7 @@ define([
     };
     $.ajaxSetup({ cache: false });          // force ajax call on all browsers
 
-    console.log("run app.js",app);
+    //console.log("run app.js",app);
     // Things worth checking
     //$.ajaxSetup({ cache: false });
     // Global event aggregator

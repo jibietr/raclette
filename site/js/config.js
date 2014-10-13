@@ -1,6 +1,8 @@
+// Loaded using data-main entry in index.html
+// http://requirejs.org/docs/api.html#config
 requirejs.config({
-    deps: [ 'main' ],
-    baseUrl: 'js',
+    deps: [ 'main' ], // dependencies
+    baseUrl: 'js', // root path to all module lookups
     paths: {
         'models': 'models',
         'collections' : 'collections',
@@ -22,8 +24,8 @@ requirejs.config({
         'recaptcha': 'lib/recaptcha_ajax',
         'parsley': 'lib/parsley',
         'utils': 'lib/utils', 
-
     },
+    // use shim for dependencies that do not use define
     shim: {
         'jquery' : {
             exports: '$'  
@@ -53,10 +55,7 @@ requirejs.config({
         'jquery.iframe':{
            deps: ['jquery']
         },
-
-
-
-        }
+   }
 });
 
 

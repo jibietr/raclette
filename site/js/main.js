@@ -1,3 +1,4 @@
+// main app loaded as dependency in config.js
 requirejs([
     'jquery',
     'underscore',
