@@ -41,8 +41,8 @@ define([
       elem = this.$('#archive_entries');
       this.collection.each(function(entry) {
         console.log('log item.', entry.attributes);
-       // elem.append(this.template_entry(entry.attributes));
-        //this.getArchive(entry.attributes.content);
+	  //entry.attributes.title= 'default';
+          elem.append(this.template_entry(entry.attributes));
     }.bind(this));
     }
 
