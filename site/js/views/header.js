@@ -54,11 +54,12 @@ function($,_,bootstrap,Backbone,app,Tmpl) {
             $('#nav_test').removeClass('active');
             $('#nav_interview').removeClass('active');
             var status =  app.session.attributes.status;
-            if(status=='finished') status = 'interview';
+            //if(status=='finished') status = 'interview';
             if(status==='setup')  status = 'setup';
             if(status==='test')  status = 'test'; 
-            if(status==='wait')  status = 'interview';
-            if(status==='expired') status = 'interview';
+            //if(status==='wait')  status = 'interview';
+            if(status==='expired') status = 'welcome';
+            if(status==='interview') status = 'interview';
             if(status==='intro') status= 'welcome';
            if(status==='examples') status= 'examples';
             $('#nav_'+status).addClass('active');

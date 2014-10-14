@@ -6,35 +6,67 @@ define([
     'views/question',
     'models/question',
     'views/archive',
+    'text!templates/setup-1.html',
+    'text!templates/setup-2.html',
     'text!templates/test.html',
-    'text!templates/archive.html'],
-  function($,_,bootstrap,Backbone,QuestionView,Question,ArchiveView,TmplTest,TmplArchive) {
-
+    'text!templates/interexamples.html',    
+    'text!templates/archive.html',
+    'views/opentok_recorder',
+    'app',
+],
+function($,_,bootstrap,Backbone,QuestionView,Question,ArchiveView,TmplSetup,TmplSetup2,TmplTest,TmplExamples,TmplArchive,Recorder,app) {
+    
     var testView = Backbone.View.extend({
-      id: 'test-view',
-      tagName: 'div',
-      template_test: _.template(TmplTest),
-      template_archive: _.template(TmplArchive),
+	id: 'test-view',
+	tagName: 'div',
+	template_setup: _.template(TmplSetup),
+	template_setup2: _.template(TmplSetup2),
+	template_test: _.template(TmplTest),
+	template_examples: _.template(TmplExamples),
+	template_archive: _.template(TmplArchive),
 
-    events:{
-         'click #go-interview':'skip',
-         'click #try-question': 'startTest' ,
-         'click #try-again': 'startTest' ,
-    },
+	events:{
+	    'click #setup-done': 'startTest' ,
+            'click #go-interview':'skip',
+            'click #try-question': 'startTest' ,
+            'click #try-again': 'startTest' ,
+	},
 
-
-    skip: function(){
-       this.trigger('test-done');
-       //this.progress.set({ status: 'interview'});
-    },
-
-
+	skip: function(){
+	    this.trigger('test-done');
+	    //this.progress.set({ status: 'interview'});
+	},
 	
-    // render question and timer                                                                                    
-    render: function() {
-        this.$el.html(this.template_test());
-        return this;
-    },
+	renderSetup2: function(){
+            window.scrollTo(0,0);
+            this.$el.html(this.template_setup2());
+            elem = $(this.el).find("#opentok_container")[0];
+	    console.log('render setup 2',elem);
+	    app.Recorder = new Recorder({ el: elem} );
+	    //this.Recorder.setAttrs({ el: elem });
+            app.Recorder.createPublisher();
+	    return this;
+	},
+
+	renderSetup: function(tempName) {
+            window.scrollTo(0,0);
+            this.$el.html(this.template_setup());
+            return this;
+	},
+
+	renderExamples: function(tempName) {
+            window.scrollTo(0,0);
+            this.$el.html(this.template_examples());
+            return this;
+	},
+	
+	// render question and timer                                                                                    
+
+	render: function(tempName) {
+            window.scrollTo(0,0);
+            this.$el.html(this.template_test());
+            return this;
+	},
 
     // call before start test
     setRecorder: function(recorder){
@@ -43,7 +75,12 @@ define([
 
     startTest: function(recorder){
        // remove if they exists (multiple tests)
-       if(this.test_question) delete this.test_question;
+	//this.Recorder.$el.detach();   
+	//this.render('test');
+	this.$el.html(this.template_test());
+
+	console.log('start test');
+     if(this.test_question) delete this.test_question;
        if(this.QuestionView){ 
            this.questionView.remove();
            delete this.questionView;
@@ -66,7 +103,8 @@ define([
        this.questionView.$el.appendTo(elem); 
        this.questionView.render();             
        // connect and render recorder                                                                                
-       this.questionView.setRecorder(this.Recorder);
+	console.log('setup recorder',app.Recorder);
+       this.questionView.setRecorder(app.Recorder);
        this.listenTo(this.test_question,'question-done',this.renderArchive);
     },
 
@@ -75,7 +113,7 @@ define([
       //need to request access to a video using S3
       console.log('SHOW VIDEO',this.test_question);
       // remove question view      
-      this.Recorder.$el.detach();
+      app.Recorder.$el.detach();
       this.questionView.remove();
       //this.archiveView = new ArchiveView();
       //.console.log('playback element',$(this.el).find("#playback")[0]);  

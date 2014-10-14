@@ -24,6 +24,11 @@ define(['jquery',
             accessAllowed: false
         },
 
+	setAttrs: function(attrs){
+	    console.log('set recorder args',attrs);
+	    this.el = attrs.el;
+	},
+
     // in case you want to create publisher before session
     createPublisher: function(){
       //elem = document.querySelector("#publisher");

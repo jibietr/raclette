@@ -73,7 +73,7 @@ function($,_,fs,http,querystring,crypto,par) {
 	    } else {
 		console.log('it seems it exists');
 		console.log(data);           // successful response
-		s3.getSignedUrl('getObject', obj, function (err, ur) {
+		s3.getSignedUrl('getObject', params, function (err, ur) {
 		    console.log('The URL is', ur);
 		    if(err) res.send({error:err.code});
 		    else res.send({url:ur});
@@ -571,71 +571,75 @@ function($,_,fs,http,querystring,crypto,par) {
    };*/
 
     // get missing questions
-   Router.prototype.GetQuestions = function(req, res){
-     // get status of interview, check status, and then retrieve questions
-     //console.log('Request questions',req);
-     console.log('Request questions for session with user',req.user);
-     // req.user is available thanks to passport
-     dd = new par.env.aws.DynamoDB();
+    Router.prototype.GetQuestions = function(req, res){
+	// get status of interview, check status, and then retrieve questions
+	//console.log('Request questions',req);
+	console.log('Request questions for session with user',req.user);
+	// req.user is available thanks to passport
+	dd = new par.env.aws.DynamoDB();
+	
+	function get_missing_questions(err,data){
+	    params = this;
+	    var dd = new par.env.aws.DynamoDB();
 
-     function get_missing_questions(err,data){
-       params = this;
-       var dd = new par.env.aws.DynamoDB();
+	    if(err) res.json({ err: 'Error starting session' + err });
+	    else{
+		console.log('Scan questions in Table ', par.env.questions);
+		// get id last 
+		var last_response = '0';
+		if('last' in data.Item) last_response = data.Item.last.S;
+		console.log('last',last_response);
 
-       if(err) res.json({ err: 'Error starting session' + err });
-       else{
-         console.log('Scan questions in Table ', par.env.questions);
-         // get id last 
-         var last_response = '0';
-         if('last' in data.Item) last_response = data.Item.last.S;
-         if('expires' in data.Item){
-
-	     var expires = parseInt(data.Item.expires.S, 10);
-             var now = parseInt((new Date).getTime().toString(),10);
-             //console.log('compare times',expires,now);
-	     if(now>expires){ 
-                console.log('session expired');
-                // res.json returns model with new fields
-                res.send('SESSION_EXPIRED');
-             }
-         }
-
-        /* var scan_params = {
-            TableName: params.env.questions, // require     
-            K 
-            AttributesToGet: [
-            'qid', 'status', 'title', 'time_response', 'time_wait', 'qtype',
-          ], 
-           QueryFilter: { 'qid': 
-             { ComparisonOperator: 'GT',
-               AttributeValueList: [ { S: last_response } ],  
-             } 
-           },
-         };*/
+		// send expired only if
+		/*
+		if('expires' in data.Item){
+		    var expires = parseInt(data.Item.expires.S, 10);
+		    var now = parseInt((new Date).getTime().toString(),10);
+		    //console.log('compare times',expires,now);
+		    if(last_response==
+		    if(now>expires){ 
+			console.log('session expired');
+			// res.json returns model with new fields
+			res.send('SESSION_EXPIRED');
+		    }
+		}*/
+		
+		/* var scan_params = {
+		   TableName: params.env.questions, // require     
+		   K 
+		   AttributesToGet: [
+		   'qid', 'status', 'title', 'time_response', 'time_wait', 'qtype',
+		   ], 
+		   QueryFilter: { 'qid': 
+		   { ComparisonOperator: 'GT',
+		   AttributeValueList: [ { S: last_response } ],  
+		   } 
+		   },
+		   };*/
+		
 
 
-
-               var query_params = {
-         TableName: par.env.questions, // require     
-            KeyConditions: { 'iid':
-             { ComparisonOperator: 'EQ',
-               AttributeValueList: [ { S: 'default_iid' } ],  
-             },
-               'qid':
-             { ComparisonOperator: 'GT',
-               AttributeValueList: [ { S: last_response } ],  
-             },
-             },
-             AttributesToGet: [
-		 'qid', 'status', 'title', 'time_response', 'time_wait', 'qtype',
-             ],
-            /*  QueryFilter:{  'qtype':
-             { ComparisonOperator: 'EQ',
-               AttributeValueList: [ { S: 'video'} ],  
-             },
-             },*/
-
-         };
+		var query_params = {
+		    TableName: par.env.questions, // require     
+		    KeyConditions: { 'iid':
+				     { ComparisonOperator: 'EQ',
+				       AttributeValueList: [ { S: 'default_iid' } ],  
+				     },
+				     'qid':
+				     { ComparisonOperator: 'GT',
+				       AttributeValueList: [ { S: last_response } ],  
+				     },
+				   },
+		    AttributesToGet: [
+			'qid', 'status', 'title', 'time_response', 'time_wait', 'qtype',
+		    ],
+		    /*  QueryFilter:{  'qtype':
+			{ ComparisonOperator: 'EQ',
+			AttributeValueList: [ { S: 'video'} ],  
+			},
+			},*/
+		    
+		};
 
 
 	 dd.query(query_params, function(err, data) {
