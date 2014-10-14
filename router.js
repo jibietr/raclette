@@ -1,6 +1,6 @@
 // define all functions served in the backend
-define(['jquery','underscore','fs','http','querystring','crypto','params'],
-function($,_,fs,http,querystring,crypto,par) {
+define(['jquery','underscore','fs','http','querystring','crypto','params','async'],
+function($,_,fs,http,querystring,crypto,par,async) {
 
     var Router = function() {}; //empty constructor
 
@@ -82,7 +82,78 @@ function($,_,fs,http,querystring,crypto,par) {
 	});
     };
 
+
+    function get_title(item,callback){
+       var dd = new par.env.aws.DynamoDB();
+       console.log('get title',item);
+        var query_params = {
+         TableName: par.env.questions, // require     
+            KeyConditions: { 'iid':
+             { ComparisonOperator: 'EQ',
+               AttributeValueList: [ { S: 'default_iid' } ],  
+             },
+               'qid':
+             { ComparisonOperator: 'EQ',
+               AttributeValueList: [ { S: item.qid } ],  
+             },
+             },
+             AttributesToGet: [
+		  'title'
+             ],
+         };
+	 dd.query(query_params, function(err, data) {
+           if (err) console.log(err, err.stack); // an error occurred
+           else{     
+             //console.log(data);
+
+             //console.log(data.Items[0].title.S);           // successful response
+	       //kaka
+	     //console.log('this is the data entry',data.Items[0].title.S);
+             item.title = data.Items[0].title.S;
+             callback(null,item);
+           }
+         }.bind(item));
+     }
+
+    function request_access(item,callback) {
+      // req.params.archive
+      // I cannot pass a sign url to a video player so will make video public
+      // and then delete it
+
+      s3 = new par.env.aws.S3();
+	var bucket = 'opentok-videos' + '/' + '44757122' + '/' + item.content;
+      //var bucket = 'opentok-videos' + '/' + par.env.apiKey + '/' + item.content;
+      //console.log('bucket',bucket,req.params);
+      var params = { Bucket: bucket, Key: 'archive.mp4', };
+      // first check if video exists...
+      s3.headObject(params, function(err, data) {
+       if (err){
+           console.log('ERR');
+           console.log(err, err.stack); // an error occurred
+           //return res.send({error: err.code}); // send error
+           //return err.code; // send error
+           callback(err.code,item);
+       } 
+       else {
+         console.log('it seems it exists');
+         console.log(data);           // successful response
+         s3.getSignedUrl('getObject', params, function (err, ur) {
+          console.log('The URL is', params, ur);
+          //if(err) res.send({error:err.code});
+          //else res.send({url:ur});
+          if(err) callback(err.code,item);
+          else{ 
+            item.url = ur;
+            callback(null,item);
+          } 
+        });
+
+       }
+      });
+    }
+
     // Get list of videos for a given user
+
     Router.prototype.getFullArchive = function(req, res, next) {
       // req.params.archive
       // I cannot pass a sign url to a video player so will make video public
@@ -105,32 +176,49 @@ function($,_,fs,http,querystring,crypto,par) {
              AttributesToGet: [
                 'qtype', 'content','qid'
              ],
-            /*  QueryFilter:{  'qtype':
+             //this does not work, we do not know why
+             /*QueryFilter:{  'qtype':
              { ComparisonOperator: 'EQ',
                AttributeValueList: [ { S: 'video'} ],  
              },
              },*/
 
          };
-	 dd.query(query_params, function(err, data) {
+       dd.query(query_params, function(err, data) {
            if (err) console.log(err, err.stack); // an error occurred
            else{     
              console.log('response',data);           // successful response
              answers = [];
+             console.log(data.Items);
+             // need to return an object for each elem
+             // filter post search
              data.Items.forEach(function(entry) {
                 // we should generate a signed url here...
-                console.log(entry);
+                //console.log(entry);
                 var item = { 
                    'qid': entry.qid.S,
-                    //'title': entry.title.S,
+                   //'title': entry.title.S,
                    'qtype': entry.qtype.S,
                    'content': entry.content.S,
                 };
                 //if('time_wait' in entry) item.time_wait = entry.time_wait.N;
-                answers.push(item);
+                if(item.qtype==='video') answers.push(item);
              });
-             answers = answers.reverse();
-             res.send(answers);
+             async.map(answers,get_title,function(err,results){
+               console.log('finish',err,results);
+		 
+             async.map(results,request_access,function(err,results){
+               console.log('finish',err,results);
+               //asnwers.push(item);
+               res.send(results);
+             });
+
+             });
+             
+
+             //answers = answers.reverse();
+             //console.log('after async',answers);
+
            }
          });
      };
@@ -590,19 +678,19 @@ function($,_,fs,http,querystring,crypto,par) {
 		if('last' in data.Item) last_response = data.Item.last.S;
 		console.log('last',last_response);
 
-		// send expired only if
-		/*
-		if('expires' in data.Item){
-		    var expires = parseInt(data.Item.expires.S, 10);
-		    var now = parseInt((new Date).getTime().toString(),10);
-		    //console.log('compare times',expires,now);
-		    if(last_response==
-		    if(now>expires){ 
-			console.log('session expired');
-			// res.json returns model with new fields
-			res.send('SESSION_EXPIRED');
+		// send expired only 
+		if(last_response<12){//send expired only if is uncompleted
+		    if('expires' in data.Item){
+			var expires = parseInt(data.Item.expires.S, 10);
+			var now = parseInt((new Date).getTime().toString(),10);
+			//console.log('compare times',expires,now);
+			if(now>expires){ 
+			    console.log('session expired');
+			    // res.json returns model with new fields
+			    res.send('SESSION_EXPIRED');
+			}
 		    }
-		}*/
+		}
 		
 		/* var scan_params = {
 		   TableName: params.env.questions, // require     

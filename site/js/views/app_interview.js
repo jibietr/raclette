@@ -28,10 +28,9 @@ InfoView,ExamplesView,SetupView,TestView,InterView,ArchiveView,Recorder,OpentokV
             // listen to changes in status
             app.session.on("change:status", this.render.bind(this)); 
 
-	    app.session.set({ status: 'archive'}); // no more questions
  
             // check if there are still missing questions to answer
-/*	    this.collection = new Interview();
+	    this.collection = new Interview();
 	    this.collection.fetch({
 		reset: true, //initialize collection from db
 		success: function(collection,response){ // interview still active
@@ -48,7 +47,7 @@ InfoView,ExamplesView,SetupView,TestView,InterView,ArchiveView,Recorder,OpentokV
 		    if(response.responseText=="SESSION_EXPIRED"){
 			app.session.set({ status: 'expired'});
 		    }
-		}.bind(this)});        */
+		}.bind(this)});        
 	},
 
 
