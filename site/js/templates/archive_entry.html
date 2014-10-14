@@ -3,14 +3,17 @@
     <div class="col-md-1">
       <p><%= qid %></p>
     </div>
-    <div class="col-md-5">
-      <p>title goes here</p>
+    <div class="col-md-8">
+      <p><%= title %></p>
     </div>
-    <div class="col-md-2">
-      <button type="submit" class="btn btn-primary" id="download">get download link</button>
-    </div>
-    <div class="col-md-4">
-      <p>link goes here</p>
+    <!--video width="320" height="240" controls><source src="<%= url %>" type="video/mp4"></video-->   
+    <!--video id="example_video_1" class="video-js vjs-default-skin"
+	controls preload="auto" width="320" height="240"
+	data-setup='{"example_option":true}'>
+ <source src="<%= url %>" type='video/mp4' />
+<p class="vjs-no-js">To view this video please enable JavaScript, and consider upgrading to a web browser that <a href="http://videojs.com/html5-video-support/" target="_blank">supports HTML5 video</a></p-->
+    <div class="col-md-3">
+      <a href="<%= url %>">click for download</a>
     </div>
   </div>
 </div>

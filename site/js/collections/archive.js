@@ -9,6 +9,15 @@ define([
       model: archive_entry,  
       url: '/api/archive', 
 
+      defaults: {
+            user_id: ''
+      },
+
+        initialize: function(id){
+            this.user_id = id;
+        }
+
+
       /*initialize: function(){
          console.log("init collection");
       }*/

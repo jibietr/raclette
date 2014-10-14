@@ -5,7 +5,6 @@ define([
     'backbone',
     'views/question',
     'models/question',
-    'views/archive',
     'text!templates/setup-1.html',
     'text!templates/setup-2.html',
     'text!templates/test.html',
@@ -14,7 +13,7 @@ define([
     'views/opentok_recorder',
     'app',
 ],
-function($,_,bootstrap,Backbone,QuestionView,Question,ArchiveView,TmplSetup,TmplSetup2,TmplTest,TmplExamples,TmplArchive,Recorder,app) {
+function($,_,bootstrap,Backbone,QuestionView,Question,TmplSetup,TmplSetup2,TmplTest,TmplExamples,TmplArchive,Recorder,app) {
     
     var testView = Backbone.View.extend({
 	id: 'test-view',
