@@ -119,10 +119,10 @@ function($,_,fs,http,querystring,crypto,par) {
              answers = [];
              data.Items.forEach(function(entry) {
                 // we should generate a signed url here...
-                //console.log(entry);
+                console.log(entry);
                 var item = { 
                    'qid': entry.qid.S,
-                   //'title': entry.title.S,
+                    //'title': entry.title.S,
                    'qtype': entry.qtype.S,
                    'content': entry.content.S,
                 };
