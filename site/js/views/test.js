@@ -64,7 +64,8 @@ function($,_,bootstrap,Backbone,QuestionView,Question,TmplTest,TmplArchive,Recor
 	    });
 	    // attach questionView to main view
 	    elem = $(this.el).find("#test_question")[0];
-	    this.questionView.$el.appendTo(elem).render();             
+	    this.questionView.$el.appendTo(elem);
+	    this.questionView.render();             
 	    // connect and render recorder                                                                                
 	    console.log('setup recorder',app.Recorder);
 	    // TODO: can this directly be done through app instead of setRecorder?
