@@ -1,4 +1,4 @@
-// main app viewonExam
+// main app view
 define([
     'jquery',
     'underscore',
@@ -13,11 +13,10 @@ define([
     'views/test',
     'views/interview',
     'views/archive',
-    'views/opentok_recorder',
-    'views/opentok'
+    'views/opentok_recorder'
 ],
-function($,_,bootstrap,Backbone,app,Interview,Archive,
-InfoView,ExamplesView,SetupView,TestView,InterView,ArchiveView,Recorder,OpentokView){
+function($,_,bootstrap,Backbone,app,Questionnaire,Archive,
+InfoView,ExamplesView,SetupView,TestView,InterView,ArchiveView,Recorder){
 
     var questionnaireView = Backbone.View.extend({
 
@@ -30,7 +29,7 @@ InfoView,ExamplesView,SetupView,TestView,InterView,ArchiveView,Recorder,OpentokV
 
  
             // check if there are still missing questions to answer
-	    this.collection = new Interview();
+	    this.collection = new Questionnaire();
 	    this.collection.fetch({
 		reset: true, //initialize collection from db
 		success: function(collection,response){ // interview still active

@@ -61,6 +61,7 @@ function($,_,bootstrap,Backbone,app,Tmpl) {
             if(status==='expired') status = 'welcome';
             if(status==='interview') status = 'interview';
             if(status==='intro') status= 'welcome';
+            if(status==='archive') status= 'archive';
            if(status==='examples') status= 'examples';
             $('#nav_'+status).addClass('active');
 
