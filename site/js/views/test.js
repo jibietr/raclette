@@ -9,10 +9,9 @@ define([
     'models/question',
     'text!templates/test.html',
     'text!templates/archive.html',
-    'views/opentok_recorder',
     'app',
 ],
-function($,_,bootstrap,Backbone,QuestionView,Question,TmplTest,TmplArchive,Recorder,app) {
+function($,_,bootstrap,Backbone,QuestionView,Question,TmplTest,TmplArchive,app) {
     
     var testView = Backbone.View.extend({
 
@@ -67,9 +66,10 @@ function($,_,bootstrap,Backbone,QuestionView,Question,TmplTest,TmplArchive,Recor
 	    this.questionView.$el.appendTo(elem);
 	    this.questionView.render();             
 	    // connect and render recorder                                                                                
-	    console.log('setup recorder',app.Recorder);
+	    //console.log('setup recorder',app.Recorder);
 	    // TODO: can this directly be done through app instead of setRecorder?
-	    this.questionView.setRecorder(app.Recorder); 
+	    //this.questionView.setRecorder(app.Recorder);
+ 	    this.questionView.setRecorder(); 
 	    // link event to model so it is cleaned if model is deleted
 	    this.listenTo(this.test_question,'question-done',this.renderArchive);
 	},
@@ -78,6 +78,7 @@ function($,_,bootstrap,Backbone,QuestionView,Question,TmplTest,TmplArchive,Recor
 	    //need to request access to a video using S3
 	    //console.log('SHOW VIDEO',this.test_question);
 	    // remove question view      
+	    // detach elemen before deleting parent we don't delete player
 	    app.Recorder.$el.detach();
 	    // remove question view...
 	    this.questionView.remove();

@@ -9,10 +9,9 @@ define([
     'views/question',
     'models/question',
     'text!templates/wrap.html',    
-    'views/opentok_recorder',
     'app',
 ],
-function($,_,bootstrap,Backbone,Panel,PanelView,QuestionView,Question,TmplWrap,Recorder,app) {
+function($,_,bootstrap,Backbone,Panel,PanelView,QuestionView,Question,TmplWrap,app) {
     
     var interView = Backbone.View.extend({
 
@@ -90,7 +89,7 @@ function($,_,bootstrap,Backbone,Panel,PanelView,QuestionView,Question,TmplWrap,R
 		//app.session.set({ status: 'wait' });
             }.bind(this));
             // set up recorder...
-            this.questionView.setRecorder(app.Recorder);
+            this.questionView.setRecorder();
 	    //this.$el.html(questionView.render().el);
 	    //this.renderChrono();
 	    console.log("render new view");

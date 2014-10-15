@@ -11,9 +11,11 @@ define([
     'text!templates/question.html',
     'text!templates/video.html',
     'text!templates/tipi.html',
-    'text!templates/text.html'],
+    'text!templates/text.html',
+    'app',
+],
 function($,_,bootstrap,Backbone,ChronoView,Recorder,aws_sdk,
-serialize,Tmpl_question,Tmpl_video,Tmpl_tipi,Tmpl_text) 
+serialize,Tmpl_question,Tmpl_video,Tmpl_tipi,Tmpl_text,app) 
 {
     //TODO: check access looking at app recorder
     //TODO: check timing with chrono..
@@ -80,27 +82,17 @@ serialize,Tmpl_question,Tmpl_video,Tmpl_tipi,Tmpl_text)
 	    this.info.find("p").removeClass('text-danger').addClass('text-warning').removeClass('text-info');
 	},
 
-
-	setRecorder: function(recorder){
+	// this requests session...
+	setRecorder: function(){
             if(this.question_type=="video"){
-		var elem =  this.$("#opentok_container").get(0);
-		/*  if(!recorder){
-		    console.log('set info panel recorder', infoPanel);
-		    this.Recorder = new Recorder({ el: elem, model: this.model});
-		    this.Recorder.createPublisher();
-		    this.Recorder.$el.appendTo(elem); 
-		    var infoPanel = this.$("#InfoContainer");
-		    this.Recorder.setInfoPanel(infoPanel);
-		    }else{*/
-		this.Recorder = recorder;
-		//console.log('append recorder');
-		// we do not need this now, we are using document.queryselector
-		this.Recorder.$el.appendTo(elem); 
+		// no need to render recorder again (it already exists)
+		// only assign to existing HTML element
+		var elem =  this.$("#video_container").get(0);
+		app.Recorder.$el.appendTo(elem); 
 		var infoPanel = this.$("#InfoContainer");
-		this.Recorder.setInfoPanel(infoPanel);
+		app.Recorder.setInfoPanel(infoPanel);
 		//init opentok session and publisher
-		this.Recorder.requestSessionPrePub();
-		//}
+		app.Recorder.requestSessionPrePub();
             }
 	},
 
@@ -127,8 +119,8 @@ serialize,Tmpl_question,Tmpl_video,Tmpl_tipi,Tmpl_text)
 	startRecording: function(time){
 	    // if function was triggered by click, there is no time
 	    this.model.set("wait_time",time);
-	    this.Recorder.requestRecording();
-	    this.listenTo(this.Recorder,'recordStarted',this.renderActiveTime);
+	    app.Recorder.requestRecording();
+	    this.listenTo(app.Recorder,'recordStarted',this.renderActiveTime);
 	},
 
 	stopActive: function(time){
@@ -142,11 +134,11 @@ serialize,Tmpl_question,Tmpl_video,Tmpl_tipi,Tmpl_text)
 
 	stopVideo: function(){
 
-	    var answer = this.Recorder.getArchiveId();
+	    var answer = app.Recorder.getArchiveId();
 	    this.model.set("content",answer);
-	    this.listenTo(this.Recorder,'recordStopped',this.saveModel);
+	    this.listenTo(app.Recorder,'recordStopped',this.saveModel);
 	    console.log('stop recording');
-	    this.Recorder.stopRecording();
+	    app.Recorder.stopRecording();
 	},
 
 

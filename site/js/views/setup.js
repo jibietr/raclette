@@ -33,9 +33,12 @@ function($,_,bootstrap,Backbone,TmplSetup,TmplSetup2,Recorder,app) {
 	requestWebcamAccess: function(){
             window.scrollTo(0,0);
             this.$el.html(this.template_setup2());
-            elem = $(this.el).find("#opentok_container")[0];
-	    app.Recorder = new Recorder({ el: elem} );
-            app.Recorder.createPublisher();
+	    //changed opentok_container for video_container
+	    app.Recorder = new Recorder();
+	    // atach video recorder element to video container in setup
+	    this.$("#video_container").html(app.Recorder.render().el)
+	    // include render in publisher?
+            //app.Recorder.createPublisher();
 	    return this;
 	},
 
