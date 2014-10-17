@@ -98,7 +98,7 @@ function($,_,fs,http,querystring,crypto,par,async) {
 	// req.params.archive
 	// I cannot pass a sign url to a video player so will make video public
 	// and then delete it --> is this what we are doing?
-	s3 = new par.env.aws.S3();
+	s3 = new par.aws.S3();
 	var bucket = 'opentok-videos' + '/' + par.env.opentok_key + '/' + req.params.archive;
 	console.log('bucket',bucket,req.params);
 	var params = { Bucket: bucket, Key: 'archive.mp4', };
