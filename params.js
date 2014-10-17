@@ -10,7 +10,7 @@ function($,_,fs,querystring,crypto,Passport,PassportLocal) {
 
     function findByCode(code, fn) {
         console.log('find code',code);
-	dd = new params.env.aws.DynamoDB();
+	dd = new params.aws.DynamoDB();
 	var item = {
             'code': { 'S': code }
 	};

@@ -4,6 +4,44 @@ function($,_,fs,http,querystring,crypto,par,async) {
 
     var Router = function() {}; //empty constructor
 
+
+
+    Router.prototype.Login = function(req, res,next){
+	par.pass.authenticate('local', { session: true }, 
+          function(err, user, info) {
+	      if (err) { return res.json({ error: err });  }
+	      if (!user) {
+		  return res.json({ error: info });
+	      }
+	      req.logIn(user, function(err) {
+		  if (err) { return next(err); }
+		  //return res.redirect('/users/' + user.username);
+		  console.log('return user',user);
+		  return res.json(user);
+	      });
+	  })(req, res, next);
+    };
+
+    // Simple route middleware to ensure user is authenticated.
+    //   Use this route middleware on any resource that needs to be protected.  If
+    //   the request is authenticated (typically via a persistent login session),
+    //   the request will proceed.  Otherwise, the user will be redirected to the
+    //   login page.
+
+
+    Router.prototype.ensureAuthenticated = function(req, res){
+	console.log("Checking if req.body is auth");
+	if (req.isAuthenticated()) { 
+	    //return next();  
+	    //res.render('account', { user: req.user });  
+	    res.json({ user: req.user});
+	}
+	//res.redirect('/login')
+	//res.json({ user: _.omit(user, ['password', 'auth_token']) });
+	res.json({ error: "Client has no valid login cookies."  });
+    };
+
+
     // Generate an opentok session 
     // https://tokbox.com/opentok/tutorials/create-token/node/index.html
     Router.prototype.startSession = function(req, res) {
@@ -20,7 +58,7 @@ function($,_,fs,http,querystring,crypto,par,async) {
               console.log("startSession:: Got token ",tokenId);
 	      // return session
               res.send({
-		  apiKey: par.config.apiKey,
+		  apiKey: par.env.opentok_key,
 		  session: session.sessionId,
 		  token: tokenId
               });
@@ -61,7 +99,7 @@ function($,_,fs,http,querystring,crypto,par,async) {
 	// I cannot pass a sign url to a video player so will make video public
 	// and then delete it --> is this what we are doing?
 	s3 = new par.env.aws.S3();
-	var bucket = 'opentok-videos' + '/' + par.config.apiKey + '/' + req.params.archive;
+	var bucket = 'opentok-videos' + '/' + par.env.opentok_key + '/' + req.params.archive;
 	console.log('bucket',bucket,req.params);
 	var params = { Bucket: bucket, Key: 'archive.mp4', };
 	// first check if video exists...
@@ -84,7 +122,7 @@ function($,_,fs,http,querystring,crypto,par,async) {
 
 
     function get_title(item,callback){
-       var dd = new par.env.aws.DynamoDB();
+       var dd = new par.aws.DynamoDB();
        console.log('get title',item);
         var query_params = {
          TableName: par.env.questions, // require     
@@ -120,7 +158,7 @@ function($,_,fs,http,querystring,crypto,par,async) {
       // I cannot pass a sign url to a video player so will make video public
       // and then delete it
 
-      s3 = new par.env.aws.S3();
+      s3 = new par.aws.S3();
 	var bucket = 'opentok-videos' + '/' + '44757122' + '/' + item.content;
       //var bucket = 'opentok-videos' + '/' + par.env.apiKey + '/' + item.content;
       //console.log('bucket',bucket,req.params);
@@ -160,7 +198,7 @@ function($,_,fs,http,querystring,crypto,par,async) {
       // and then delete it
        console.log('get full archive');
        params = this;
-       var dd = new par.env.aws.DynamoDB();
+       var dd = new par.aws.DynamoDB();
          console.log('check answers of user',req.user.id);
          var query_params = {
          TableName: par.env.answers, // require     
@@ -255,7 +293,7 @@ function($,_,fs,http,querystring,crypto,par,async) {
        if('content' in req.body) answer.content = { 'S': req.body.content };
        console.log(answer);
 
-       dd = new par.env.aws.DynamoDB();
+       dd = new par.aws.DynamoDB();
        dd.putItem({
           'TableName': par.env.answers,
           'Item': answer
@@ -664,11 +702,11 @@ function($,_,fs,http,querystring,crypto,par,async) {
 	//console.log('Request questions',req);
 	console.log('Request questions for session with user',req.user);
 	// req.user is available thanks to passport
-	dd = new par.env.aws.DynamoDB();
+	dd = new par.aws.DynamoDB();
 	
 	function get_missing_questions(err,data){
 	    params = this;
-	    var dd = new par.env.aws.DynamoDB();
+	    var dd = new par.aws.DynamoDB();
 
 	    if(err) res.json({ err: 'Error starting session' + err });
 	    else{
@@ -790,7 +828,7 @@ function($,_,fs,http,querystring,crypto,par,async) {
 	          'email': { 'S': user.username },
 		  'pwd': { 'S': toBeStored }
 		};
-	  var AWS = par.env.aws;
+	  var AWS = par.aws;
 	  dd = new AWS.DynamoDB();
 	  dd.putItem({
 		    'TableName': par.env.accounts,
