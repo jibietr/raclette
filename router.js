@@ -7,6 +7,7 @@ function($,_,fs,http,querystring,crypto,par,async) {
 
 
     Router.prototype.Login = function(req, res,next){
+	console.log("Login to app");
 	par.pass.authenticate('local', { session: true }, 
           function(err, user, info) {
 	      if (err) { return res.json({ error: err });  }

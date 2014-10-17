@@ -192,6 +192,7 @@ function($,_,bootstrap,Backbone,TmplOpentok)
 	hostSessionPrePub: function(data){
 	    OT.setLogLevel(OT.NONE);
 	    // init session
+	    //console.log(
 	    this.session = OT.initSession(data.apiKey,data.session);
 	    this.sessionId = data.session;      
 	    this.tokenId = data.token;

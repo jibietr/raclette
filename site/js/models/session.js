@@ -42,7 +42,7 @@ define([
          * and return a user object if authenticated
          */
         checkAuth: function(callback, args) {
-            console.log("Check for session from API using fetch");
+            console.log("Check auth: check for session from API using fetch",app.API);
             console.log(this);
             var self = this;
             
