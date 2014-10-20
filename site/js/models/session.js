@@ -20,7 +20,7 @@ define([
 
         initialize: function(){
             //_.bindAll(this,'postAuth');
-
+	    console.log('init session');
             // Singleton user object
             // Access or listen on this throughout any module with app.session.user
             this.user = new User({ });
@@ -51,7 +51,7 @@ define([
                     if(!res.error && res.user){
                         self.updateSessionUser( res.user );
                         self.set({ logged_in : true });
-                        console.log("Success auth:",res.error);
+                        console.log("Success auth:",res.user);
                         if('success' in callback) callback.success(mod, res);    
                     } else {
                         self.set({ logged_in : false });

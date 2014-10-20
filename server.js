@@ -84,7 +84,12 @@ function(express,path,$,_,Backbone,AWS,Router,params,OpenTok){
     app.get('/api/questions', routes.GetQuestions);
     // login a user
     app.post('/api/auth/login', routes.Login);
+    /*app.get('/api/auth', routes.ensureAuthenticated,function(req, res){
+     res.json({ user: req.user});
+    });*/
     app.get('/api/auth', routes.ensureAuthenticated);
+
+
 
 
     //var s3 = new AWS.S3();

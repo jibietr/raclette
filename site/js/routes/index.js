@@ -18,10 +18,11 @@ function($,_,bootstrap,Backbone,app,faqView,AppView,LoginView,HeaderView) {
             "faq" : "showFAQ",
 	    "*other": "showLogin"
 	},
-
+	
         initialize: function(){
             // listen to changes in log status
-            app.session.on("change:logged_in", this.showLogin.bind(this));
+	    console.log('re init router',app.session.get('logged_in'));
+
         },
 	
         showFAQ: function(){
@@ -35,6 +36,9 @@ function($,_,bootstrap,Backbone,app,faqView,AppView,LoginView,HeaderView) {
 		this.show(new LoginView({}));
 		return false;
 	    }
+	    // if not logged in...
+
+	    console.log('yes logged in');
 	    return true;
 	},
 
@@ -55,7 +59,11 @@ function($,_,bootstrap,Backbone,app,faqView,AppView,LoginView,HeaderView) {
                       this.headerView.setElement( $("#header") );
 		  }
 		  this.show( new AppView({}) );
-              }
+              }else{ 
+		  // be careful where you put this listener. in combination 
+		  // with isAuth can result in double renders...
+		  app.session.on("change:logged_in", this.showLogin.bind(this));
+	      }
           }               
 	},
 

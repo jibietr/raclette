@@ -31,6 +31,8 @@ requirejs([
             // so i comment it for the moment...
             //if(hasPushstate) Backbone.history.start({ pushState: true, root: '/' } );
             //else Backbone.history.start();
+
+	    // this is necessary to at least start the routing of login..
             Backbone.history.start();
             /*Backbone.history.bind("all", function (route, router) {
                window.scrollTo(0,0);

@@ -33,13 +33,10 @@ function($,_,fs,http,querystring,crypto,par,async) {
     Router.prototype.ensureAuthenticated = function(req, res){
 	console.log("Checking if req.body is auth");
 	if (req.isAuthenticated()) { 
-	    //return next();  
-	    //res.render('account', { user: req.user });  
 	    res.json({ user: req.user});
+	}else{
+	    res.json({ error: "Client has no valid login cookies."  });
 	}
-	//res.redirect('/login')
-	//res.json({ user: _.omit(user, ['password', 'auth_token']) });
-	res.json({ error: "Client has no valid login cookies."  });
     };
 
 

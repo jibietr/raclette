@@ -9,7 +9,7 @@ function($,_,fs,querystring,crypto,Passport,PassportLocal) {
     //params.
 
     function findByCode(code, fn) {
-        console.log('find code',code);
+        //console.log('find code',code);
 	dd = new params.aws.DynamoDB();
 	var item = {
             'code': { 'S': code }
@@ -25,6 +25,7 @@ function($,_,fs,querystring,crypto,Passport,PassportLocal) {
       done(null, user.code);
     });
 
+    // this is called at every request
     params.pass.deserializeUser(function(code, done) {
       findByCode(code, function (err, data) {
         //var user = { id: data.Item.userid.S };
