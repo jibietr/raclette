@@ -1,4 +1,4 @@
-// define all functions served in the backend
+// define all functions served in the bucckend
 define(['jquery','underscore','fs','http','querystring','crypto','params','async'],
 function($,_,fs,http,querystring,crypto,par,async) {
 
@@ -97,8 +97,9 @@ function($,_,fs,http,querystring,crypto,par,async) {
 	// I cannot pass a sign url to a video player so will make video public
 	// and then delete it --> is this what we are doing?
 	s3 = new par.aws.S3();
-	var bucket = 'opentok-videos' + '/' + par.env.opentok_key + '/' + req.params.archive;
-	console.log('bucket',bucket,req.params);
+	//var bucket = 'opentok-videos' + '/' + par.env.opentok_key + '/' + req.params.archive;
+	var bucket = par.env.bucket + '/' + par.env.opentok_key + '/' + req.params.archive;
+	console.log('get archive from bucket',bucket,req.params);
 	var params = { Bucket: bucket, Key: 'archive.mp4', };
 	// first check if video exists...
 	s3.headObject(params, function(err, data) {

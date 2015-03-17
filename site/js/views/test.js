@@ -82,7 +82,7 @@ function($,_,bootstrap,Backbone,QuestionView,Question,TmplTest,TmplArchive,app) 
 	    app.Recorder.$el.detach();
 	    // remove question view...
 	    this.questionView.remove();
-	    //this.archiveView = new ArchiveView();
+	    //this.achiveView = new ArchiveView();
 	    //.console.log('playback element',$(this.el).find("#playback")[0]);  
 	    // render template
 	    $(this.el).find("#playback").html(this.template_archive());
@@ -91,8 +91,8 @@ function($,_,bootstrap,Backbone,QuestionView,Question,TmplTest,TmplArchive,app) 
 	    var archiveId = this.test_question.get('content').S;
 	    this.setInfo('info',"Wait while we play back the video");    
 	    this.tryCount =  0;
-	    this.retryLimit = 3;
-	    setTimeout(function(){ this.getArchive(archiveId) }.bind(this), 5000);
+	    this.retryLimit = 5;
+	    setTimeout(function(){ this.getArchive(archiveId) }.bind(this), 10000);
 	},
 
 	// set player 
@@ -117,7 +117,7 @@ function($,_,bootstrap,Backbone,QuestionView,Question,TmplTest,TmplArchive,app) 
 			if (data.error =='NotFound') {
 			    this.tryCount++;
 			    if(this.tryCount<this.retryLimit){
-				setTimeout(function(){ this.getArchive() }.bind(this), 5000);
+				setTimeout(function(){ this.getArchive(archiveId) }.bind(this), 5000);
 			    }else{
 				this.setInfo('warning','Ooops, something went wrong!');
 			    }
